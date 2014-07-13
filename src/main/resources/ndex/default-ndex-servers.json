@@ -1,0 +1,12 @@
+[
+  {
+    "name": "default-server1",
+    "url": "http:\\\\www.fooserver.com",
+    "type": "DEFAULT"
+  },
+  {
+    "name": "default-server2",
+    "url": "http:\\\\www.barserver.com",
+    "type": "DEFAULT"
+  }
+]
