@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.cytoscape.ndex.gui;
+package org.cytoscape.ndex.internal.gui;
 
 /**
  *
@@ -27,7 +27,8 @@ public class DownloadNetwork extends javax.swing.JDialog {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
@@ -89,8 +90,10 @@ public class DownloadNetwork extends javax.swing.JDialog {
         jLabel3.setText("Query");
 
         jButton1.setText("Run Query");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton1.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton1ActionPerformed(evt);
             }
         });
@@ -100,7 +103,8 @@ public class DownloadNetwork extends javax.swing.JDialog {
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Edges [ 25 out of 77 ]"));
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {"FANCD2/ubiquitin", "CO_CONTROL", "CHK2"},
                 {"Hus1/Rad1/Rad9/Rad17", "STATE_CHANGE", "ATM"},
                 {"Hus1/Rad1/Rad9/Rad17", "STATE_CHANGE", "ATR"},
@@ -112,15 +116,19 @@ public class DownloadNetwork extends javax.swing.JDialog {
                 {"ATR/ATRIP/ATM", "STATE_CHANGE", "HUS1"},
                 {"ATR/ATRIP/ATM", "STATE_CHANGE", "NBN"}
             },
-            new String [] {
+            new String []
+            {
                 "Source Node", "Edge Type", "Target Node"
             }
-        ) {
-            Class[] types = new Class [] {
+        )
+        {
+            Class[] types = new Class []
+            {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
-            public Class getColumnClass(int columnIndex) {
+            public Class getColumnClass(int columnIndex)
+            {
                 return types [columnIndex];
             }
         });
@@ -144,22 +152,28 @@ public class DownloadNetwork extends javax.swing.JDialog {
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Load Network to Session"));
 
         jRadioButton1.setText("Selected Subnetwork");
-        jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jRadioButton1.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jRadioButton1ActionPerformed(evt);
             }
         });
 
         jRadioButton2.setText("Entire Network");
-        jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jRadioButton2.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jRadioButton2ActionPerformed(evt);
             }
         });
 
         jButton3.setText("Load");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton3.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton3ActionPerformed(evt);
             }
         });
@@ -206,8 +220,10 @@ public class DownloadNetwork extends javax.swing.JDialog {
         jLabel5.setText("Network 7");
 
         jComboBox1.setEditable(true);
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jComboBox1.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jComboBox1ActionPerformed(evt);
             }
         });

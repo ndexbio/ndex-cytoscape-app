@@ -4,18 +4,18 @@
  * and open the template in the editor.
  */
 
-package org.cytoscape.ndex.gui;
+package org.cytoscape.ndex.internal.gui;
 
 /**
  *
  * @author David
  */
-public class FindNetworks extends javax.swing.JDialog {
+public class FindNetworksDialog extends javax.swing.JDialog {
 
     /**
      * Creates new form SimpleSearch
      */
-    public FindNetworks(java.awt.Frame parent, boolean modal) {
+    public FindNetworksDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
@@ -27,7 +27,8 @@ public class FindNetworks extends javax.swing.JDialog {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
@@ -43,7 +44,8 @@ public class FindNetworks extends javax.swing.JDialog {
         setTitle("Find Networks");
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {"Network1", null, null, null, null},
                 {"Network2", null, null, null, null},
                 {"Network3", null, null, null, null},
@@ -65,7 +67,8 @@ public class FindNetworks extends javax.swing.JDialog {
                 {"Network19", null, null, null, null},
                 {"Network20", null, null, null, null}
             },
-            new String [] {
+            new String []
+            {
                 "Network Title", "Format", "Admins", "Number of Edges", "Number of Nodes"
             }
         ));
@@ -148,20 +151,20 @@ public class FindNetworks extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FindNetworks.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FindNetworksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FindNetworks.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FindNetworksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FindNetworks.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FindNetworksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FindNetworks.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FindNetworksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FindNetworks dialog = new FindNetworks(new javax.swing.JFrame(), true);
+                FindNetworksDialog dialog = new FindNetworksDialog(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

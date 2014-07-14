@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.cytoscape.ndex.gui;
+package org.cytoscape.ndex.internal.gui;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,9 +13,9 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import org.cytoscape.ndex.server.Server;
-import org.cytoscape.ndex.server.ServerList;
-import org.cytoscape.ndex.server.ServerManager;
+import org.cytoscape.ndex.internal.server.Server;
+import org.cytoscape.ndex.internal.server.ServerList;
+import org.cytoscape.ndex.internal.server.ServerManager;
 
 /**
  * @author David

@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.cytoscape.ndex.server;
+package org.cytoscape.ndex.internal.server;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,9 +45,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
-import org.cytoscape.ndex.strings.ErrorMessage;
-import org.cytoscape.ndex.strings.FilePath;
-import org.cytoscape.ndex.strings.ResourcePath;
+import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.cytoscape.ndex.internal.strings.FilePath;
+import org.cytoscape.ndex.internal.strings.ResourcePath;
 
 /**
  *
@@ -118,8 +119,16 @@ public class ServerList extends AbstractListModel
     
     private Collection<Server> readServerCollection(String resourcePath)
     {
-        InputStream is = ClassLoader.getSystemResourceAsStream(resourcePath);
-        BufferedReader br = new BufferedReader( new InputStreamReader (is) );
+        URL json = ServerList.class.getClassLoader().getResource(resourcePath);
+        BufferedReader br = null;
+        try
+        {
+            br = new BufferedReader( new InputStreamReader (json.openStream()) );
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(ServerList.class.getName()).log(Level.SEVERE, null, ex);
+        }
         Gson gson = new Gson();
         Type collectionType = new TypeToken<Collection<Server>>(){}.getType();
         Collection<Server> result =  gson.fromJson(br, collectionType);

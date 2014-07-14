@@ -24,14 +24,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.cytoscape.ndex.strings;
+package org.cytoscape.ndex.internal.strings;
 
 /**
  *
  * @author David Welker
  */
-public class FilePath
+public class ResourcePath
 {
-    public static final String ADDED_SERVERS = "src/main/resources/ndex/added-servers.json";
-    public static String DEFAULT_SERVER_CREDENTIALS = "src/main/resources/ndex/default-server-credentials.json";
+    public static final String DEFAULT_NDEX_SERVERS = "ndex/default-ndex-servers.json";
+    public static final String DEFAULT_SERVER_CREDENTIALS  = "ndex/default-server-credentials.json";
+    public static final String ADDED_SERVERS = "ndex/added-servers.json";  
 }

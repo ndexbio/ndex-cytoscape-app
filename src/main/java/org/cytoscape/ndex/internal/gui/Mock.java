@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.cytoscape.ndex.gui;
+package org.cytoscape.ndex.internal.gui;
 
 /**
  *

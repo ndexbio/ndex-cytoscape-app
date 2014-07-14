@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.cytoscape.ndex.gui;
+package org.cytoscape.ndex.internal.gui;
 
 /**
  *
@@ -27,7 +27,8 @@ public class UploadNetwork extends javax.swing.JDialog {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
 
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -70,8 +71,10 @@ public class UploadNetwork extends javax.swing.JDialog {
         jLabel9.setText("1513");
 
         jButton2.setText("Upload Network To NDEx");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton2.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton2ActionPerformed(evt);
             }
         });

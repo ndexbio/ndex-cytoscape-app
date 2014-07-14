@@ -24,13 +24,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.cytoscape.ndex.strings;
+package org.cytoscape.ndex.internal.server;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author David Welker
  */
-public class ErrorMessage
+public enum ServerManager
 {
-    public static final String serverNameAlreadyUsed = "A server with that name already exists.";
+    INSTANCE;
+    private Server selectedServer;
+    private final ServerList availableServers = new ServerList();
+    
+    public ServerList getAvailableServers()
+    {
+        return availableServers;
+    }
+
+    public Server getSelectedServer()
+    {
+        return selectedServer;
+    }
+
+    public void setSelectedServer(Server selectedServer)
+    {
+        this.selectedServer = selectedServer;
+    }   
 }

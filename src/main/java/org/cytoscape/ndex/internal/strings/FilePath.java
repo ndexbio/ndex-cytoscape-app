@@ -24,17 +24,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.cytoscape.ndex.singletons;
-
-import org.cytoscape.ndex.server.Server;
+package org.cytoscape.ndex.internal.strings;
 
 /**
  *
  * @author David Welker
  */
-public enum NDExSession
+public class FilePath
 {
-    INSTANCE;
-    Server currentServer;
-    
+    public static final String ADDED_SERVERS = "src/main/resources/ndex/added-servers.json";
+    public static String DEFAULT_SERVER_CREDENTIALS = "src/main/resources/ndex/default-server-credentials.json";
 }

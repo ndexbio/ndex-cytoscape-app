@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.cytoscape.ndex.gui;
+package org.cytoscape.ndex.internal.gui;
 
 /**
  *
@@ -27,7 +27,8 @@ public class AdvancedFindNetworks extends javax.swing.JDialog {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
 
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
@@ -64,7 +65,8 @@ public class AdvancedFindNetworks extends javax.swing.JDialog {
         setTitle("Find Networks");
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {"Property1", "Value1", "FALSE"},
                 {"Property2", "Value2", "FALSE"},
                 {"Property3", "Value3", "TRUE"},
@@ -73,15 +75,19 @@ public class AdvancedFindNetworks extends javax.swing.JDialog {
                 {"Property6", "Value6", "FALSE"},
                 {"Property7", "Value7", "FALSE"}
             },
-            new String [] {
+            new String []
+            {
                 "Name", "Value", "Ignore"
             }
-        ) {
-            Class[] types = new Class [] {
+        )
+        {
+            Class[] types = new Class []
+            {
                 java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
 
-            public Class getColumnClass(int columnIndex) {
+            public Class getColumnClass(int columnIndex)
+            {
                 return types [columnIndex];
             }
         });
@@ -91,16 +97,20 @@ public class AdvancedFindNetworks extends javax.swing.JDialog {
 
         jTextField5.setText("user:treyideker");
         jTextField5.setEnabled(false);
-        jTextField5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jTextField5.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jTextField5ActionPerformed(evt);
             }
         });
 
         jCheckBox1.setSelected(true);
         jCheckBox1.setText("Me");
-        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jCheckBox1.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jCheckBox1ActionPerformed(evt);
             }
         });
@@ -110,7 +120,8 @@ public class AdvancedFindNetworks extends javax.swing.JDialog {
         jLabel7.setText("Results:");
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {"Network1", null, null, null, null},
                 {"Network2", null, null, null, null},
                 {"Network3", null, null, null, null},
@@ -132,7 +143,8 @@ public class AdvancedFindNetworks extends javax.swing.JDialog {
                 {"Network19", null, null, null, null},
                 {"Network20", null, null, null, null}
             },
-            new String [] {
+            new String []
+            {
                 "Network Title", "Format", "Admins", "Number of Edges", "Number of Nodes"
             }
         ));
@@ -156,8 +168,10 @@ public class AdvancedFindNetworks extends javax.swing.JDialog {
         jLabel13.setText("of the following properties (except those ignored):");
 
         jButton6.setText("Load Standard Properties");
-        jButton6.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton6.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton6ActionPerformed(evt);
             }
         });
@@ -167,8 +181,10 @@ public class AdvancedFindNetworks extends javax.swing.JDialog {
         jButton8.setText("Use All Properties");
 
         jButton10.setText("Add Property");
-        jButton10.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton10.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton10ActionPerformed(evt);
             }
         });

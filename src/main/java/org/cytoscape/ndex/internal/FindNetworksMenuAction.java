@@ -24,33 +24,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.cytoscape.ndex.server;
+package org.cytoscape.ndex.internal;
 
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.AbstractCyAction;
+import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
+import org.cytoscape.ndex.internal.gui.SelectServerDialog;
+import org.cytoscape.view.model.CyNetworkViewManager;
 
 /**
  *
  * @author David Welker
  */
-public enum ServerManager
+public class FindNetworksMenuAction extends AbstractCyAction
 {
-    INSTANCE;
-    private Server selectedServer;
-    private final ServerList availableServers = new ServerList();
+
+    public FindNetworksMenuAction(String menuTitle, CyApplicationManager applicationManager)
+    {
+        super(menuTitle, applicationManager, null, null);
+        setPreferredMenu("Apps.NDEx");
+    }
     
-    public ServerList getAvailableServers()
-    {
-        return availableServers;
-    }
 
-    public Server getSelectedServer()
+    @Override
+    public void actionPerformed(ActionEvent e)
     {
-        return selectedServer;
+        FindNetworksDialog dialog = new FindNetworksDialog(null, true);
+        dialog.setVisible(true);
     }
-
-    public void setSelectedServer(Server selectedServer)
-    {
-        this.selectedServer = selectedServer;
-    }   
+    
 }

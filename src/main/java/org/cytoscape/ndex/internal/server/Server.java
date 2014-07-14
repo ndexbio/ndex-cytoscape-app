@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.cytoscape.ndex.server;
+package org.cytoscape.ndex.internal.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
