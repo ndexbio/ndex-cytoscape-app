@@ -26,13 +26,8 @@
 
 package org.cytoscape.ndex.internal.server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.ndexbio.rest.client.NdexRestClient;
+import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 /**
  *
@@ -46,6 +41,7 @@ public class Server
     private String url;
     private String username;
     private String password;
+    private String description;
     private Type type;
     
     /**
@@ -66,9 +62,10 @@ public class Server
         username = s.username;
         password = s.password;
         type = s.type;
+        description = s.description;
     }
     
-    public boolean namesEqual(Server s)
+    public boolean hasSameName(Server s)
     {
         return name.equals(s.name);
     }
@@ -77,16 +74,8 @@ public class Server
     {
         username = s.username;
         password = s.password;
+        description = s.description;
     }
-    
-//    private Server(String name, String url, String username, String password, Type type )
-//    {
-//        this.name = name;
-//        this.url = url;
-//        this.username = username;
-//        this.password = password;
-//        this.type = type;
-//    }
     
     public String show()
     {
@@ -101,15 +90,27 @@ public class Server
     
     public String getHeader()
     {
-        String username = getUsername();
+        String username = this.username;
         if( username == null )
             username = "None";
         
         String header = "NDEx Server Information\n===============\n";
-        header += "Name: " + getName() + "\n";
-        header += "URL: " + getUrl() + "\n";
+        header += "Name: " + name + "\n";
+        header += "URL: " + url + "\n";
         header += "Username: " + username + "\n";
+        if( description != null )
+        {
+            header += "\n";
+            header += "Description\n=======\n";
+            header += description + "\n";
+        }
         return header;
+    }
+    
+    public NdexRestClientModelAccessLayer getModelAccessLayer()
+    {
+        NdexRestClient client = new NdexRestClient(username,password,url);
+        return new NdexRestClientModelAccessLayer(client);
     }
    
     public boolean isDefault()
@@ -117,9 +118,15 @@ public class Server
         return type == Type.DEFAULT;
     }
     
+    @Override
     public String toString()
     {
         return name;
+    }
+    
+    public String display()
+    {
+        return name + " ("+url+")";
     }
        
     // <editor-fold defaultstate="collapsed" desc="Getters and Setters">
@@ -149,6 +156,11 @@ public class Server
         return type;
     }
     
+    public String getDescription()
+    {
+        return description;
+    }
+    
     //Setters
     public void setName(String name)
     {
@@ -173,6 +185,11 @@ public class Server
     public void setType(Type type)
     {
         this.type = type;
+    }
+    
+    public void setDescription(String description)
+    {
+        this.description = description;
     }
     // </editor-fold>
     

@@ -23,36 +23,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.cytoscape.ndex.internal;
 
-import java.awt.event.ActionEvent;
+package org.cytoscape.ndex.internal.singletons;
 
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.application.swing.AbstractCyAction;
-import org.cytoscape.ndex.internal.gui.SelectServerDialog;
-
+import org.cytoscape.ndex.internal.server.Server;
+import org.cytoscape.ndex.internal.server.ServerList;
 
 /**
+ *
  * @author David Welker
- * Creates a new menu item in the Apps|NDex menu to select an NDEx server.
  */
-public class SelectServerMenuAction extends AbstractCyAction
+public enum ServerManager
 {
-    public SelectServerMenuAction(final String menuTitle, CyApplicationManager cyApplicationManager)
+    INSTANCE;
+    private Server selectedServer;
+    private final ServerList availableServers = new ServerList();
+    
+    public ServerList getAvailableServers()
     {
-        super(menuTitle, cyApplicationManager, null, null);
-        // We want this menu item to appear under the App|NDEx menu. The actual name of the menu item is set in
-        // org.cytoscape.ndex.internal.CyActivator as "Select Server"
-        setPreferredMenu("Apps.NDEx");
+        return availableServers;
     }
 
-    /**
-     * This method displays the select server dialog.
-     * It is called when the menu item is selected.  
-     */
-    public void actionPerformed(ActionEvent e)
+    public Server getSelectedServer()
     {
-        SelectServerDialog dialog = new SelectServerDialog(null, true);
-        dialog.setVisible(true);
+        return selectedServer;
     }
+
+    public void setSelectedServer(Server selectedServer)
+    {
+        this.selectedServer = selectedServer;
+    }
+    
 }

@@ -27,14 +27,24 @@
 package org.cytoscape.ndex.internal.singletons;
 
 import org.cytoscape.ndex.internal.server.Server;
+import org.ndexbio.model.object.network.NetworkSummary;
 
 /**
  *
  * @author David Welker
  */
-public enum NDExSession
+public enum NetworkManager
 {
     INSTANCE;
-    Server currentServer;
-    
+    private NetworkSummary selectedNetworkSummary;
+
+    public NetworkSummary getSelectedNetworkSummary()
+    {
+        return selectedNetworkSummary;
+    }
+
+    public void setSelectedNetworkSummary(NetworkSummary selectedNetworkSummary)
+    {
+        this.selectedNetworkSummary = selectedNetworkSummary;
+    }
 }

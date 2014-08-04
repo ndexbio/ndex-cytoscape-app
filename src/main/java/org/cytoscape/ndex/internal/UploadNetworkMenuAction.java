@@ -24,33 +24,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.cytoscape.ndex.internal.server;
+package org.cytoscape.ndex.internal;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.ActionEvent;
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.AbstractCyAction;
+import org.cytoscape.ndex.internal.gui.UploadNetworkDialog;
 
 /**
  *
  * @author David Welker
+ * Creates a new menu item in the Apps|NDex menu to upload an Cytoscape network to the current NDEx server.
  */
-public enum ServerManager
+public class UploadNetworkMenuAction extends AbstractCyAction
 {
-    INSTANCE;
-    private Server selectedServer;
-    private final ServerList availableServers = new ServerList();
-    
-    public ServerList getAvailableServers()
+    public UploadNetworkMenuAction(String menuTitle, CyApplicationManager applicationManager)
     {
-        return availableServers;
+        super(menuTitle, applicationManager, null, null);
+        // We want this menu item to appear under the App|NDEx menu. The actual name of the menu item is set in
+        // org.cytoscape.ndex.internal.CyActivator as "Upload Network"
+        setPreferredMenu("Apps.NDEx");
     }
 
-    public Server getSelectedServer()
+    @Override
+    /**
+     * This method displays the upload network dialog.
+     * It is called when the menu item is selected.  
+     */
+    public void actionPerformed(ActionEvent e)
     {
-        return selectedServer;
+        UploadNetworkDialog dialog = new UploadNetworkDialog(null, true);
+        dialog.setVisible(true);
     }
-
-    public void setSelectedServer(Server selectedServer)
-    {
-        this.selectedServer = selectedServer;
-    }   
 }

@@ -33,9 +33,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
+import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
 import org.cytoscape.ndex.internal.strings.FilePath;
 import org.cytoscape.ndex.internal.strings.ResourcePath;
@@ -86,7 +89,9 @@ public class ServerList extends AbstractListModel
     
     private void readDefaultServerCredentials()
     {
-        Collection<Server> credentials = readServerCollection(ResourcePath.DEFAULT_SERVER_CREDENTIALS);
+        File configDir = CyObjectManager.INSTANCE.getConfigDir();
+        File defaultServersJsonFile = new File(configDir, FilePath.DEFAULT_SERVER_CREDENTIALS);
+        Collection<Server> credentials = readServerCollection(defaultServersJsonFile);
         defaultServerCredentials.addAll(credentials);
         for( Server server : credentials )
             namesUsed.add( server.getName() );
@@ -102,7 +107,7 @@ public class ServerList extends AbstractListModel
     {   
         for( Server server : getDefaultServers() )
         {
-            if( server.namesEqual( credentials ) )
+            if( server.hasSameName( credentials ) )
             {
                 server.useCredentialsOf( credentials );
             }
@@ -111,24 +116,47 @@ public class ServerList extends AbstractListModel
        
     private void readAddedServers()
     {
-        Collection<Server> addedServers = readServerCollection(ResourcePath.ADDED_SERVERS);     
+        File configDir = CyObjectManager.INSTANCE.getConfigDir();
+        File addedServersJsonFile = new File(configDir, FilePath.ADDED_SERVERS);
+        Collection<Server> addedServers = readServerCollection(addedServersJsonFile);     
         serverList.addAll(addedServers);
         for( Server server : addedServers )
             namesUsed.add( server.getName() );
     }
     
     private Collection<Server> readServerCollection(String resourcePath)
-    {
+    {  
         URL json = ServerList.class.getClassLoader().getResource(resourcePath);
-        BufferedReader br = null;
         try
         {
-            br = new BufferedReader( new InputStreamReader (json.openStream()) );
+            return readServerCollection( new InputStreamReader (json.openStream()) );
         }
         catch (IOException ex)
         {
             Logger.getLogger(ServerList.class.getName()).log(Level.SEVERE, null, ex);
+            //Return null because this is an error you want to detect right away.
+            return null;
         }
+    }
+    
+    private Collection<Server> readServerCollection(File jsonFile)
+    {
+        try
+        {
+            return readServerCollection( new FileReader(jsonFile) );
+        }
+        catch (FileNotFoundException ex)
+        {
+            Logger.getLogger(ServerList.class.getName()).log(Level.SEVERE, null, ex);
+            //Return an empty server list, because sometimes a file won't exist and that is perfectly normal.
+            return new ArrayList<Server>();
+        }
+    }
+    
+    private Collection<Server> readServerCollection(Reader reader)
+    {
+        BufferedReader br = null;
+        br = new BufferedReader( reader );
         Gson gson = new Gson();
         Type collectionType = new TypeToken<Collection<Server>>(){}.getType();
         Collection<Server> result =  gson.fromJson(br, collectionType);
@@ -173,12 +201,16 @@ public class ServerList extends AbstractListModel
     
     private void saveAddedServers()
     {
-        saveServerList( getAddedServers(), FilePath.ADDED_SERVERS );
+        File configDir = CyObjectManager.INSTANCE.getConfigDir();
+        File addedServersFile = new File(configDir, FilePath.ADDED_SERVERS);
+        saveServerList( getAddedServers(), addedServersFile.getAbsolutePath() );
     }
     
     private void saveDefaultServerCredentials()
     {
-        saveServerList( defaultServerCredentials, FilePath.DEFAULT_SERVER_CREDENTIALS );
+        File configDir = CyObjectManager.INSTANCE.getConfigDir();
+        File defaultServerCredentialsFile = new File(configDir, FilePath.DEFAULT_SERVER_CREDENTIALS );
+        saveServerList( defaultServerCredentials, defaultServerCredentialsFile.getAbsolutePath() );
     }
     
     private void saveServerList( List<Server> serverList, String filePath )
@@ -258,7 +290,7 @@ public class ServerList extends AbstractListModel
         Server existingCredentialsToReplace = null;
         for( Server s : defaultServerCredentials )
         {
-            if( credentials.getName().equals(s.getName()) )
+            if( credentials.hasSameName(s) )
                 existingCredentialsToReplace = s;
         }
         //If credentials for the server do not already exist, add them. Otherwise, replace them.
@@ -269,6 +301,18 @@ public class ServerList extends AbstractListModel
             int index = defaultServerCredentials.indexOf(existingCredentialsToReplace);
             defaultServerCredentials.set( index, credentials);
         }
+    }
+    
+    public void serverDescriptionChanged(Server changedServer)
+    {
+        if( !serverList.contains(changedServer) )
+            return;
+        if( changedServer.getType() == Server.Type.DEFAULT )
+        {
+            registerDefaultServerCredentials(changedServer);
+        }
+        int indexOfChangedServer = serverList.indexOf(changedServer);
+        fireContentsChanged(this, indexOfChangedServer, indexOfChangedServer);
     }
     
     public String findNextAvailableName(String startName)

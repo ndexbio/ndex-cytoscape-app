@@ -139,6 +139,27 @@
             <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>layout-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>work-swing-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>model-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Logging -->
         <dependency>
@@ -167,6 +188,13 @@
             <groupId>org.ndexbio.client</groupId>
             <artifactId>ndex-java-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        
+        <!-- NDEx Object Model -->
+        <dependency>
+            <groupId>org.ndexbio</groupId>
+            <artifactId>ndex-object-model</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

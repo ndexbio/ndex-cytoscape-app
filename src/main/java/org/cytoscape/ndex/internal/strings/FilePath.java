@@ -32,6 +32,6 @@ package org.cytoscape.ndex.internal.strings;
  */
 public class FilePath
 {
-    public static final String ADDED_SERVERS = "src/main/resources/ndex/added-servers.json";
-    public static String DEFAULT_SERVER_CREDENTIALS = "src/main/resources/ndex/default-server-credentials.json";
+    public static final String ADDED_SERVERS = "added-servers.json";
+    public static String DEFAULT_SERVER_CREDENTIALS = "default-server-credentials.json";
 }

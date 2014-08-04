@@ -1,10 +1,31 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2014, the Cytoscape Consortium and the Regents of the University of California
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package org.cytoscape.ndex.internal.gui;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -15,7 +36,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.server.ServerList;
-import org.cytoscape.ndex.internal.server.ServerManager;
+import org.cytoscape.ndex.internal.singletons.ServerManager;
+import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.ndexbio.model.object.NdexStatus;
+import org.ndexbio.rest.client.NdexRestClient;
+import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 /**
  * @author David
@@ -42,6 +67,7 @@ public class SelectServerDialog extends javax.swing.JDialog
      */
     private void prepComponents()
     {
+        this.setModal(true);
         prepServerList();
         this.getRootPane().setDefaultButton(connect);
     }
@@ -96,16 +122,6 @@ public class SelectServerDialog extends javax.swing.JDialog
             
         });
         guiServerList.setSelectedIndex(0);
-
-//            //Next, add the default server to the list.
-//            DefaultMutableTreeNode defaultServer = new DefaultMutableTreeNode("Default Server");
-//            root.add(defaultServer);
-//            
-//            
-//            //Add any previously added servers to the list.
-//            
-//            //Finally, set the modified root as the new root of the server list's tree model.
-//            treeModel.setRoot(root);
     }
 
     /**
@@ -287,7 +303,35 @@ public class SelectServerDialog extends javax.swing.JDialog
     }//GEN-LAST:event_copyActionPerformed
 
     private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
-        // TODO add your handling code here:
+        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        boolean success = mal.checkCredential();
+        if( success )
+        {
+            try
+            {
+                NdexStatus status = mal.getServerStatus();
+                String description = "Number of Networks: " + status.getNetworkCount();
+                selectedServer.setDescription(description);
+                ServerList availableServers = ServerManager.INSTANCE.getAvailableServers();
+                availableServers.serverDescriptionChanged(selectedServer);
+                availableServers.save();
+                // TODO Fix this description later.
+            }
+            catch( IOException ex )
+            {
+                Logger.getLogger(SelectServerDialog.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            String name = selectedServer.getName();
+            JOptionPane.showMessageDialog(this, "Successfully connect to: " + name, "Connected", JOptionPane.INFORMATION_MESSAGE);
+            this.setVisible(false);
+        }
+        else
+        {
+            // TODO Need error from server.
+            JOptionPane.showMessageDialog(this, ErrorMessage.failedToConnect, "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_connectActionPerformed
 
     private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed

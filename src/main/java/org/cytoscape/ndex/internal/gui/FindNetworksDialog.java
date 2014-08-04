@@ -1,10 +1,44 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2014, the Cytoscape Consortium and the Regents of the University of California
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 package org.cytoscape.ndex.internal.gui;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Vector;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import org.cytoscape.ndex.internal.server.Server;
+import org.cytoscape.ndex.internal.singletons.NetworkManager;
+import org.cytoscape.ndex.internal.singletons.ServerManager;
+import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.ndexbio.model.object.NdexProperty;
+import org.ndexbio.model.object.network.NetworkSummary;
+import org.ndexbio.model.object.network.PropertyGraphNode;
+import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 /**
  *
@@ -12,12 +46,53 @@ package org.cytoscape.ndex.internal.gui;
  */
 public class FindNetworksDialog extends javax.swing.JDialog {
 
+    private List<NetworkSummary> networkSummaries;
+    
     /**
      * Creates new form SimpleSearch
      */
     public FindNetworksDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        prepComponents();
+    }
+    
+    public void setFocusOnDone()
+    {
+        this.getRootPane().setDefaultButton(done);
+        done.requestFocus();
+    }
+    
+    private void prepComponents()
+    {
+        this.setModal(true);
+        this.getRootPane().setDefaultButton(selectNetwork);
+        
+        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        serverName.setText( selectedServer.display() );
+        
+        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        boolean success = mal.checkCredential();
+        if( success )
+        {
+            try
+            {
+                networkSummaries = mal.findNetworkSummariesByText("*", null, 0, 50);       
+            }
+            catch (IOException ex)
+            {         
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorX", JOptionPane.ERROR_MESSAGE);
+                this.setVisible(false);
+                return;
+            }
+            showSearchResults( ); 
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+            this.setVisible(false);
+        }
     }
 
     /**
@@ -31,19 +106,21 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jButton12 = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        resultsTable = new javax.swing.JTable();
+        selectNetwork = new javax.swing.JButton();
+        done = new javax.swing.JButton();
+        search = new javax.swing.JButton();
+        searchField = new javax.swing.JTextField();
+        administeredByMe = new javax.swing.JCheckBox();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        serverName = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Find Networks");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        resultsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][]
             {
                 {"Network1", null, null, null, null},
@@ -72,17 +149,44 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                 "Network Title", "Format", "Admins", "Number of Edges", "Number of Nodes"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        resultsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane1.setViewportView(resultsTable);
 
-        jButton12.setText("Select Network");
+        selectNetwork.setText("Select Network");
+        selectNetwork.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                selectNetworkActionPerformed(evt);
+            }
+        });
 
-        jButton1.setText("Done Loading Networks");
+        done.setText("Done Loading Networks");
+        done.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                doneActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Search");
+        search.setText("Search");
+        search.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                searchActionPerformed(evt);
+            }
+        });
 
-        jCheckBox1.setText("Administered By Me");
+        administeredByMe.setText("Administered By Me");
 
         jLabel1.setText("Results");
+
+        jLabel2.setText("Current Server: ");
+
+        serverName.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
+        serverName.setText("Server1");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -91,22 +195,26 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 868, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 864, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton12, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jTextField1)
+                        .addComponent(searchField)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2))
+                        .addComponent(search))
                     .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jCheckBox1)
-                            .addComponent(jLabel1))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(jLabel1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(serverName))
+                            .addComponent(administeredByMe))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(selectNetwork, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(done, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -114,25 +222,113 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel2)
+                    .addComponent(serverName))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBox1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(search)
+                    .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(administeredByMe)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 303, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton12)
+                .addComponent(selectNetwork)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
-                .addContainerGap())
+                .addComponent(done)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void doneActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_doneActionPerformed
+    {//GEN-HEADEREND:event_doneActionPerformed
+        setVisible(false);
+    }//GEN-LAST:event_doneActionPerformed
+
+    private void selectNetworkActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectNetworkActionPerformed
+    {//GEN-HEADEREND:event_selectNetworkActionPerformed
+        int selectedIndex = resultsTable.getSelectedRow();
+        if( selectedIndex == -1 )
+        {
+            JOptionPane.showMessageDialog(this, ErrorMessage.noNetworkSelected, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        NetworkSummary ns = networkSummaries.get(selectedIndex);
+        NetworkManager.INSTANCE.setSelectedNetworkSummary(ns);
+        
+        org.cytoscape.ndex.internal.gui.DownloadNetworkDialog dialog = new org.cytoscape.ndex.internal.gui.DownloadNetworkDialog(this, true);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_selectNetworkActionPerformed
+
+    private void searchActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_searchActionPerformed
+    {//GEN-HEADEREND:event_searchActionPerformed
+        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        
+        String me = null;
+        if( administeredByMe.isSelected() )
+            me = selectedServer.getUsername();
+        
+        String searchText = searchField.getText();
+        if( searchText.isEmpty() )
+            searchText = "*";
+        
+        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        boolean success = mal.checkCredential();
+        if( success )
+        {
+            try
+            {
+                networkSummaries = mal.findNetworkSummariesByText(searchText, me, 0, 50);       
+            }
+            catch (IOException ex)
+            {         
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            showSearchResults( ); 
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+            this.setVisible(false);
+        }
+        
+    }//GEN-LAST:event_searchActionPerformed
+
+    private void showSearchResults()
+    {
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers( new String[]
+        {
+            "Network Title", "Format", "Admins", "Number of Edges", "Number of Nodes"
+        });
+        for( NetworkSummary networkSummary : networkSummaries )
+        {
+            Vector row = new Vector();
+            
+            //Network Title
+            row.add(networkSummary.getName());
+            //Format
+            row.add("");
+            //Admins
+            row.add("");
+            //Number of Edges
+            row.add(networkSummary.getEdgeCount());
+            //Number of Nodes
+            row.add(networkSummary.getNodeCount());
+            
+            model.addRow(row);
+        }
+        resultsTable.setModel(model);
+        resultsTable.getSelectionModel().setSelectionInterval(0, 0);
+    }
 
     /**
      * @param args the command line arguments
@@ -177,14 +373,18 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton12;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JCheckBox administeredByMe;
+    private javax.swing.JButton done;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTable resultsTable;
+    private javax.swing.JButton search;
+    private javax.swing.JTextField searchField;
+    private javax.swing.JButton selectNetwork;
+    private javax.swing.JLabel serverName;
     // End of variables declaration//GEN-END:variables
+
+    
 }

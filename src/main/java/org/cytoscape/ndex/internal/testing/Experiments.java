@@ -23,36 +23,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.cytoscape.ndex.internal;
 
-import java.awt.event.ActionEvent;
+package org.cytoscape.ndex.internal.testing;
 
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.application.swing.AbstractCyAction;
-import org.cytoscape.ndex.internal.gui.SelectServerDialog;
 
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Collection;
+import org.cytoscape.ndex.internal.server.Server;
 
 /**
+ *
  * @author David Welker
- * Creates a new menu item in the Apps|NDex menu to select an NDEx server.
  */
-public class SelectServerMenuAction extends AbstractCyAction
+public class Experiments
 {
-    public SelectServerMenuAction(final String menuTitle, CyApplicationManager cyApplicationManager)
+    public static void main(String[] args) throws ClassNotFoundException
     {
-        super(menuTitle, cyApplicationManager, null, null);
-        // We want this menu item to appear under the App|NDEx menu. The actual name of the menu item is set in
-        // org.cytoscape.ndex.internal.CyActivator as "Select Server"
-        setPreferredMenu("Apps.NDEx");
-    }
-
-    /**
-     * This method displays the select server dialog.
-     * It is called when the menu item is selected.  
-     */
-    public void actionPerformed(ActionEvent e)
-    {
-        SelectServerDialog dialog = new SelectServerDialog(null, true);
-        dialog.setVisible(true);
+        Collection ints = new ArrayList();
+        ints.add(1);
+        ints.add(2);
+        ints.add("foo");
+        ints.add(2.2);
+        ints.add(true);
+        Gson gson = new Gson();
+        String json = gson.toJson(ints);
+        System.out.println(json);
+        
+        Class c = Class.forName("String");
+        System.out.println(c.getName());
     }
 }
