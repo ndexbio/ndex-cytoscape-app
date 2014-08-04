@@ -66,7 +66,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     private void prepComponents()
     {
         this.setModal(true);
-        this.getRootPane().setDefaultButton(selectNetwork);
+        this.getRootPane().setDefaultButton(search);
         
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         serverName.setText( selectedServer.display() );

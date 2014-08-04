@@ -227,7 +227,7 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         
         PropertyGraphNetwork network = new PropertyGraphNetwork();
         String networkName = nameField.getText().trim();
-        network.setName(networkName);
+        
         
         // Upload Ordinary Network Properties
         List<NdexProperty> networkProperties = network.getProperties();
@@ -248,6 +248,8 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
                 handleSimpleType(cyNetwork, cyNetwork, predicate, dataType, networkProperties);
             }
         }
+        //This needs to happen AFTER loading ordinary network properties.
+        network.setName(networkName);
         
         //Set network presentation properties.
         List<NdexProperty> networkPresentationProperties = network.getPresentationProperties();
