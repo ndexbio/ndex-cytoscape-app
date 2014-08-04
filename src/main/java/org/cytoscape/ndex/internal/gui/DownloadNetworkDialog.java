@@ -473,31 +473,36 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
             {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<Boolean>>(){}.getType();
                 Collection<Boolean> collection = gson.fromJson(property.getValue(), collectionType);
-                cyRow.set(property.getPredicateString(), new ArrayList<Boolean>(collection) );
+                List<Boolean> values = collection == null ? null : new ArrayList<Boolean>(collection);
+                cyRow.set(property.getPredicateString(), values );
             }
             if( elementDataType.equals("Integer") )
             {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<Integer>>(){}.getType();
                 Collection<Integer> collection = gson.fromJson(property.getValue(), collectionType);
-                cyRow.set(property.getPredicateString(), new ArrayList<Integer>(collection) );
+                List<Integer> values = collection == null ? null : new ArrayList<Integer>(collection);
+                cyRow.set(property.getPredicateString(), values );
             }
             if( elementDataType.equals("Long") )
             {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<Long>>(){}.getType();
                 Collection<Long> collection = gson.fromJson(property.getValue(), collectionType);
-                cyRow.set(property.getPredicateString(), new ArrayList<Long>(collection) );
+                List<Long> values = collection == null ? null : new ArrayList<Long>(collection);
+                cyRow.set(property.getPredicateString(), values );
             }
             if( elementDataType.equals("Double") )
             {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<Double>>(){}.getType();
                 Collection<Double> collection = gson.fromJson(property.getValue(), collectionType);
-                cyRow.set(property.getPredicateString(), new ArrayList<Double>(collection) );
+                List<Double> values = collection == null ? null : new ArrayList<Double>(collection);
+                cyRow.set(property.getPredicateString(), values );
             }
             if( elementDataType.equals("String") )
             {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<String>>(){}.getType();
                 Collection<String> collection = gson.fromJson(property.getValue(), collectionType);
-                cyRow.set(property.getPredicateString(), new ArrayList<String>(collection) );
+                List<String> values = collection == null ? null : new ArrayList<String>(collection);
+                cyRow.set(property.getPredicateString(), values );
             }
         }
         else
