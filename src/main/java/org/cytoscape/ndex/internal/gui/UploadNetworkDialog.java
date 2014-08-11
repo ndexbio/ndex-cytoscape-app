@@ -47,9 +47,7 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
-import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.ndexbio.model.object.NdexProperty;
 import org.ndexbio.model.object.network.PropertyGraphEdge;
 import org.ndexbio.model.object.network.PropertyGraphNetwork;
@@ -75,6 +73,17 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
     {
         setModal(true);
         rootPane.setDefaultButton(upload);
+        CyApplicationManager appManager = CyObjectManager.INSTANCE.getApplicationManager();
+        CyNetwork cyNetwork = appManager.getCurrentNetwork();
+        //CyNetworkView cyNetworkView = appManager.getCurrentNetworkView();
+        String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
+        nameField.setText(networkName);
+        jLabel8.setText(String.valueOf(cyNetwork.getNodeCount()));
+        jLabel9.setText(String.valueOf(cyNetwork.getEdgeCount()));
+        
+        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        jLabel2.setText(selectedServer.getName());
+        jLabel4.setText(selectedServer.getUsername());
         
     }
 
@@ -224,6 +233,8 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         CyNetwork cyNetwork = appManager.getCurrentNetwork();
         CyNetworkView cyNetworkView = appManager.getCurrentNetworkView();
         VisualLexicon lexicon = CyObjectManager.INSTANCE.getRenderingEngineManager().getDefaultVisualLexicon();
+        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         
         PropertyGraphNetwork network = new PropertyGraphNetwork();
         String networkName = nameField.getText().trim();
@@ -250,6 +261,7 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         }
         //This needs to happen AFTER loading ordinary network properties.
         network.setName(networkName);
+        
         
         //Set network presentation properties.
         List<NdexProperty> networkPresentationProperties = network.getPresentationProperties();
@@ -366,8 +378,7 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         }
         network.setEdges( edges );
         
-        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
-        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        
         try
         {
             mal.insertPropertyGraphNetwork(network);

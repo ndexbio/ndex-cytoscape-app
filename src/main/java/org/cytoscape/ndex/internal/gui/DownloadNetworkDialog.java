@@ -23,7 +23,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.cytoscape.ndex.internal.gui;
 
 import com.google.gson.Gson;
@@ -75,7 +74,7 @@ import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 public class DownloadNetworkDialog extends javax.swing.JDialog {
 
     FindNetworksDialog findNetworksDialog;
-    
+
     /**
      * Creates new form QueryNetwork
      */
@@ -83,87 +82,86 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
     }
-    
+
     /**
      * This is the constructor that will normally be called.
+     *
      * @param parent
-     * @param modal 
+     * @param modal
      */
-    public DownloadNetworkDialog(FindNetworksDialog parent, boolean modal)
-    {
+    public DownloadNetworkDialog(FindNetworksDialog parent, boolean modal) {
         super(parent, modal);
         initComponents();
         prepComponents();
         this.findNetworksDialog = parent;
     }
-    
-    private String getName(PropertyGraphNode node)
-    {
-        for( NdexProperty p : node.getProperties() )
-        {
-            if( p.getPredicateString().equals(PropertyGraphNode.name) )
+
+    private String getName(PropertyGraphNode node) {
+        for (NdexProperty p : node.getProperties()) {
+            if (p.getPredicateString().equals(PropertyGraphNode.name)) {
                 return p.getValue();
+            }
         }
         return "NONE";
     }
-    
-    private void prepComponents()
-    {
+
+    private void prepComponents() {
         this.setModal(true);
         this.getRootPane().setDefaultButton(load);
-        
+
         NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
-        networkNameLabel.setText( networkSummary.getName() );
-        networkNameField.setText( networkSummary.getName() );
-        networkDetails.setText( networkSummary.getDescription() );
+        networkNameLabel.setText(networkSummary.getName());
+        networkNameField.setText(networkSummary.getName());
+        networkDetails.setText(networkSummary.getDescription());
         
+        //edgePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Edges [ 25 out of " + edgeCount + " ]"));
+
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         boolean success = mal.checkCredential();
-        if( success )
-        {
+        if (success) {
             UUID id = networkSummary.getExternalId();
-            PropertyGraphNetwork pn = null;
-            try
-            {
-                pn = mal.getPropertyGraphNetwork(id.toString(), 0, 25);
-            }
-            catch (IOException ex)
-            {
+            PropertyGraphNetwork network = null;
+            try {
+                network = mal.getPropertyGraphNetwork(id.toString(), 0, 25);
+                NetworkManager.INSTANCE.setSelectedNetwork(network);
+                int edgeCount = networkSummary.getEdgeCount();
+                int edgesReturned = network.getEdges().size();
+                edgePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Edges [ " + edgesReturned + " out of " + edgeCount + " ]"));
+                updateEdgeTable(network);
+            } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
                 this.setVisible(false);
                 return;
             }
-
-            DefaultTableModel model = new DefaultTableModel();
-            model.setColumnIdentifiers( new String[]
-            {
+            
+        } else {
+            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+            this.setVisible(false);
+        }
+    }
+    
+    private void updateEdgeTable(PropertyGraphNetwork network){
+                    DefaultTableModel model = new DefaultTableModel();
+            model.setColumnIdentifiers(new String[]{
                 "Source Node (Subject)", "Edge Type (Predicate)", "Target Node (Object)"
             });
-            Map<Long, PropertyGraphNode> nodeMap = pn.getNodes();
-            for( PropertyGraphEdge edge : pn.getEdges() )
-            {                 
+            Map<Long, PropertyGraphNode> nodeMap = network.getNodes();
+            for (PropertyGraphEdge edge : network.getEdges()) {
                 Vector row = new Vector();
 
                 //Source Node
                 PropertyGraphNode sourceNode = nodeMap.get(edge.getSubjectId());
-                row.add( getName(sourceNode) );
+                row.add(getName(sourceNode));
                 //Edge Type
-                row.add( edge.getPredicate() );
+                row.add(edge.getPredicate());
                 //Target Node
                 PropertyGraphNode objectNode = nodeMap.get(edge.getObjectId());
-                row.add( getName(objectNode) );
+                row.add(getName(objectNode));
 
                 model.addRow(row);
             }
             edgeJTable.setModel(model);
-                             
-        }
-        else
-        {
-            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-            this.setVisible(false);
-        }     
     }
 
     /**
@@ -442,302 +440,308 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void queryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queryActionPerformed
-        // TODO add your handling code here:
+        PropertyGraphNetwork network = null;
+        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        // First re-check credentials
+        boolean success = mal.checkCredential();
+        
+
+        if (success) {
+            //The network to query.
+            String queryString = jComboBox1.getSelectedItem().toString();
+            int depth = 1; // TODO: need to add control for depth
+            NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+            UUID id = networkSummary.getExternalId();
+
+            try {
+                network = mal.getNeighborhoodAsPropertyGraph(id.toString(), queryString, depth);
+                NetworkManager.INSTANCE.setSelectedNetwork(network);
+                updateEdgeTable(network);
+                int edgeCount = networkSummary.getEdgeCount();
+                int edgesReturned = network.getEdges().size();
+                edgePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Edges [ " + edgesReturned + " out of " + edgeCount + " ]"));
+                networkNameField.setText(networkNameField.getText() + " query");
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_queryActionPerformed
 
-    private Object convertTo(String value, String type)
-    {
-        if( value == null )
+    private Object convertTo(String value, String type) {
+        if (value == null) {
             return null;
-        if( type.equals("Boolean") )
+        }
+        if (type.equals("Boolean")) {
             return value.trim().equals("true");
-        else if( type.equals("Integer") )
+        } else if (type.equals("Integer")) {
             return Integer.parseInt(value);
-        else if( type.equals("Long") )
+        } else if (type.equals("Long")) {
             return Long.parseLong(value);
-        else if( type.equals("Double") )
+        } else if (type.equals("Double")) {
             return Double.parseDouble(value);
-        else if( type.equals("String") )
+        } else if (type.equals("String")) {
             return value;
+        }
         return value;
     }
-    
-    private void setData(NdexProperty property, CyRow cyRow)
-    {
+
+    private void setData(NdexProperty property, CyRow cyRow) {
         String dataType = property.getDataType();
-        if( dataType.startsWith("List") )
-        {
-            String elementDataType = dataType.substring( dataType.indexOf(".") + 1 );
+        if (dataType.startsWith("List")) {
+            String elementDataType = dataType.substring(dataType.indexOf(".") + 1);
             Gson gson = new Gson();
-            if( elementDataType.equals("Boolean") )
-            {
-                java.lang.reflect.Type collectionType = new TypeToken<Collection<Boolean>>(){}.getType();
+            if (elementDataType.equals("Boolean")) {
+                java.lang.reflect.Type collectionType = new TypeToken<Collection<Boolean>>() {
+                }.getType();
                 Collection<Boolean> collection = gson.fromJson(property.getValue(), collectionType);
                 List<Boolean> values = collection == null ? null : new ArrayList<Boolean>(collection);
-                cyRow.set(property.getPredicateString(), values );
+                cyRow.set(property.getPredicateString(), values);
             }
-            if( elementDataType.equals("Integer") )
-            {
-                java.lang.reflect.Type collectionType = new TypeToken<Collection<Integer>>(){}.getType();
+            if (elementDataType.equals("Integer")) {
+                java.lang.reflect.Type collectionType = new TypeToken<Collection<Integer>>() {
+                }.getType();
                 Collection<Integer> collection = gson.fromJson(property.getValue(), collectionType);
                 List<Integer> values = collection == null ? null : new ArrayList<Integer>(collection);
-                cyRow.set(property.getPredicateString(), values );
+                cyRow.set(property.getPredicateString(), values);
             }
-            if( elementDataType.equals("Long") )
-            {
-                java.lang.reflect.Type collectionType = new TypeToken<Collection<Long>>(){}.getType();
+            if (elementDataType.equals("Long")) {
+                java.lang.reflect.Type collectionType = new TypeToken<Collection<Long>>() {
+                }.getType();
                 Collection<Long> collection = gson.fromJson(property.getValue(), collectionType);
                 List<Long> values = collection == null ? null : new ArrayList<Long>(collection);
-                cyRow.set(property.getPredicateString(), values );
+                cyRow.set(property.getPredicateString(), values);
             }
-            if( elementDataType.equals("Double") )
-            {
-                java.lang.reflect.Type collectionType = new TypeToken<Collection<Double>>(){}.getType();
+            if (elementDataType.equals("Double")) {
+                java.lang.reflect.Type collectionType = new TypeToken<Collection<Double>>() {
+                }.getType();
                 Collection<Double> collection = gson.fromJson(property.getValue(), collectionType);
                 List<Double> values = collection == null ? null : new ArrayList<Double>(collection);
-                cyRow.set(property.getPredicateString(), values );
+                cyRow.set(property.getPredicateString(), values);
             }
-            if( elementDataType.equals("String") )
-            {
-                java.lang.reflect.Type collectionType = new TypeToken<Collection<String>>(){}.getType();
+            if (elementDataType.equals("String")) {
+                java.lang.reflect.Type collectionType = new TypeToken<Collection<String>>() {
+                }.getType();
                 Collection<String> collection = gson.fromJson(property.getValue(), collectionType);
                 List<String> values = collection == null ? null : new ArrayList<String>(collection);
-                cyRow.set(property.getPredicateString(), values );
+                cyRow.set(property.getPredicateString(), values);
+            }
+        } else {
+            Object converted = convertTo(property.getValue(), property.getDataType());
+            if (converted instanceof Boolean) {
+                cyRow.set(property.getPredicateString(), (Boolean) converted);
+            } else if (converted instanceof Integer) {
+                cyRow.set(property.getPredicateString(), (Integer) converted);
+            } else if (converted instanceof Long) {
+                cyRow.set(property.getPredicateString(), (Long) converted);
+            } else if (converted instanceof Double) {
+                cyRow.set(property.getPredicateString(), (Double) converted);
+            } else if (converted instanceof String) {
+                cyRow.set(property.getPredicateString(), (String) converted);
             }
         }
-        else
-        {
-            Object converted = convertTo(property.getValue(), property.getDataType() );
-            if( converted instanceof Boolean )
-                cyRow.set( property.getPredicateString(), (Boolean)converted );
-            else if( converted instanceof Integer )
-                cyRow.set( property.getPredicateString(), (Integer)converted );
-            else if( converted instanceof Long )
-                cyRow.set( property.getPredicateString(), (Long)converted);
-            else if( converted instanceof Double )
-                cyRow.set( property.getPredicateString(), (Double)converted);
-            else if( converted instanceof String )
-                cyRow.set( property.getPredicateString(), (String)converted );
-        }
     }
-    
 
-    
+
     private void loadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadActionPerformed
         // Note: In this code, references named network, node, and edge generally refer to the NDEx object model 
         // while references named cyNetwork, cyNode, and cyEdge generally refer to the Cytoscape object model. 
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        boolean success = mal.checkCredential();
-        if( success )
-        {        
-            
-            //The network to copy from.
-            NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
-            UUID id = networkSummary.getExternalId();
-            PropertyGraphNetwork network = null;
-            try
-            {
-                network = mal.getPropertyGraphNetwork(id.toString(), 0, 25);
-            }
-            catch (IOException ex)
-            {
-                JOptionPane.showMessageDialog(this, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            //The network to copy to.
-            CyNetworkFactory networkFactory = CyObjectManager.INSTANCE.getNetworkFactory();
-            CyNetwork cyNetwork = networkFactory.createNetwork();
-            cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, networkNameField.getText());
-            
-            //Copy network properties
-            CyTable  networkTable = cyNetwork.getDefaultNetworkTable();
-            List<NdexProperty> networkProperties = network.getProperties();
-            for( NdexProperty property : networkProperties )
-            {
-                if (networkTable.getColumn(property.getPredicateString()) == null )
-                {
-                    Class type = String.class;
-                    Class listElementType = null;
-                    try
-                    {
-                        String ndexDataType = property.getDataType();
-                        if( ndexDataType.startsWith("List") )
-                        {
-                            type = List.class;
-                            String elementTypeString = ndexDataType.substring(ndexDataType.indexOf(".") + 1);
-                            listElementType = Class.forName("java.lang." + elementTypeString);
-                        }    
-                        else
-                            type = Class.forName("java.lang." + ndexDataType);
-                    }
-                    catch (ClassNotFoundException ex)
-                    {
-                        Logger.getLogger(DownloadNetworkDialog.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    if( type == List.class )
-                    {
-                        networkTable.createListColumn(property.getPredicateString(), listElementType, false);
-                    }
-                    else
-                    {
-                        networkTable.createColumn(property.getPredicateString(), type, false);
-                    }
+        PropertyGraphNetwork network = null;
+        if (selectedSubnetworkRadio.isSelected()) {
+            // We already have the selected subnetwork
+            network = NetworkManager.INSTANCE.getSelectedNetwork();
+            loadNetworkToCyNetwork(network);
+        } else if (entireNetworkRadio.isSelected()) {
+            // For entire network, we will query again, hence will check credential
+            boolean success = mal.checkCredential();
+            if (success) {
+                //The network to copy from.
+                NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+                UUID id = networkSummary.getExternalId();
+                
+
+                try {
+                    network = mal.getPropertyGraphNetwork(id.toString(), 0, 10000);
+                    loadNetworkToCyNetwork(network);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
-                CyRow cyRow = cyNetwork.getRow(cyNetwork);
-                setData(property, cyRow);
-            }    
-            
-            //Copy nodes   
-            //Create a map to keep track of the new CyNodes we create.
-            Map<Long,CyNode> nodeMap = new HashMap<Long,CyNode>();
-            for( PropertyGraphNode node : network.getNodes().values() )
-            {
-                //Create a new node and save a reference in the nodeMap for a little later.
-                CyNode cyNode = cyNetwork.addNode();
-                nodeMap.put( node.getId(), cyNode);
-                List<NdexProperty> nodeProperties = node.getProperties();
-                CyTable nodeTable = cyNetwork.getDefaultNodeTable();
-                readNdexProperties(nodeProperties, nodeTable, cyNetwork, cyNode);
+            } else {
+                JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
             }
-            
-            //Copy edges           
-            //Create a map to keep track of the new CyEdges we create.
-            Map<Long,CyEdge> edgeMap = new HashMap<Long,CyEdge>();
-            for( PropertyGraphEdge e : network.getEdges() )
-            {
-                PropertyGraphNode s = network.getNodes().get( e.getSubjectId() );
-                CyNode sourceNode = nodeMap.get( s.getId() );
-                
-                PropertyGraphNode t = network.getNodes().get( e.getObjectId() );
-                CyNode targetNode = nodeMap.get( t.getId() );
-                
-                CyEdge cyEdge = cyNetwork.addEdge(sourceNode, targetNode, true);
-                edgeMap.put(e.getId(), cyEdge);
-                cyNetwork.getRow(cyEdge).set(CyEdge.INTERACTION, e.getPredicate());
-                
-                List<NdexProperty> edgeProperties = e.getProperties();
-                CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
-                readNdexProperties(edgeProperties, edgeTable, cyNetwork, cyEdge);
+
+        }
+        findNetworksDialog.setFocusOnDone();
+        this.setVisible(false);
+    }
+
+    private void loadNetworkToCyNetwork(PropertyGraphNetwork network) {
+
+        //Create the CyNetwork to copy to.
+        CyNetworkFactory networkFactory = CyObjectManager.INSTANCE.getNetworkFactory();
+        CyNetwork cyNetwork = networkFactory.createNetwork();
+        String networkName = networkNameField.getText();
+        cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, networkName );
+
+        //Copy network properties
+        CyTable networkTable = cyNetwork.getDefaultNetworkTable();
+        List<NdexProperty> networkProperties = network.getProperties();
+        for (NdexProperty property : networkProperties) {
+            if (networkTable.getColumn(property.getPredicateString()) == null) {
+                Class type = String.class;
+                Class listElementType = null;
+                try {
+                    String ndexDataType = property.getDataType();
+                    if (ndexDataType.startsWith("List")) {
+                        type = List.class;
+                        String elementTypeString = ndexDataType.substring(ndexDataType.indexOf(".") + 1);
+                        listElementType = Class.forName("java.lang." + elementTypeString);
+                    } else {
+                        type = Class.forName("java.lang." + ndexDataType);
+                    }
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(DownloadNetworkDialog.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                if (type == List.class) {
+                    networkTable.createListColumn(property.getPredicateString(), listElementType, false);
+                } else {
+                    networkTable.createColumn(property.getPredicateString(), type, false);
+                }
             }
-            
-            //Create a view for the network
-            CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getNetworkViewFactory().createNetworkView(cyNetwork);
-            
-            CyEventHelper eventHelper = CyObjectManager.INSTANCE.getEventHelper();
-            eventHelper.flushPayloadEvents();
-            
-            VisualLexicon lexicon = CyObjectManager.INSTANCE.getRenderingEngineManager().getDefaultVisualLexicon();
-            
-            // Copy presentation properties for the network.
-            List<NdexProperty> networkPresentationProperties = network.getPresentationProperties();
-            copyPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
-            
-            
-            for( PropertyGraphNode node : network.getNodes().values() )
-            {    
-                List<NdexProperty> properties = node.getPresentationProperties();
-                
-                CyNode cyNode = nodeMap.get(node.getId());
-                View cyNodeView = cyNetworkView.getNodeView(cyNode);
-                
-                copyPresentationProperties(CyNode.class, properties, lexicon, cyNodeView );
-            }
-            
-            for( PropertyGraphEdge edge : network.getEdges() )
-            {
-                List<NdexProperty> properties = edge.getPresentationProperties();
-                
-                CyEdge cyEdge = edgeMap.get(edge.getId());
-                View cyEdgeView = cyNetworkView.getEdgeView(cyEdge);
-                
-                copyPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView );   
-            }
-            
-            
-            //Register the new network with the network manager.
-            CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
-            
-            //Create and register a view for the newly creaty network.
+            CyRow cyRow = cyNetwork.getRow(cyNetwork);
+            setData(property, cyRow);
+        }
+
+        //Copy nodes   
+        //Create a map to keep track of the new CyNodes we create.
+        Map<Long, CyNode> nodeMap = new HashMap<Long, CyNode>();
+        for (PropertyGraphNode node : network.getNodes().values()) {
+            //Create a new node and save a reference in the nodeMap for a little later.
+            CyNode cyNode = cyNetwork.addNode();
+            nodeMap.put(node.getId(), cyNode);
+            List<NdexProperty> nodeProperties = node.getProperties();
+            CyTable nodeTable = cyNetwork.getDefaultNodeTable();
+            readNdexProperties(nodeProperties, nodeTable, cyNetwork, cyNode);
+        }
+
+        //Copy edges           
+        //Create a map to keep track of the new CyEdges we create.
+        Map<Long, CyEdge> edgeMap = new HashMap<Long, CyEdge>();
+        for (PropertyGraphEdge e : network.getEdges()) {
+            PropertyGraphNode s = network.getNodes().get(e.getSubjectId());
+            CyNode sourceNode = nodeMap.get(s.getId());
+
+            PropertyGraphNode t = network.getNodes().get(e.getObjectId());
+            CyNode targetNode = nodeMap.get(t.getId());
+
+            CyEdge cyEdge = cyNetwork.addEdge(sourceNode, targetNode, true);
+            edgeMap.put(e.getId(), cyEdge);
+            cyNetwork.getRow(cyEdge).set(CyEdge.INTERACTION, e.getPredicate());
+
+            List<NdexProperty> edgeProperties = e.getProperties();
+            CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
+            readNdexProperties(edgeProperties, edgeTable, cyNetwork, cyEdge);
+        }
+
+        //Create a view for the network
+        CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getNetworkViewFactory().createNetworkView(cyNetwork);
+
+        CyEventHelper eventHelper = CyObjectManager.INSTANCE.getEventHelper();
+        eventHelper.flushPayloadEvents();
+
+        VisualLexicon lexicon = CyObjectManager.INSTANCE.getRenderingEngineManager().getDefaultVisualLexicon();
+
+        // Copy presentation properties for the network.
+        List<NdexProperty> networkPresentationProperties = network.getPresentationProperties();
+        copyPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
+
+        for (PropertyGraphNode node : network.getNodes().values()) {
+            List<NdexProperty> properties = node.getPresentationProperties();
+
+            CyNode cyNode = nodeMap.get(node.getId());
+            View cyNodeView = cyNetworkView.getNodeView(cyNode);
+
+            copyPresentationProperties(CyNode.class, properties, lexicon, cyNodeView);
+        }
+
+        for (PropertyGraphEdge edge : network.getEdges()) {
+            List<NdexProperty> properties = edge.getPresentationProperties();
+
+            CyEdge cyEdge = edgeMap.get(edge.getId());
+            View cyEdgeView = cyNetworkView.getEdgeView(cyEdge);
+
+            copyPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
+        }
+
+        //Register the new network with the network manager.
+        CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
+
+        //Create and register a view for the newly creaty network.
 //            VisualMappingManager vmm = CyObjectManager.INSTANCE.getVisualMappingManager();
 //            VisualStyle style = vmm.getCurrentVisualStyle();
-            
-            
-            
 //            TODO: Make blog post about this....
-            //CyLayoutAlgorithm layout = CyObjectManager.INSTANCE.getLayoutAlgorithmManager().getDefaultLayout();
+        //CyLayoutAlgorithm layout = CyObjectManager.INSTANCE.getLayoutAlgorithmManager().getDefaultLayout();
 //            TaskIterator taskIterator = layout.createTaskIterator(view, layout.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS,"");
 //            
 //            DialogTaskManager dialogTaskManager = CyObjectManager.INSTANCE.getDialogTaskManager();
 //            dialogTaskManager.execute( taskIterator );
-            
-              CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
-        }
-        else
-        {
-            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        findNetworksDialog.setFocusOnDone();
-        this.setVisible(false);
+        CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
+
     }//GEN-LAST:event_loadActionPerformed
 
-    private void readNdexProperties(List<NdexProperty> ndexProperties, CyTable cyTable, CyNetwork cyNetwork, CyIdentifiable rowId)
-    {
-        for( NdexProperty property : ndexProperties )
-        {
-            if (cyTable.getColumn(property.getPredicateString()) == null )
-            {
+    private void readNdexProperties(List<NdexProperty> ndexProperties, CyTable cyTable, CyNetwork cyNetwork, CyIdentifiable rowId) {
+        for (NdexProperty property : ndexProperties) {
+            if (cyTable.getColumn(property.getPredicateString()) == null) {
                 Class type = String.class;
                 Class listElementType = null;
-                try
-                {
+                try {
                     String ndexDataType = property.getDataType();
-                    if( ndexDataType.startsWith("List") )
-                    {
+                    if (ndexDataType.startsWith("List")) {
                         type = List.class;
                         String elementTypeString = ndexDataType.substring(ndexDataType.indexOf(".") + 1);
                         listElementType = Class.forName("java.lang." + elementTypeString);
-                    }    
-                    else
+                    } else {
                         type = Class.forName("java.lang." + ndexDataType);
-                }
-                catch (ClassNotFoundException ex)
-                {
+                    }
+                } catch (ClassNotFoundException ex) {
                     Logger.getLogger(DownloadNetworkDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if( type == List.class )
-                {
+                if (type == List.class) {
                     cyTable.createListColumn(property.getPredicateString(), listElementType, false);
-                }
-                else
-                {
+                } else {
                     cyTable.createColumn(property.getPredicateString(), type, false);
                 }
             }
             CyRow cyRow = cyNetwork.getRow(rowId);
             setData(property, cyRow);
+            // This is a temporary hack, need to check the mapping of node names / labels...
+            if (property.getPredicateString().equalsIgnoreCase("DC:Title")){
+                cyRow.set("name", property.getValue());
+            }
         }
     }
 
-    
-    private void copyPresentationProperties(Class type, List<NdexProperty> properties, VisualLexicon lexicon, View view)
-    {
-        for( NdexProperty property : properties )
-        {
-            VisualProperty vp = lexicon.lookup( type, property.getPredicateString() );
-            Object value = vp.parseSerializableString( property.getValue() );
+    private void copyPresentationProperties(Class type, List<NdexProperty> properties, VisualLexicon lexicon, View view) {
+        for (NdexProperty property : properties) {
+            VisualProperty vp = lexicon.lookup(type, property.getPredicateString());
+            Object value = vp.parseSerializableString(property.getValue());
             view.setLockedValue(vp, value);
         }
     }
 
 
     private void selectedSubnetworkRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectedSubnetworkRadioActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_selectedSubnetworkRadioActionPerformed
 
     private void entireNetworkRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_entireNetworkRadioActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_entireNetworkRadioActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed

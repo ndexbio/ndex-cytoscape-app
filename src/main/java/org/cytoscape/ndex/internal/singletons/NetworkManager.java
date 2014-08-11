@@ -28,6 +28,7 @@ package org.cytoscape.ndex.internal.singletons;
 
 import org.cytoscape.ndex.internal.server.Server;
 import org.ndexbio.model.object.network.NetworkSummary;
+import org.ndexbio.model.object.network.PropertyGraphNetwork;
 
 /**
  *
@@ -37,6 +38,7 @@ public enum NetworkManager
 {
     INSTANCE;
     private NetworkSummary selectedNetworkSummary;
+    private PropertyGraphNetwork selectedNetwork;
 
     public NetworkSummary getSelectedNetworkSummary()
     {
@@ -46,5 +48,15 @@ public enum NetworkManager
     public void setSelectedNetworkSummary(NetworkSummary selectedNetworkSummary)
     {
         this.selectedNetworkSummary = selectedNetworkSummary;
+    }
+    
+    public PropertyGraphNetwork getSelectedNetwork()
+    {
+        return selectedNetwork;
+    }
+
+    public void setSelectedNetwork(PropertyGraphNetwork selectedNetwork)
+    {
+        this.selectedNetwork = selectedNetwork;
     }
 }
