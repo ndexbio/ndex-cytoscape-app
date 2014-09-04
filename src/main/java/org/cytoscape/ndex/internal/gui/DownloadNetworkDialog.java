@@ -39,7 +39,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
@@ -53,13 +52,10 @@ import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
-import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.swing.DialogTaskManager;
 import org.ndexbio.model.object.NdexProperty;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.model.object.network.PropertyGraphEdge;
@@ -147,7 +143,8 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
                 "Source Node (Subject)", "Edge Type (Predicate)", "Target Node (Object)"
             });
             Map<Long, PropertyGraphNode> nodeMap = network.getNodes();
-            for (PropertyGraphEdge edge : network.getEdges()) {
+            for (Map.Entry<Long, PropertyGraphEdge> entry : network.getEdges().entrySet()) {
+                PropertyGraphEdge edge = entry.getValue();
                 Vector row = new Vector();
 
                 //Source Node
@@ -633,7 +630,8 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
         //Copy edges           
         //Create a map to keep track of the new CyEdges we create.
         Map<Long, CyEdge> edgeMap = new HashMap<Long, CyEdge>();
-        for (PropertyGraphEdge e : network.getEdges()) {
+        for (Map.Entry<Long, PropertyGraphEdge> entry : network.getEdges().entrySet()) {
+            PropertyGraphEdge e = entry.getValue();
             PropertyGraphNode s = network.getNodes().get(e.getSubjectId());
             CyNode sourceNode = nodeMap.get(s.getId());
 
@@ -670,7 +668,8 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
             copyPresentationProperties(CyNode.class, properties, lexicon, cyNodeView);
         }
 
-        for (PropertyGraphEdge edge : network.getEdges()) {
+        for (Map.Entry<Long, PropertyGraphEdge> entry : network.getEdges().entrySet()) {
+            PropertyGraphEdge edge = entry.getValue();
             List<NdexProperty> properties = edge.getPresentationProperties();
 
             CyEdge cyEdge = edgeMap.get(edge.getId());

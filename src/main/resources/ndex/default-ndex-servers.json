@@ -1,7 +1,12 @@
 [
   {
-    "name": "default-server1",
+    "name": "NDEx Local",
     "url": "http://localhost:8080/ndexbio-rest",
+    "type": "DEFAULT"
+  },
+  {
+    "name": "NDEx Test",
+    "url": "http://test.ndexbio.org/rest",
     "type": "DEFAULT"
   }
 ]

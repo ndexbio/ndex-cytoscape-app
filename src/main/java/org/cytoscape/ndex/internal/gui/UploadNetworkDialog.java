@@ -329,7 +329,7 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         }
         network.setNodes( nodeMap );
         
-        Collection<PropertyGraphEdge> edges = new ArrayList<PropertyGraphEdge>();
+        Map<Long, PropertyGraphEdge> edges = new HashMap<Long, PropertyGraphEdge>();
         for( CyEdge cyEdge : cyNetwork.getEdgeList() )
         {
             PropertyGraphEdge edge = new PropertyGraphEdge();
@@ -374,7 +374,7 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
                     presentationProperties.add(property);
                 }
             }   
-            edges.add(edge);    
+            edges.put(id, edge);    
         }
         network.setEdges( edges );
         
