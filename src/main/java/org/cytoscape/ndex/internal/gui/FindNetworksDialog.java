@@ -26,19 +26,18 @@
 
 package org.cytoscape.ndex.internal.gui;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Vector;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
-import org.ndexbio.model.object.NdexProperty;
 import org.ndexbio.model.object.network.NetworkSummary;
-import org.ndexbio.model.object.network.PropertyGraphNode;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.io.IOException;
+import java.util.List;
+import java.util.Vector;
 
 /**
  *
@@ -77,7 +76,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworkSummariesByText("*", null, 0, 50);       
+                networkSummaries = mal.findNetworks("*", null, 0, 50);
             }
             catch (IOException ex)
             {         
@@ -284,7 +283,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworkSummariesByText(searchText, me, 0, 50);       
+                networkSummaries = mal.findNetworks(searchText, me, 0, 50);
             }
             catch (IOException ex)
             {         

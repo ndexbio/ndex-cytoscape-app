@@ -27,19 +27,8 @@
 package org.cytoscape.ndex.internal.gui;
 
 import com.google.gson.Gson;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.model.CyColumn;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyIdentifiable;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyTable;
+import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
@@ -48,11 +37,17 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.ndexbio.model.object.NdexProperty;
+import org.ndexbio.model.object.NdexPropertyValuePair;
+import org.ndexbio.model.object.SimplePropertyValuePair;
 import org.ndexbio.model.object.network.PropertyGraphEdge;
 import org.ndexbio.model.object.network.PropertyGraphNetwork;
 import org.ndexbio.model.object.network.PropertyGraphNode;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -241,7 +236,7 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         
         
         // Upload Ordinary Network Properties
-        List<NdexProperty> networkProperties = network.getProperties();
+        List<NdexPropertyValuePair> networkProperties = network.getProperties();
         CyTable networkTable = cyNetwork.getDefaultNetworkTable();
         for( CyColumn cyColumn : networkTable.getColumns() )
         {
@@ -264,17 +259,17 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         
         
         //Set network presentation properties.
-        List<NdexProperty> networkPresentationProperties = network.getPresentationProperties();
+        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
 
         for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NETWORK))
         {
             if( cyNetworkView.isSet(p) && p.getTargetDataType() == CyNetwork.class )
             {
-                NdexProperty property = new NdexProperty();
-                property.setPredicateString( p.getIdString() );
+                SimplePropertyValuePair property = new SimplePropertyValuePair();
+                property.setName(p.getIdString());
                 Object value = cyNetworkView.getVisualProperty(p);
                 property.setValue( p.toSerializableString( value ) );
-                property.setDataType( value.getClass().getSimpleName() );
+                property.setType(value.getClass().getSimpleName());
                 networkPresentationProperties.add(property);
             }
         }
@@ -291,7 +286,7 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
             node.setName( cyNetwork.getRow(cyNode).get(CyNetwork.NAME, String.class) );
             
             //Set Node properties
-            List<NdexProperty> properties = node.getProperties();
+            List<NdexPropertyValuePair> properties = node.getProperties();
             for(CyColumn cyColumn : nodeTable.getColumns())
             {    
                 String predicate = cyColumn.getName();
@@ -309,18 +304,18 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
             }
             
             //Set node presentation properties.
-            List<NdexProperty> presentationProperties = node.getPresentationProperties();
+            List<SimplePropertyValuePair> presentationProperties = node.getPresentationProperties();
             View nodeView = cyNetworkView.getNodeView(cyNode);
             
             for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NODE))
             {
                 if( nodeView.isSet(p) )
                 {
-                    NdexProperty property = new NdexProperty();
-                    property.setPredicateString( p.getIdString() );
+                    SimplePropertyValuePair property = new SimplePropertyValuePair();
+                    property.setName(p.getIdString());
                     Object value = nodeView.getVisualProperty(p);
                     property.setValue( p.toSerializableString( value ) );
-                    property.setDataType( value.getClass().getSimpleName() );
+                    property.setType(value.getClass().getSimpleName());
                     presentationProperties.add(property);
                 }
             }
@@ -341,7 +336,7 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
                            
             //Set ordinary edge properties
             CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
-            List<NdexProperty> properties = edge.getProperties();
+            List<NdexPropertyValuePair> properties = edge.getProperties();
             for(CyColumn cyColumn : edgeTable.getColumns())
             {    
                 String predicate = cyColumn.getName();
@@ -359,18 +354,18 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
             }
             
             //Set edge presentation properties.
-            List<NdexProperty> presentationProperties = edge.getPresentationProperties();
+            List<SimplePropertyValuePair> presentationProperties = edge.getPresentationProperties();
             View edgeView = cyNetworkView.getEdgeView(cyEdge);
 
             for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.EDGE))
             {
                 if( edgeView.isSet(p) )
                 {
-                    NdexProperty property = new NdexProperty();
-                    property.setPredicateString( p.getIdString() );
+                    SimplePropertyValuePair property = new SimplePropertyValuePair();
+                    property.setName(p.getIdString());
                     Object value = edgeView.getVisualProperty(p);
                     property.setValue( p.toSerializableString( value ) );
-                    property.setDataType( value.getClass().getSimpleName() );
+                    property.setType(value.getClass().getSimpleName());
                     presentationProperties.add(property);
                 }
             }   
@@ -390,10 +385,10 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         this.setVisible(false);
     }//GEN-LAST:event_uploadActionPerformed
 
-    private void handleSimpleType(CyNetwork cyNetwork, CyIdentifiable rowId, String predicate, Class<?> dataType, List<NdexProperty> properties)
+    private void handleSimpleType(CyNetwork cyNetwork, CyIdentifiable rowId, String predicate, Class<?> dataType, List<NdexPropertyValuePair> properties)
     {
         Object value = cyNetwork.getRow(rowId).get(predicate, dataType);
-        NdexProperty property = new NdexProperty();
+        NdexPropertyValuePair property = new NdexPropertyValuePair();
         property.setPredicateString(predicate);
         String valueString = value != null ? value.toString() : null;
         property.setValue(valueString);
@@ -401,12 +396,12 @@ public class UploadNetworkDialog extends javax.swing.JDialog {
         properties.add(property);
     }
 
-    private void handeListType(CyColumn cyColumn, CyNetwork cyNetwork, CyIdentifiable rowId, String predicate, List<NdexProperty> networkProperties)
+    private void handeListType(CyColumn cyColumn, CyNetwork cyNetwork, CyIdentifiable rowId, String predicate, List<NdexPropertyValuePair> networkProperties)
     {
         Class listElementType = cyColumn.getListElementType();
         String typeName = "List."+listElementType.getSimpleName();
         List list = cyNetwork.getRow(rowId).getList(predicate, listElementType);
-        NdexProperty property = new NdexProperty();
+        NdexPropertyValuePair property = new NdexPropertyValuePair();
         property.setPredicateString(predicate);
         Gson gson = new Gson();
         property.setValue( gson.toJson(list) );

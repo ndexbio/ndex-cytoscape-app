@@ -27,26 +27,8 @@ package org.cytoscape.ndex.internal.gui;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyIdentifiable;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyRow;
-import org.cytoscape.model.CyTable;
+import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
@@ -56,12 +38,20 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
-import org.ndexbio.model.object.NdexProperty;
+import org.ndexbio.model.object.NdexPropertyValuePair;
+import org.ndexbio.model.object.SimplePropertyValuePair;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.model.object.network.PropertyGraphEdge;
 import org.ndexbio.model.object.network.PropertyGraphNetwork;
 import org.ndexbio.model.object.network.PropertyGraphNode;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -93,7 +83,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
     }
 
     private String getName(PropertyGraphNode node) {
-        for (NdexProperty p : node.getProperties()) {
+        for (NdexPropertyValuePair p : node.getProperties()) {
             if (p.getPredicateString().equals(PropertyGraphNode.name)) {
                 return p.getValue();
             }
@@ -486,7 +476,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
         return value;
     }
 
-    private void setData(NdexProperty property, CyRow cyRow) {
+    private void setData(NdexPropertyValuePair property, CyRow cyRow) {
         String dataType = property.getDataType();
         if (dataType.startsWith("List")) {
             String elementDataType = dataType.substring(dataType.indexOf(".") + 1);
@@ -588,8 +578,8 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
 
         //Copy network properties
         CyTable networkTable = cyNetwork.getDefaultNetworkTable();
-        List<NdexProperty> networkProperties = network.getProperties();
-        for (NdexProperty property : networkProperties) {
+        List<NdexPropertyValuePair> networkProperties = network.getProperties();
+        for (NdexPropertyValuePair property : networkProperties) {
             if (networkTable.getColumn(property.getPredicateString()) == null) {
                 Class type = String.class;
                 Class listElementType = null;
@@ -622,7 +612,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
             //Create a new node and save a reference in the nodeMap for a little later.
             CyNode cyNode = cyNetwork.addNode();
             nodeMap.put(node.getId(), cyNode);
-            List<NdexProperty> nodeProperties = node.getProperties();
+            List<NdexPropertyValuePair> nodeProperties = node.getProperties();
             CyTable nodeTable = cyNetwork.getDefaultNodeTable();
             readNdexProperties(nodeProperties, nodeTable, cyNetwork, cyNode);
         }
@@ -642,7 +632,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
             edgeMap.put(e.getId(), cyEdge);
             cyNetwork.getRow(cyEdge).set(CyEdge.INTERACTION, e.getPredicate());
 
-            List<NdexProperty> edgeProperties = e.getProperties();
+            List<NdexPropertyValuePair> edgeProperties = e.getProperties();
             CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
             readNdexProperties(edgeProperties, edgeTable, cyNetwork, cyEdge);
         }
@@ -656,11 +646,11 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
         VisualLexicon lexicon = CyObjectManager.INSTANCE.getRenderingEngineManager().getDefaultVisualLexicon();
 
         // Copy presentation properties for the network.
-        List<NdexProperty> networkPresentationProperties = network.getPresentationProperties();
+        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
         copyPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
 
         for (PropertyGraphNode node : network.getNodes().values()) {
-            List<NdexProperty> properties = node.getPresentationProperties();
+            List<SimplePropertyValuePair> properties = node.getPresentationProperties();
 
             CyNode cyNode = nodeMap.get(node.getId());
             View cyNodeView = cyNetworkView.getNodeView(cyNode);
@@ -670,7 +660,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
 
         for (Map.Entry<Long, PropertyGraphEdge> entry : network.getEdges().entrySet()) {
             PropertyGraphEdge edge = entry.getValue();
-            List<NdexProperty> properties = edge.getPresentationProperties();
+            List<SimplePropertyValuePair> properties = edge.getPresentationProperties();
 
             CyEdge cyEdge = edgeMap.get(edge.getId());
             View cyEdgeView = cyNetworkView.getEdgeView(cyEdge);
@@ -694,8 +684,8 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_loadActionPerformed
 
-    private void readNdexProperties(List<NdexProperty> ndexProperties, CyTable cyTable, CyNetwork cyNetwork, CyIdentifiable rowId) {
-        for (NdexProperty property : ndexProperties) {
+    private void readNdexProperties(List<NdexPropertyValuePair> ndexProperties, CyTable cyTable, CyNetwork cyNetwork, CyIdentifiable rowId) {
+        for (NdexPropertyValuePair property : ndexProperties) {
             if (cyTable.getColumn(property.getPredicateString()) == null) {
                 Class type = String.class;
                 Class listElementType = null;
@@ -720,15 +710,18 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
             CyRow cyRow = cyNetwork.getRow(rowId);
             setData(property, cyRow);
             // This is a temporary hack, need to check the mapping of node names / labels...
-            if (property.getPredicateString().equalsIgnoreCase("DC:Title")){
+            if (property.getPredicateString().equalsIgnoreCase("DC:Title")) {
+                cyRow.set("name", property.getValue());
+            }
+            else if (property.getPredicateString().equalsIgnoreCase("NDEx:represents")){
                 cyRow.set("name", property.getValue());
             }
         }
     }
 
-    private void copyPresentationProperties(Class type, List<NdexProperty> properties, VisualLexicon lexicon, View view) {
-        for (NdexProperty property : properties) {
-            VisualProperty vp = lexicon.lookup(type, property.getPredicateString());
+    private void copyPresentationProperties(Class type, List<SimplePropertyValuePair> properties, VisualLexicon lexicon, View view) {
+        for (SimplePropertyValuePair property : properties) {
+            VisualProperty vp = lexicon.lookup(type, property.getName());
             Object value = vp.parseSerializableString(property.getValue());
             view.setLockedValue(vp, value);
         }
