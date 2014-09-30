@@ -36,7 +36,7 @@ import org.cytoscape.ndex.internal.server.ServerList;
 public enum ServerManager
 {
     INSTANCE;
-    private Server selectedServer;
+    private Server selectedServer = Server.createDefaultServer();
     private final ServerList availableServers = new ServerList();
     
     public ServerList getAvailableServers()

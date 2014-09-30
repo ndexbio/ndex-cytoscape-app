@@ -104,7 +104,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
 
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        boolean success = mal.checkCredential();
+        boolean success = selectedServer.check(mal);
         if (success) {
             UUID id = networkSummary.getExternalId();
             PropertyGraphNetwork network = null;
@@ -431,9 +431,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         // First re-check credentials
-        boolean success = mal.checkCredential();
-        
-
+        boolean success = selectedServer.check(mal);
         if (success) {
             //The network to query.
             String queryString = jComboBox1.getSelectedItem().toString();
@@ -545,7 +543,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
             loadNetworkToCyNetwork(network);
         } else if (entireNetworkRadio.isSelected()) {
             // For entire network, we will query again, hence will check credential
-            boolean success = mal.checkCredential();
+            boolean success = selectedServer.check(mal);
             if (success) {
                 //The network to copy from.
                 NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();

@@ -71,8 +71,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         serverName.setText( selectedServer.display() );
         
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        boolean success = mal.checkCredential();
-        if( success )
+        if( selectedServer.check(mal) )
         {
             try
             {
@@ -278,8 +277,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             searchText = "*";
         
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        boolean success = mal.checkCredential();
-        if( success )
+        if( selectedServer.check(mal) )
         {
             try
             {

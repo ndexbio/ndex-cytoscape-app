@@ -44,6 +44,8 @@ public class Server
     private String description;
     private Type type;
     
+    private boolean authenticated;
+    
     /**
      * Default constructor,
      */
@@ -63,6 +65,24 @@ public class Server
         password = s.password;
         type = s.type;
         description = s.description;
+        authenticated = s.authenticated;
+    }
+    
+    public static Server createDefaultServer()
+    {
+        Server s = new Server();
+        s.name = "NDEx Public";
+        s.url = "http://www.ndexbio.org/rest";
+        s.type = Type.DEFAULT;
+        return s;
+    }
+    
+    public boolean check(NdexRestClientModelAccessLayer mal)
+    {
+        if( username == null && password == null )
+            return true;
+        else
+            return mal.checkCredential();    
     }
     
     public boolean hasSameName(Server s)
@@ -85,6 +105,7 @@ public class Server
         result += "Username: " + username +"\n";
         result += "Password: " + password +"\n";
         result += "Type: " + type +"\n";
+        result += "Authenticated: " + authenticated +"\n";
         return result;
     }
     
@@ -190,6 +211,16 @@ public class Server
     public void setDescription(String description)
     {
         this.description = description;
+    }
+    
+    public boolean isAuthenticated() 
+    {
+        return authenticated;
+    }
+
+    public void setAuthenticated(boolean authenticated) 
+    {
+        this.authenticated = authenticated;
     }
     // </editor-fold>
     

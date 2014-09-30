@@ -305,27 +305,26 @@ public class SelectServerDialog extends javax.swing.JDialog
     private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        boolean success = mal.checkCredential();
-        if( success )
+        if( selectedServer.check(mal) )
         {
             try
-            {
-                NdexStatus status = mal.getServerStatus();
-                String description = "Number of Networks: " + status.getNetworkCount();
-                selectedServer.setDescription(description);
-                ServerList availableServers = ServerManager.INSTANCE.getAvailableServers();
-                availableServers.serverDescriptionChanged(selectedServer);
-                availableServers.save();
-                // TODO Fix this description later.
-            }
-            catch( IOException ex )
-            {
-                Logger.getLogger(SelectServerDialog.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            String name = selectedServer.getName();
-            JOptionPane.showMessageDialog(this, "Successfully connect to: " + name, "Connected", JOptionPane.INFORMATION_MESSAGE);
-            this.setVisible(false);
+                {
+                    NdexStatus status = mal.getServerStatus();
+                    String description = "Number of Networks: " + status.getNetworkCount();
+                    selectedServer.setDescription(description);
+                    ServerList availableServers = ServerManager.INSTANCE.getAvailableServers();
+                    availableServers.serverDescriptionChanged(selectedServer);
+                    availableServers.save();
+                    // TODO Fix this description later.
+                }
+                catch( IOException ex )
+                {
+                    Logger.getLogger(SelectServerDialog.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                String name = selectedServer.getName();
+                JOptionPane.showMessageDialog(this, "Successfully connect to: " + name, "Connected", JOptionPane.INFORMATION_MESSAGE);
+                this.setVisible(false);
         }
         else
         {
