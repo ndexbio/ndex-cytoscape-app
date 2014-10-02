@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "name": "Hello",
+    "url": "There",
+    "username": "username",
+    "password": "pass",
+    "type": "ADDED",
+    "authenticated": false
+  }
+]

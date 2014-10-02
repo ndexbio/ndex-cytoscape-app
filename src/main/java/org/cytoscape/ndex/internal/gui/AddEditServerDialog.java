@@ -129,13 +129,13 @@ public class AddEditServerDialog extends javax.swing.JDialog {
         name = new javax.swing.JTextField();
         url = new javax.swing.JTextField();
         username = new javax.swing.JTextField();
-        password = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         save = new javax.swing.JButton();
         cancel = new javax.swing.JButton();
+        password = new javax.swing.JPasswordField();
 
         jTextField9.setText("jTextField9");
 
@@ -199,8 +199,8 @@ public class AddEditServerDialog extends javax.swing.JDialog {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(name)
                             .addComponent(url)
-                            .addComponent(password)
-                            .addComponent(username)))
+                            .addComponent(username)
+                            .addComponent(password)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 221, Short.MAX_VALUE)
                         .addComponent(cancel)
@@ -227,8 +227,8 @@ public class AddEditServerDialog extends javax.swing.JDialog {
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6))
+                    .addComponent(jLabel6)
+                    .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(save)
@@ -360,7 +360,7 @@ public class AddEditServerDialog extends javax.swing.JDialog {
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTextField jTextField9;
     private javax.swing.JTextField name;
-    private javax.swing.JTextField password;
+    private javax.swing.JPasswordField password;
     private javax.swing.JButton save;
     private javax.swing.JTextField url;
     private javax.swing.JTextField username;

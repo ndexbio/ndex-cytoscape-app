@@ -27,8 +27,8 @@
 package org.cytoscape.ndex.internal.testing;
 
 import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
-import org.cytoscape.ndex.internal.gui.SelectServerDialog;
-import org.cytoscape.ndex.internal.gui.UploadNetworkDialog;
+import org.cytoscape.ndex.internal.gui.ChangeNdexServerDialog;
+import org.cytoscape.ndex.internal.gui.ExportNetworkDialog;
 
 /**
  *
@@ -118,7 +118,7 @@ public class Mock extends javax.swing.JFrame
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton1ActionPerformed
     {//GEN-HEADEREND:event_jButton1ActionPerformed
-        SelectServerDialog dialog = new SelectServerDialog(this, true);
+        ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(this, true);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -132,7 +132,7 @@ public class Mock extends javax.swing.JFrame
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton3ActionPerformed
     {//GEN-HEADEREND:event_jButton3ActionPerformed
-        UploadNetworkDialog dialog = new UploadNetworkDialog(this, true);
+        ExportNetworkDialog dialog = new ExportNetworkDialog(this, true);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed

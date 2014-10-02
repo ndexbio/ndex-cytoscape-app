@@ -45,7 +45,7 @@ import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 /**
  * @author David
  */
-public class SelectServerDialog extends javax.swing.JDialog
+public class ChangeNdexServerDialog extends javax.swing.JDialog
 {
 
     private JFrame parent;
@@ -53,7 +53,7 @@ public class SelectServerDialog extends javax.swing.JDialog
     /**
      * Creates new form SelectServerDialog. This is for prototyping.
      */
-    public SelectServerDialog(JFrame parent, boolean modal)
+    public ChangeNdexServerDialog(JFrame parent, boolean modal)
     {
         super(parent, modal);
         this.parent = parent;
@@ -319,7 +319,7 @@ public class SelectServerDialog extends javax.swing.JDialog
                 }
                 catch( IOException ex )
                 {
-                    Logger.getLogger(SelectServerDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ChangeNdexServerDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 String name = selectedServer.getName();
@@ -385,20 +385,27 @@ public class SelectServerDialog extends javax.swing.JDialog
         }
         catch (ClassNotFoundException ex)
         {
-            java.util.logging.Logger.getLogger(SelectServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ChangeNdexServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         catch (InstantiationException ex)
         {
-            java.util.logging.Logger.getLogger(SelectServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ChangeNdexServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         catch (IllegalAccessException ex)
         {
-            java.util.logging.Logger.getLogger(SelectServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ChangeNdexServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         catch (javax.swing.UnsupportedLookAndFeelException ex)
         {
-            java.util.logging.Logger.getLogger(SelectServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ChangeNdexServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
@@ -406,7 +413,7 @@ public class SelectServerDialog extends javax.swing.JDialog
         {
             public void run()
             {
-                SelectServerDialog dialog = new SelectServerDialog(new javax.swing.JFrame(), true);
+                ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter()
                 {
                     @Override

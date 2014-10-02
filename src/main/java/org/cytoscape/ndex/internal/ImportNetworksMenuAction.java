@@ -23,36 +23,39 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.cytoscape.ndex.internal;
 
 import java.awt.event.ActionEvent;
-
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
-import org.cytoscape.ndex.internal.gui.SelectServerDialog;
-
+import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
 
 /**
+ *
  * @author David Welker
- * Creates a new menu item in the Apps|NDex menu to select an NDEx server.
+ * Creates a new menu item in the Apps|NDex menu to find networks in the currently selected NDEx server.
  */
-public class SelectServerMenuAction extends AbstractCyAction
+public class ImportNetworksMenuAction extends AbstractCyAction
 {
-    public SelectServerMenuAction(final String menuTitle, CyApplicationManager cyApplicationManager)
+    public ImportNetworksMenuAction(String menuTitle, CyApplicationManager applicationManager)
     {
-        super(menuTitle, cyApplicationManager, null, null);
+        super(menuTitle, applicationManager, null, null);
         // We want this menu item to appear under the App|NDEx menu. The actual name of the menu item is set in
-        // org.cytoscape.ndex.internal.CyActivator as "Select Server"
+        // org.cytoscape.ndex.internal.CyActivator as "Find Networks"
         setPreferredMenu("Apps.NDEx");
     }
+    
 
+    @Override
     /**
-     * This method displays the select server dialog.
+     * This method displays the find networks dialog.
      * It is called when the menu item is selected.  
      */
     public void actionPerformed(ActionEvent e)
     {
-        SelectServerDialog dialog = new SelectServerDialog(null, true);
+        FindNetworksDialog dialog = new FindNetworksDialog(null, true);
         dialog.setVisible(true);
     }
+    
 }

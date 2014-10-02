@@ -57,14 +57,14 @@ import java.util.logging.Logger;
  *
  * @author David
  */
-public class DownloadNetworkDialog extends javax.swing.JDialog {
+public class ImportNetworksDialog extends javax.swing.JDialog {
 
     FindNetworksDialog findNetworksDialog;
 
     /**
      * Creates new form QueryNetwork
      */
-    public DownloadNetworkDialog(java.awt.Frame parent, boolean modal) {
+    public ImportNetworksDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
@@ -75,7 +75,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
      * @param parent
      * @param modal
      */
-    public DownloadNetworkDialog(FindNetworksDialog parent, boolean modal) {
+    public ImportNetworksDialog(FindNetworksDialog parent, boolean modal) {
         super(parent, modal);
         initComponents();
         prepComponents();
@@ -591,7 +591,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
                         type = Class.forName("java.lang." + ndexDataType);
                     }
                 } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(DownloadNetworkDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ImportNetworksDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 if (type == List.class) {
                     networkTable.createListColumn(property.getPredicateString(), listElementType, false);
@@ -697,7 +697,7 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
                         type = Class.forName("java.lang." + ndexDataType);
                     }
                 } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(DownloadNetworkDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ImportNetworksDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 if (type == List.class) {
                     cyTable.createListColumn(property.getPredicateString(), listElementType, false);
@@ -760,20 +760,21 @@ public class DownloadNetworkDialog extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DownloadNetworkDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ImportNetworksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DownloadNetworkDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ImportNetworksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DownloadNetworkDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ImportNetworksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DownloadNetworkDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ImportNetworksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                DownloadNetworkDialog dialog = new DownloadNetworkDialog(new javax.swing.JFrame(), true);
+                ImportNetworksDialog dialog = new ImportNetworksDialog(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

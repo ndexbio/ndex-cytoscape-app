@@ -29,33 +29,31 @@ package org.cytoscape.ndex.internal;
 import java.awt.event.ActionEvent;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
-import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
+import org.cytoscape.ndex.internal.gui.ExportNetworkDialog;
 
 /**
  *
  * @author David Welker
- * Creates a new menu item in the Apps|NDex menu to find networks in the currently selected NDEx server.
+ * Creates a new menu item in the Apps|NDex menu to upload an Cytoscape network to the current NDEx server.
  */
-public class FindNetworksMenuAction extends AbstractCyAction
+public class ExportCurrentNetworkMenuAction extends AbstractCyAction
 {
-    public FindNetworksMenuAction(String menuTitle, CyApplicationManager applicationManager)
+    public ExportCurrentNetworkMenuAction(String menuTitle, CyApplicationManager applicationManager)
     {
         super(menuTitle, applicationManager, null, null);
         // We want this menu item to appear under the App|NDEx menu. The actual name of the menu item is set in
-        // org.cytoscape.ndex.internal.CyActivator as "Find Networks"
+        // org.cytoscape.ndex.internal.CyActivator as "Upload Network"
         setPreferredMenu("Apps.NDEx");
     }
-    
 
     @Override
     /**
-     * This method displays the find networks dialog.
+     * This method displays the upload network dialog.
      * It is called when the menu item is selected.  
      */
     public void actionPerformed(ActionEvent e)
     {
-        FindNetworksDialog dialog = new FindNetworksDialog(null, true);
+        ExportNetworkDialog dialog = new ExportNetworkDialog(null, true);
         dialog.setVisible(true);
     }
-    
 }
