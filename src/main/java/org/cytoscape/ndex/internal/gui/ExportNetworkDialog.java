@@ -44,6 +44,7 @@ import org.ndexbio.model.object.network.PropertyGraphNetwork;
 import org.ndexbio.model.object.network.PropertyGraphNode;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -229,9 +230,9 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         CyNetworkView cyNetworkView = appManager.getCurrentNetworkView();
         VisualLexicon lexicon = CyObjectManager.INSTANCE.getRenderingEngineManager().getDefaultVisualLexicon();
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
-        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         
-        PropertyGraphNetwork network = new PropertyGraphNetwork();
+        final PropertyGraphNetwork network = new PropertyGraphNetwork();
         String networkName = nameField.getText().trim();
         
         
@@ -241,7 +242,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         for( CyColumn cyColumn : networkTable.getColumns() )
         {
             String predicate = cyColumn.getName();
-            if( predicate.equals("SUID") )
+            if( predicate.equals("SUID") || predicate.equals("shared name") || predicate.equals("name") )
                 continue;
             Class dataType = cyColumn.getType();
             
@@ -372,16 +373,26 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             edges.put(id, edge);    
         }
         network.setEdges( edges );
-        
-        
-        try
+
+        SwingWorker worker = new SwingWorker<Void,Void>()
         {
-            mal.insertPropertyGraphNetwork(network);
-        }
-        catch (IOException ex)
-        {
-            ex.printStackTrace();
-        }
+
+            @Override
+            protected Void doInBackground() throws Exception
+            {
+                try
+                {
+                    mal.insertPropertyGraphNetwork(network);
+                }
+                catch (IOException ex)
+                {
+                    ex.printStackTrace();
+                }
+                return null;
+            }
+        };
+        worker.execute();
+
         this.setVisible(false);
     }//GEN-LAST:event_uploadActionPerformed
 

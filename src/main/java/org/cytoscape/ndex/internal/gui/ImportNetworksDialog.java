@@ -27,6 +27,7 @@ package org.cytoscape.ndex.internal.gui;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.awt.Component;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
@@ -534,34 +535,45 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
     private void loadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadActionPerformed
         // Note: In this code, references named network, node, and edge generally refer to the NDEx object model 
         // while references named cyNetwork, cyNode, and cyEdge generally refer to the Cytoscape object model. 
-        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
-        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        PropertyGraphNetwork network = null;
-        if (selectedSubnetworkRadio.isSelected()) {
-            // We already have the selected subnetwork
-            network = NetworkManager.INSTANCE.getSelectedNetwork();
-            loadNetworkToCyNetwork(network);
-        } else if (entireNetworkRadio.isSelected()) {
-            // For entire network, we will query again, hence will check credential
-            boolean success = selectedServer.check(mal);
-            if (success) {
-                //The network to copy from.
-                NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
-                UUID id = networkSummary.getExternalId();
-                
+        final Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        final Component me = this;
+        SwingWorker worker = new SwingWorker<Integer,Integer>()
+        {
 
-                try {
-                    network = mal.getPropertyGraphNetwork(id.toString(), 0, 10000);
+            @Override
+            protected Integer doInBackground() throws Exception
+            {
+                PropertyGraphNetwork network = null;
+                if (selectedSubnetworkRadio.isSelected()) {
+                    // We already have the selected subnetwork
+                    network = NetworkManager.INSTANCE.getSelectedNetwork();
                     loadNetworkToCyNetwork(network);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-            }
+                } else if (entireNetworkRadio.isSelected()) {
+                    // For entire network, we will query again, hence will check credential
+                    boolean success = selectedServer.check(mal);
+                    if (success) {
+                        //The network to copy from.
+                        NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+                        UUID id = networkSummary.getExternalId();
 
-        }
+
+                        try {
+                            network = mal.getPropertyGraphNetwork(id.toString(), 0, 10000);
+                            loadNetworkToCyNetwork(network);
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
+                            return -1;
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(me, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                return 1;
+            }
+            
+        };
+        worker.execute();
         findNetworksDialog.setFocusOnDone();
         this.setVisible(false);
     }
