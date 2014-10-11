@@ -259,7 +259,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         NetworkSummary ns = networkSummaries.get(selectedIndex);
         NetworkManager.INSTANCE.setSelectedNetworkSummary(ns);
         
-        org.cytoscape.ndex.internal.gui.ImportNetworksDialog dialog = new org.cytoscape.ndex.internal.gui.ImportNetworksDialog(this, true);
+        org.cytoscape.ndex.internal.gui.ImportNetworksDialog dialog = new org.cytoscape.ndex.internal.gui.ImportNetworksDialog(this,true);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }//GEN-LAST:event_selectNetworkActionPerformed

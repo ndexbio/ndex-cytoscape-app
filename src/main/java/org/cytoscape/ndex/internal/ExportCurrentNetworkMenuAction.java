@@ -29,7 +29,9 @@ package org.cytoscape.ndex.internal;
 import java.awt.event.ActionEvent;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
+import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.ndex.internal.gui.ExportNetworkDialog;
+import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 
 /**
  *
@@ -53,7 +55,8 @@ public class ExportCurrentNetworkMenuAction extends AbstractCyAction
      */
     public void actionPerformed(ActionEvent e)
     {
-        ExportNetworkDialog dialog = new ExportNetworkDialog(null, true);
+        CySwingApplication swingApp = CyObjectManager.INSTANCE.getSwingApplication();
+        ExportNetworkDialog dialog = new ExportNetworkDialog(swingApp.getJFrame(), true);
         dialog.setVisible(true);
     }
 }

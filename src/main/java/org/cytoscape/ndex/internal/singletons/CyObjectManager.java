@@ -29,9 +29,11 @@ package org.cytoscape.ndex.internal.singletons;
 import java.io.File;
 import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.task.create.CreateNetworkViewTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -57,6 +59,8 @@ public enum CyObjectManager
     private VisualMappingManager visualMappingManager;
     private RenderingEngineManager renderingEngineManager;
     private CyEventHelper eventHelper;
+    private CreateNetworkViewTaskFactory createNetworkViewTaskFactory;
+    private CySwingApplication swingApplication;
 
     public CyApplicationManager getApplicationManager()
     {
@@ -167,7 +171,23 @@ public enum CyObjectManager
     {
         this.eventHelper = eventHelper;
     }
-    
-    
 
+    public CreateNetworkViewTaskFactory getCreateNetworkViewTaskFactory()
+    {
+        return this.createNetworkViewTaskFactory;
+    }
+
+    public void setCreateNetworkViewTaskFactory(CreateNetworkViewTaskFactory createNetworkViewTaskFactory)
+    {
+        this.createNetworkViewTaskFactory = createNetworkViewTaskFactory;
+    }
+
+    public CySwingApplication getSwingApplication()
+    {
+        return swingApplication;
+    }
+    public void setCySwingApplication(CySwingApplication swingApplication)
+    {
+        this.swingApplication = swingApplication;
+    }
 }

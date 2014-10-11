@@ -31,11 +31,13 @@ import java.util.Properties;
 import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
+import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.task.create.CreateNetworkViewTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -97,12 +99,14 @@ public class CyActivator extends AbstractCyActivator
         CyNetworkFactory networkFactory = getService(context, CyNetworkFactory.class);
         CyNetworkManager networkManager = getService(context, CyNetworkManager.class);
         CyNetworkViewFactory networkViewFactory = getService(context, CyNetworkViewFactory.class);
+        CreateNetworkViewTaskFactory createNetworkViewTaskFactory = getService(context, CreateNetworkViewTaskFactory.class);
         CyNetworkViewManager networkViewManager = getService(context, CyNetworkViewManager.class);      
         CyLayoutAlgorithmManager layoutAlgorithmManager = getService(context,CyLayoutAlgorithmManager.class);
         DialogTaskManager dialogTaskManager = getService(context,DialogTaskManager.class);
         VisualMappingManager visualMappingManager = getService(context, VisualMappingManager.class);
         RenderingEngineManager renderingEngineManager = getService(context,RenderingEngineManager.class);
         CyEventHelper eventHelper = getService(context, CyEventHelper.class);
+        CySwingApplication swingApplication = getService(context, CySwingApplication.class);
         
         //Register these with the CyObjectManager singleton.
         CyObjectManager manager = CyObjectManager.INSTANCE;
@@ -119,6 +123,8 @@ public class CyActivator extends AbstractCyActivator
         manager.setVisualMappingManager(visualMappingManager);
         manager.setRenderingEngineManager(renderingEngineManager);
         manager.setEventHelper(eventHelper);
+        manager.setCreateNetworkViewTaskFactory(createNetworkViewTaskFactory);
+        manager.setCySwingApplication(swingApplication);
     }
 
 }

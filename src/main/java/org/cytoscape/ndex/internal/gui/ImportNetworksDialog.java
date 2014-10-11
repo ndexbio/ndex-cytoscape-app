@@ -657,15 +657,16 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
         // Copy presentation properties for the network.
         List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
-        copyPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
+        copyDefaultPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
 
         for (PropertyGraphNode node : network.getNodes().values()) {
             List<SimplePropertyValuePair> properties = node.getPresentationProperties();
 
             CyNode cyNode = nodeMap.get(node.getId());
+            eventHelper.flushPayloadEvents();
             View cyNodeView = cyNetworkView.getNodeView(cyNode);
 
-            copyPresentationProperties(CyNode.class, properties, lexicon, cyNodeView);
+            copyDefaultPresentationProperties(CyNode.class, properties, lexicon, cyNodeView);
         }
 
         for (Map.Entry<Long, PropertyGraphEdge> entry : network.getEdges().entrySet()) {
@@ -673,11 +674,13 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             List<SimplePropertyValuePair> properties = edge.getPresentationProperties();
 
             CyEdge cyEdge = edgeMap.get(edge.getId());
+            eventHelper.flushPayloadEvents();
             View cyEdgeView = cyNetworkView.getEdgeView(cyEdge);
 
-            copyPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
+            copyDefaultPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
         }
 
+        cyNetworkView.updateView();
         //Register the new network with the network manager.
         CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
 
@@ -726,6 +729,14 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             else if (property.getPredicateString().equalsIgnoreCase("NDEx:represents")){
                 cyRow.set("name", property.getValue());
             }
+        }
+    }
+
+    private void copyDefaultPresentationProperties(Class type, List<SimplePropertyValuePair> properties, VisualLexicon lexicon, View view) {
+        for (SimplePropertyValuePair property : properties) {
+            VisualProperty vp = lexicon.lookup(type, property.getName());
+            Object value = vp.parseSerializableString(property.getValue());
+            view.setVisualProperty(vp, value);
         }
     }
 
