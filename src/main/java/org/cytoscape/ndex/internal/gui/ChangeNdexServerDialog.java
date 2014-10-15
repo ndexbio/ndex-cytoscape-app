@@ -325,10 +325,12 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
                 String name = selectedServer.getName();
                 JOptionPane.showMessageDialog(this, "Successfully connect to: " + name, "Connected", JOptionPane.INFORMATION_MESSAGE);
                 this.setVisible(false);
+                selectedServer.setAuthenticated(true);
         }
         else
         {
             // TODO Need error from server.
+            selectedServer.setAuthenticated(false);
             JOptionPane.showMessageDialog(this, ErrorMessage.failedToConnect, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_connectActionPerformed

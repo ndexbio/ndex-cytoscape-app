@@ -30,8 +30,13 @@ import java.awt.event.ActionEvent;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.ndex.internal.gui.ExportNetworkDialog;
+import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
+import org.cytoscape.ndex.internal.singletons.ServerManager;
+
+import javax.swing.*;
 
 /**
  *
@@ -56,7 +61,30 @@ public class ExportCurrentNetworkMenuAction extends AbstractCyAction
     public void actionPerformed(ActionEvent e)
     {
         CySwingApplication swingApp = CyObjectManager.INSTANCE.getSwingApplication();
-        ExportNetworkDialog dialog = new ExportNetworkDialog(swingApp.getJFrame(), true);
+        JFrame parent = swingApp.getJFrame();
+
+        Server currentServer = ServerManager.INSTANCE.getSelectedServer();
+        if( !currentServer.isAuthenticated() )
+        {
+            String serverName = currentServer.getName();
+            String msg = "You are not authenticed on: " + serverName + "\n";
+            msg += "You must be authenticated to export a network to an NDEx.";
+            String dialogTitle = "Authentication Error";
+            JOptionPane.showMessageDialog(parent, msg, dialogTitle, JOptionPane.ERROR_MESSAGE );
+            return;
+        }
+
+        CyNetwork currentNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
+        if( currentNetwork == null )
+        {
+            String msg = "There is no network to export.";
+            String dialogTitle = "No Network Error";
+            JOptionPane.showMessageDialog(parent, msg, dialogTitle, JOptionPane.ERROR_MESSAGE );
+            return;
+        }
+
+        ExportNetworkDialog dialog = new ExportNetworkDialog(parent, true);
+        dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
     }
 }

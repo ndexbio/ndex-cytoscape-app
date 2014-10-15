@@ -33,6 +33,8 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 
+import javax.swing.*;
+
 /**
  *
  * @author David Welker
@@ -57,7 +59,9 @@ public class ImportNetworksMenuAction extends AbstractCyAction
     public void actionPerformed(ActionEvent e)
     {
         CySwingApplication swingApp = CyObjectManager.INSTANCE.getSwingApplication();
-        FindNetworksDialog dialog = new FindNetworksDialog(swingApp.getJFrame(), true);
+        JFrame parent = swingApp.getJFrame();
+        FindNetworksDialog dialog = new FindNetworksDialog(parent, true);
+        dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
     }
     

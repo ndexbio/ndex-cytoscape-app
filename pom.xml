@@ -161,6 +161,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>swing-app-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Logging -->
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>

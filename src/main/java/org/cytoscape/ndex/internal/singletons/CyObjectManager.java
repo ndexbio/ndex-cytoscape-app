@@ -27,14 +27,17 @@
 package org.cytoscape.ndex.internal.singletons;
 
 import java.io.File;
-import org.cytoscape.application.CyApplicationConfiguration;
+
+import org.cytoscape.app.swing.CySwingAppAdapter;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.task.create.CreateNetworkViewTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
+import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.presentation.RenderingEngineManager;
@@ -61,10 +64,18 @@ public enum CyObjectManager
     private CyEventHelper eventHelper;
     private CreateNetworkViewTaskFactory createNetworkViewTaskFactory;
     private CySwingApplication swingApplication;
+    private CySwingAppAdapter adapter;
 
-    public CyApplicationManager getApplicationManager()
+    public CyNetwork getCurrentNetwork()
     {
-        return applicationManager;
+        CyApplicationManager applicationManager = adapter.getCyApplicationManager();
+        return applicationManager == null ? null : applicationManager.getCurrentNetwork();
+    }
+
+    public CyNetworkView getCurrentNetworkView()
+    {
+        CyApplicationManager applicationManager = adapter.getCyApplicationManager();
+        return applicationManager == null ? null : applicationManager.getCurrentNetworkView();
     }
 
     public void setApplicationManager(CyApplicationManager applicationManager)
@@ -84,7 +95,7 @@ public enum CyObjectManager
     
     public CyNetworkFactory getNetworkFactory()
     {
-        return networkFactory;
+        return adapter.getCyNetworkFactory();
     }
 
     public void setNetworkFactory(CyNetworkFactory networkFactory)
@@ -94,7 +105,7 @@ public enum CyObjectManager
     
     public CyNetworkManager getNetworkManager()
     {
-        return networkManager;
+        return adapter.getCyNetworkManager();
     }
 
     public void setNetworkManager(CyNetworkManager networkManager)
@@ -104,7 +115,7 @@ public enum CyObjectManager
     
     public CyNetworkViewFactory getNetworkViewFactory()
     {
-        return networkViewFactory;
+        return adapter.getCyNetworkViewFactory();
     }
 
     public void setNetworkViewFactory(CyNetworkViewFactory networkViewFactory)
@@ -114,7 +125,7 @@ public enum CyObjectManager
 
     public CyNetworkViewManager getNetworkViewManager()
     {
-        return networkViewManager;
+        return adapter.getCyNetworkViewManager();
     }
 
     public void setNetworkViewManager(CyNetworkViewManager networkViewManager)
@@ -124,7 +135,7 @@ public enum CyObjectManager
     
     public CyLayoutAlgorithmManager getLayoutAlgorithmManager()
     {
-        return layoutAlgorithmManager;
+        return adapter.getCyLayoutAlgorithmManager();
     }
 
     public void setLayoutAlgorithmManager(CyLayoutAlgorithmManager layoutAlgorithmManager)
@@ -139,12 +150,12 @@ public enum CyObjectManager
     
     public DialogTaskManager getDialogTaskManager()
     {
-        return dialogTaskManager;
+        return adapter.getDialogTaskManager();
     }
 
     public VisualMappingManager getVisualMappingManager()
     {
-        return visualMappingManager;
+        return adapter.getVisualMappingManager();
     }
 
     public void setVisualMappingManager(VisualMappingManager visualMappingManager)
@@ -154,7 +165,7 @@ public enum CyObjectManager
 
     public RenderingEngineManager getRenderingEngineManager()
     {
-        return renderingEngineManager;
+        return adapter.getRenderingEngineManager();
     }
 
     public void setRenderingEngineManager(RenderingEngineManager renderingEngineManager)
@@ -164,7 +175,7 @@ public enum CyObjectManager
 
     public CyEventHelper getEventHelper()
     {
-        return eventHelper;
+        return adapter.getCyEventHelper();
     }
 
     public void setEventHelper(CyEventHelper eventHelper)
@@ -174,7 +185,7 @@ public enum CyObjectManager
 
     public CreateNetworkViewTaskFactory getCreateNetworkViewTaskFactory()
     {
-        return this.createNetworkViewTaskFactory;
+        return adapter.get_CreateNetworkViewTaskFactory();
     }
 
     public void setCreateNetworkViewTaskFactory(CreateNetworkViewTaskFactory createNetworkViewTaskFactory)
@@ -184,10 +195,17 @@ public enum CyObjectManager
 
     public CySwingApplication getSwingApplication()
     {
-        return swingApplication;
+        return adapter.getCySwingApplication();
     }
     public void setCySwingApplication(CySwingApplication swingApplication)
     {
         this.swingApplication = swingApplication;
     }
+
+    public void setCySwingAppAdapter(CySwingAppAdapter appAdapter)
+    {
+        this.adapter = appAdapter;
+    }
+
+
 }

@@ -69,9 +69,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     {
         setModal(true);
         rootPane.setDefaultButton(upload);
-        CyApplicationManager appManager = CyObjectManager.INSTANCE.getApplicationManager();
-        CyNetwork cyNetwork = appManager.getCurrentNetwork();
-        //CyNetworkView cyNetworkView = appManager.getCurrentNetworkView();
+        CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
         String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
         nameField.setText(networkName);
         jLabel8.setText(String.valueOf(cyNetwork.getNodeCount()));
@@ -224,10 +222,9 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void uploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadActionPerformed
-        
-        CyApplicationManager appManager = CyObjectManager.INSTANCE.getApplicationManager();
-        CyNetwork cyNetwork = appManager.getCurrentNetwork();
-        CyNetworkView cyNetworkView = appManager.getCurrentNetworkView();
+
+        CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
+        CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getCurrentNetworkView();
         VisualLexicon lexicon = CyObjectManager.INSTANCE.getRenderingEngineManager().getDefaultVisualLexicon();
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();

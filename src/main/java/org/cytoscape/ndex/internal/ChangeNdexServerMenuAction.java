@@ -33,6 +33,8 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.ndex.internal.gui.ChangeNdexServerDialog;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 
+import javax.swing.*;
+
 
 /**
  * @author David Welker
@@ -55,7 +57,9 @@ public class ChangeNdexServerMenuAction extends AbstractCyAction
     public void actionPerformed(ActionEvent e)
     {
         CySwingApplication swingApp = CyObjectManager.INSTANCE.getSwingApplication();
-        ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(swingApp.getJFrame(), true);
+        JFrame parent = swingApp.getJFrame();
+        ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(parent, true);
+        dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
     }
 }
