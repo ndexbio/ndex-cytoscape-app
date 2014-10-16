@@ -444,12 +444,18 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
             try {
                 network = mal.getNeighborhoodAsPropertyGraph(id.toString(), queryString, depth);
+                if( network == null || network.getNodes() == null || network.getNodes().size() == 0 )
+                {
+                    JOptionPane.showMessageDialog(this, ErrorMessage.noResultsFromQuery, "Warning", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 NetworkManager.INSTANCE.setSelectedNetwork(network);
                 updateEdgeTable(network);
                 int edgeCount = networkSummary.getEdgeCount();
                 int edgesReturned = network.getEdges().size();
                 edgePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Edges [ " + edgesReturned + " out of " + edgeCount + " ]"));
-                networkNameField.setText(networkNameField.getText() + " query");
+                if( !networkNameField.getText().endsWith(" query") )
+                    networkNameField.setText(networkNameField.getText() + " query");
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
                 return;

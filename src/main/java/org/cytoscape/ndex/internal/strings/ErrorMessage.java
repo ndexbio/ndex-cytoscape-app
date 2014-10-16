@@ -37,4 +37,5 @@ public class ErrorMessage
     public static final String failedServerCommunication = "Failed to communicate with server. Please connect to a valid server before continuing.";
     public static final String noNetworkSelected = "No network is selected. This should never happen.";
     public static final String failedToParseJson = "Failed to parse JSON from NDEx source.";
+    public static final String noResultsFromQuery = "Your query did not return any results. Please try another.";
 }
