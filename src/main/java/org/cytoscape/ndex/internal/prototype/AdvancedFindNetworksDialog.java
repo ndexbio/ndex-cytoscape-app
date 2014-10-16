@@ -175,7 +175,7 @@ public class AdvancedFindNetworksDialog extends javax.swing.JDialog {
 
         jLabel9.setText("Find networks on");
 
-        jLabel10.setText("(an NDEx server), which meet the following criteria:");
+        jLabel10.setText("(an NDEx source), which meet the following criteria:");
 
         jLabel11.setText("Title or description");
 

@@ -118,21 +118,21 @@ public class Mock extends javax.swing.JFrame
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton1ActionPerformed
     {//GEN-HEADEREND:event_jButton1ActionPerformed
-        ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(this, true);
+        ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(this);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton2ActionPerformed
     {//GEN-HEADEREND:event_jButton2ActionPerformed
-        FindNetworksDialog dialog = new FindNetworksDialog(this, true);
+        FindNetworksDialog dialog = new FindNetworksDialog(this);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton3ActionPerformed
     {//GEN-HEADEREND:event_jButton3ActionPerformed
-        ExportNetworkDialog dialog = new ExportNetworkDialog(this, true);
+        ExportNetworkDialog dialog = new ExportNetworkDialog(this);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed

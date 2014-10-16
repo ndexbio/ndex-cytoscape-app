@@ -79,10 +79,18 @@ public class Server
     
     public boolean check(NdexRestClientModelAccessLayer mal)
     {
-        if( username == null && password == null )
+        boolean usernamePresent = username != null && !username.isEmpty();
+        boolean passwordPresent = password != null && !username.isEmpty();
+        if( !usernamePresent && !passwordPresent )
+        {
+            authenticated = false;
             return true;
+        }
         else
-            return mal.checkCredential();    
+        {
+            authenticated = mal.checkCredential();
+            return authenticated;
+        }
     }
     
     public boolean hasSameName(Server s)
@@ -115,7 +123,7 @@ public class Server
         if( username == null )
             username = "None";
         
-        String header = "NDEx Server Information\n===============\n";
+        String header = "NDEx Source Information\n===============\n";
         header += "Name: " + name + "\n";
         header += "URL: " + url + "\n";
         header += "Username: " + username + "\n";

@@ -39,7 +39,6 @@ import org.cytoscape.ndex.internal.server.ServerList;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
 import org.ndexbio.model.object.NdexStatus;
-import org.ndexbio.rest.client.NdexRestClient;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 /**
@@ -53,9 +52,9 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
     /**
      * Creates new form SelectServerDialog. This is for prototyping.
      */
-    public ChangeNdexServerDialog(JFrame parent, boolean modal)
+    public ChangeNdexServerDialog(JFrame parent)
     {
-        super(parent, modal);
+        super(parent, true);
         this.parent = parent;
         initComponents();
         prepComponents();
@@ -148,7 +147,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         edit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Select NDEx Server");
+        setTitle("Select NDEx Source");
 
         add.setText("Add");
         add.addActionListener(new java.awt.event.ActionListener()
@@ -199,19 +198,19 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         serverInformation.setEditable(false);
         serverInformation.setColumns(20);
         serverInformation.setRows(5);
-        serverInformation.setText("Server Information\n============\nNDEx Server URL: http://www.foobar.org\nUsername: treyideker\n\n");
+        serverInformation.setText("Source Information\n============\nNDEx Source URL: http://www.foobar.org\nUsername: treyideker\n\n");
         jScrollPane2.setViewportView(serverInformation);
 
         guiServerList.setModel(new javax.swing.AbstractListModel()
         {
-            String[] strings = { "Server 1", "Server 2", "Server 3", "Server 4", "Server 5", "Server 6", "Server 7", "Server 8", "Server 9", "Server 10" };
+            String[] strings = { "Source 1", "Source 2", "Source 3", "Source 4", "Source 5", "Source 6", "Source 7", "Source 8", "Source 9", "Source 10" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
         guiServerList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane3.setViewportView(guiServerList);
 
-        jLabel1.setText("NDEx Server List");
+        jLabel1.setText("NDEx Source List");
 
         edit.setText("Edit");
         edit.addActionListener(new java.awt.event.ActionListener()
@@ -297,7 +296,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         {
             JOptionPane.showMessageDialog(this,
                     ex.getMessage(),
-                    "Error Copying Server",
+                    "Error Copying Source",
                     JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_copyActionPerformed
@@ -325,18 +324,17 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
                 String name = selectedServer.getName();
                 JOptionPane.showMessageDialog(this, "Successfully connect to: " + name, "Connected", JOptionPane.INFORMATION_MESSAGE);
                 this.setVisible(false);
-                selectedServer.setAuthenticated(true);
+
         }
         else
         {
-            // TODO Need error from server.
-            selectedServer.setAuthenticated(false);
+            // TODO Need error from server
             JOptionPane.showMessageDialog(this, ErrorMessage.failedToConnect, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_connectActionPerformed
 
     private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
-        AddEditServerDialog dialog = new AddEditServerDialog(parent, true);
+        AddEditServerDialog dialog = new AddEditServerDialog(parent);
         dialog.setMode(AddEditServerDialog.Mode.ADD);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
@@ -344,7 +342,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
 
     private void editActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editActionPerformed
     {//GEN-HEADEREND:event_editActionPerformed
-        AddEditServerDialog dialog = new AddEditServerDialog(parent, true);
+        AddEditServerDialog dialog = new AddEditServerDialog(parent);
         dialog.setMode(AddEditServerDialog.Mode.EDIT);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
@@ -415,7 +413,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         {
             public void run()
             {
-                ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(new javax.swing.JFrame(), true);
+                ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(new javax.swing.JFrame());
                 dialog.addWindowListener(new java.awt.event.WindowAdapter()
                 {
                     @Override

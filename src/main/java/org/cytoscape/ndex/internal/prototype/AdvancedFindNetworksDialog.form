@@ -306,7 +306,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel10">
       <Properties>
-        <Property name="text" type="java.lang.String" value="(an NDEx server), which meet the following criteria:"/>
+        <Property name="text" type="java.lang.String" value="(an NDEx source), which meet the following criteria:"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel11">

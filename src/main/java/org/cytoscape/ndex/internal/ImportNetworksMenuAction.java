@@ -29,9 +29,10 @@ package org.cytoscape.ndex.internal;
 import java.awt.event.ActionEvent;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
-import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
+import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
+import org.cytoscape.ndex.internal.singletons.ServerManager;
 
 import javax.swing.*;
 
@@ -58,9 +59,19 @@ public class ImportNetworksMenuAction extends AbstractCyAction
      */
     public void actionPerformed(ActionEvent e)
     {
-        CySwingApplication swingApp = CyObjectManager.INSTANCE.getSwingApplication();
-        JFrame parent = swingApp.getJFrame();
-        FindNetworksDialog dialog = new FindNetworksDialog(parent, true);
+        JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+
+        Server currentServer = ServerManager.INSTANCE.getSelectedServer();
+        if( !currentServer.isAuthenticated() )
+        {
+            String serverName = currentServer.getName();
+            String msg = "You are not authenticed on: " + serverName + "\n";
+            msg += "Warning: You will only be able to view and retrieve PUBLIC networks.";
+            String dialogTitle = "Authentication Warning";
+            JOptionPane.showMessageDialog(parent, msg, dialogTitle, JOptionPane.WARNING_MESSAGE );
+        }
+
+        FindNetworksDialog dialog = new FindNetworksDialog(parent);
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
     }

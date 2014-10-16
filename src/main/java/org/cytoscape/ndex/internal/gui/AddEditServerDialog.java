@@ -32,6 +32,8 @@ import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.server.ServerList;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 
+import java.awt.*;
+
 /**
  *
  * @author David
@@ -44,8 +46,8 @@ public class AddEditServerDialog extends javax.swing.JDialog {
     /**
      * Creates new form AddNDExServer
      */
-    public AddEditServerDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public AddEditServerDialog(Frame parent) {
+        super(parent, true);
         initComponents();
         prepComponents();
     }
@@ -143,7 +145,7 @@ public class AddEditServerDialog extends javax.swing.JDialog {
         setTitle("Add Server");
 
         jLabel1.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
-        jLabel1.setText("NDEx Server");
+        jLabel1.setText("NDEx Source");
 
         url.addActionListener(new java.awt.event.ActionListener()
         {
@@ -338,7 +340,7 @@ public class AddEditServerDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                AddEditServerDialog dialog = new AddEditServerDialog(new javax.swing.JFrame(), true);
+                AddEditServerDialog dialog = new AddEditServerDialog(new javax.swing.JFrame());
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

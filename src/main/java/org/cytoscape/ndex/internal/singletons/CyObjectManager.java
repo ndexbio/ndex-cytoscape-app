@@ -40,9 +40,12 @@ import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.swing.DialogTaskManager;
+
+import javax.swing.*;
 
 /**
  *
@@ -51,21 +54,45 @@ import org.cytoscape.work.swing.DialogTaskManager;
 public enum CyObjectManager
 {
     INSTANCE;
-    private CyApplicationManager applicationManager;
+    // App Configuration Directory where configuraton may be stored.
     private File configDir;
-    private CyNetworkFactory networkFactory;
-    private CyNetworkManager networkManager;
-    private CyNetworkViewFactory networkViewFactory;
-    private CyNetworkViewManager networkViewManager;
-    private CyLayoutAlgorithmManager layoutAlgorithmManager;
-    private DialogTaskManager dialogTaskManager;
-    private VisualMappingManager visualMappingManager;
-    private RenderingEngineManager renderingEngineManager;
-    private CyEventHelper eventHelper;
-    private CreateNetworkViewTaskFactory createNetworkViewTaskFactory;
-    private CySwingApplication swingApplication;
+    // The Cytoscape helper class that allows us to easily get all sorts of Cytoscape objects.
     private CySwingAppAdapter adapter;
 
+    public File getConfigDir()
+    {
+        return configDir;
+    }
+    public void setConfigDir(File configDir)
+    {
+        this.configDir = configDir;
+    }
+    public void setCySwingAppAdapter(CySwingAppAdapter appAdapter)
+    {
+        this.adapter = appAdapter;
+    }
+
+    // Trivial Getters
+    public CyNetworkFactory getNetworkFactory()
+    {
+        return adapter.getCyNetworkFactory();
+    }
+    public CyNetworkManager getNetworkManager()
+    {
+        return adapter.getCyNetworkManager();
+    }
+    public CyNetworkViewFactory getNetworkViewFactory()
+    {
+        return adapter.getCyNetworkViewFactory();
+    }
+    public CyNetworkViewManager getNetworkViewManager()
+    {
+        return adapter.getCyNetworkViewManager();
+    }
+    public VisualLexicon getDefaultVisualLexicon() { return adapter.getRenderingEngineManager().getDefaultVisualLexicon(); }
+    public JFrame getApplicationFrame() { return adapter.getCySwingApplication().getJFrame(); }
+
+    // Slightly More Sophisticated Getters
     public CyNetwork getCurrentNetwork()
     {
         CyApplicationManager applicationManager = adapter.getCyApplicationManager();
@@ -77,135 +104,5 @@ public enum CyObjectManager
         CyApplicationManager applicationManager = adapter.getCyApplicationManager();
         return applicationManager == null ? null : applicationManager.getCurrentNetworkView();
     }
-
-    public void setApplicationManager(CyApplicationManager applicationManager)
-    {
-        this.applicationManager = applicationManager;
-    }
-    
-    public File getConfigDir()
-    {
-        return configDir;
-    }
-
-    public void setConfigDir(File configDir)
-    {
-        this.configDir = configDir;
-    }
-    
-    public CyNetworkFactory getNetworkFactory()
-    {
-        return adapter.getCyNetworkFactory();
-    }
-
-    public void setNetworkFactory(CyNetworkFactory networkFactory)
-    {
-        this.networkFactory = networkFactory;
-    }
-    
-    public CyNetworkManager getNetworkManager()
-    {
-        return adapter.getCyNetworkManager();
-    }
-
-    public void setNetworkManager(CyNetworkManager networkManager)
-    {
-        this.networkManager = networkManager;
-    }
-    
-    public CyNetworkViewFactory getNetworkViewFactory()
-    {
-        return adapter.getCyNetworkViewFactory();
-    }
-
-    public void setNetworkViewFactory(CyNetworkViewFactory networkViewFactory)
-    {
-        this.networkViewFactory = networkViewFactory;
-    }
-
-    public CyNetworkViewManager getNetworkViewManager()
-    {
-        return adapter.getCyNetworkViewManager();
-    }
-
-    public void setNetworkViewManager(CyNetworkViewManager networkViewManager)
-    {
-        this.networkViewManager = networkViewManager;
-    }
-    
-    public CyLayoutAlgorithmManager getLayoutAlgorithmManager()
-    {
-        return adapter.getCyLayoutAlgorithmManager();
-    }
-
-    public void setLayoutAlgorithmManager(CyLayoutAlgorithmManager layoutAlgorithmManager)
-    {
-        this.layoutAlgorithmManager = layoutAlgorithmManager;
-    }
-
-    public void setDialogTaskManager(DialogTaskManager dialogTaskManager)
-    {
-        this.dialogTaskManager = dialogTaskManager;
-    }
-    
-    public DialogTaskManager getDialogTaskManager()
-    {
-        return adapter.getDialogTaskManager();
-    }
-
-    public VisualMappingManager getVisualMappingManager()
-    {
-        return adapter.getVisualMappingManager();
-    }
-
-    public void setVisualMappingManager(VisualMappingManager visualMappingManager)
-    {
-        this.visualMappingManager = visualMappingManager;
-    }
-
-    public RenderingEngineManager getRenderingEngineManager()
-    {
-        return adapter.getRenderingEngineManager();
-    }
-
-    public void setRenderingEngineManager(RenderingEngineManager renderingEngineManager)
-    {
-        this.renderingEngineManager = renderingEngineManager;
-    }
-
-    public CyEventHelper getEventHelper()
-    {
-        return adapter.getCyEventHelper();
-    }
-
-    public void setEventHelper(CyEventHelper eventHelper)
-    {
-        this.eventHelper = eventHelper;
-    }
-
-    public CreateNetworkViewTaskFactory getCreateNetworkViewTaskFactory()
-    {
-        return adapter.get_CreateNetworkViewTaskFactory();
-    }
-
-    public void setCreateNetworkViewTaskFactory(CreateNetworkViewTaskFactory createNetworkViewTaskFactory)
-    {
-        this.createNetworkViewTaskFactory = createNetworkViewTaskFactory;
-    }
-
-    public CySwingApplication getSwingApplication()
-    {
-        return adapter.getCySwingApplication();
-    }
-    public void setCySwingApplication(CySwingApplication swingApplication)
-    {
-        this.swingApplication = swingApplication;
-    }
-
-    public void setCySwingAppAdapter(CySwingAppAdapter appAdapter)
-    {
-        this.adapter = appAdapter;
-    }
-
 
 }

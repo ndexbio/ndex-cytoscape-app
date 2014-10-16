@@ -175,7 +175,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel2">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Current Server: "/>
+        <Property name="text" type="java.lang.String" value="Current Source: "/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="serverName">

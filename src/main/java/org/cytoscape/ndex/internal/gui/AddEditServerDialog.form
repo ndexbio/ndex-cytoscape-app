@@ -109,7 +109,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Lucida Grande" size="13" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="NDEx Server"/>
+        <Property name="text" type="java.lang.String" value="NDEx Source"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="name">

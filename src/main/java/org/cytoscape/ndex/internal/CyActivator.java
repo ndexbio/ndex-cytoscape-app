@@ -98,36 +98,13 @@ public class CyActivator extends AbstractCyActivator
         
         //Get Cytocape objects needed by this app using the bundle context.
         CyApplicationConfiguration config = getService(context,CyApplicationConfiguration.class);
-//        CyNetworkFactory networkFactory = getService(context, CyNetworkFactory.class);
-//        CyNetworkManager networkManager = getService(context, CyNetworkManager.class);
-//        CyNetworkViewFactory networkViewFactory = getService(context, CyNetworkViewFactory.class);
-//        CreateNetworkViewTaskFactory createNetworkViewTaskFactory = getService(context, CreateNetworkViewTaskFactory.class);
-//        CyNetworkViewManager networkViewManager = getService(context, CyNetworkViewManager.class);
-//        CyLayoutAlgorithmManager layoutAlgorithmManager = getService(context,CyLayoutAlgorithmManager.class);
-//        DialogTaskManager dialogTaskManager = getService(context,DialogTaskManager.class);
-//        VisualMappingManager visualMappingManager = getService(context, VisualMappingManager.class);
-//        RenderingEngineManager renderingEngineManager = getService(context,RenderingEngineManager.class);
-//        CyEventHelper eventHelper = getService(context, CyEventHelper.class);
-//        CySwingApplication swingApplication = getService(context, CySwingApplication.class);
         CySwingAppAdapter appAdapter = getService(context, CySwingAppAdapter.class);
         
         //Register these with the CyObjectManager singleton.
         CyObjectManager manager = CyObjectManager.INSTANCE;
         File configDir = config.getAppConfigurationDirectoryLocation(CyActivator.class);
         configDir.mkdirs();
-//        manager.setApplicationManager(applicationManager);
         manager.setConfigDir(configDir);
-//        manager.setNetworkFactory(networkFactory);
-//        manager.setNetworkManager(networkManager);
-//        manager.setNetworkViewFactory(networkViewFactory);
-//        manager.setNetworkViewManager(networkViewManager);
-//        manager.setLayoutAlgorithmManager(layoutAlgorithmManager);
-//        manager.setDialogTaskManager(dialogTaskManager);
-//        manager.setVisualMappingManager(visualMappingManager);
-//        manager.setRenderingEngineManager(renderingEngineManager);
-//        manager.setEventHelper(eventHelper);
-//        manager.setCreateNetworkViewTaskFactory(createNetworkViewTaskFactory);
-//        manager.setCySwingApplication(swingApplication);
         manager.setCySwingAppAdapter(appAdapter);
     }
 

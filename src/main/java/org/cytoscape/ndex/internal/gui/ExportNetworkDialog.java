@@ -27,7 +27,6 @@
 package org.cytoscape.ndex.internal.gui;
 
 import com.google.gson.Gson;
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
@@ -45,6 +44,7 @@ import org.ndexbio.model.object.network.PropertyGraphNode;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -59,8 +59,9 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     /**
      * Creates new form UploadNetwork
      */
-    public ExportNetworkDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public ExportNetworkDialog(Frame parent)
+    {
+        super(parent, true);
         initComponents();
         prepComponents();
     }
@@ -108,17 +109,17 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Upload Network to NDEx");
 
-        jLabel1.setText("Current NDEx Server:");
+        jLabel1.setText("Current NDEx Source:");
 
         jLabel2.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
-        jLabel2.setText("Server 3");
+        jLabel2.setText("Source 3");
 
         jLabel3.setText("            Current User:");
 
         jLabel4.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         jLabel4.setText("Username");
 
-        jLabel5.setText("Save Network to Server As:");
+        jLabel5.setText("Save Network to NDEx As:");
 
         nameField.setText("Default Network Name");
 
@@ -162,7 +163,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(nameField, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
+                                .addComponent(nameField, javax.swing.GroupLayout.DEFAULT_SIZE, 217, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
@@ -225,7 +226,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
         CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getCurrentNetworkView();
-        VisualLexicon lexicon = CyObjectManager.INSTANCE.getRenderingEngineManager().getDefaultVisualLexicon();
+        VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         
@@ -453,7 +454,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                ExportNetworkDialog dialog = new ExportNetworkDialog(new javax.swing.JFrame(), true);
+                ExportNetworkDialog dialog = new ExportNetworkDialog(new javax.swing.JFrame());
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

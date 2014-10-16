@@ -27,8 +27,9 @@ package org.cytoscape.ndex.internal.gui;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.awt.Component;
-import org.cytoscape.event.CyEventHelper;
+
+import java.awt.*;
+
 import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
@@ -51,6 +52,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,8 +67,8 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
     /**
      * Creates new form QueryNetwork
      */
-    public ImportNetworksDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public ImportNetworksDialog(Frame parent) {
+        super(parent, true);
         initComponents();
     }
 
@@ -650,23 +652,19 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         //Create a view for the network
         CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getNetworkViewFactory().createNetworkView(cyNetwork);
 
-        CyEventHelper eventHelper = CyObjectManager.INSTANCE.getEventHelper();
-        eventHelper.flushPayloadEvents();
-
-        VisualLexicon lexicon = CyObjectManager.INSTANCE.getRenderingEngineManager().getDefaultVisualLexicon();
+        VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
 
         // Copy presentation properties for the network.
         List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
-        copyDefaultPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
+        copyPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
 
         for (PropertyGraphNode node : network.getNodes().values()) {
             List<SimplePropertyValuePair> properties = node.getPresentationProperties();
 
             CyNode cyNode = nodeMap.get(node.getId());
-            eventHelper.flushPayloadEvents();
             View cyNodeView = cyNetworkView.getNodeView(cyNode);
 
-            copyDefaultPresentationProperties(CyNode.class, properties, lexicon, cyNodeView);
+            copyPresentationProperties(CyNode.class, properties, lexicon, cyNodeView);
         }
 
         for (Map.Entry<Long, PropertyGraphEdge> entry : network.getEdges().entrySet()) {
@@ -674,25 +672,14 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             List<SimplePropertyValuePair> properties = edge.getPresentationProperties();
 
             CyEdge cyEdge = edgeMap.get(edge.getId());
-            eventHelper.flushPayloadEvents();
             View cyEdgeView = cyNetworkView.getEdgeView(cyEdge);
 
-            copyDefaultPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
+            copyPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
         }
 
         cyNetworkView.updateView();
-        //Register the new network with the network manager.
+        //Register the new network and view with the appropriate managers.
         CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
-
-        //Create and register a view for the newly creaty network.
-//            VisualMappingManager vmm = CyObjectManager.INSTANCE.getVisualMappingManager();
-//            VisualStyle style = vmm.getCurrentVisualStyle();
-//            TODO: Make blog post about this....
-        //CyLayoutAlgorithm layout = CyObjectManager.INSTANCE.getLayoutAlgorithmManager().getDefaultLayout();
-//            TaskIterator taskIterator = layout.createTaskIterator(view, layout.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS,"");
-//            
-//            DialogTaskManager dialogTaskManager = CyObjectManager.INSTANCE.getDialogTaskManager();
-//            dialogTaskManager.execute( taskIterator );
         CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
 
     }//GEN-LAST:event_loadActionPerformed
@@ -732,21 +719,17 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         }
     }
 
-    private void copyDefaultPresentationProperties(Class type, List<SimplePropertyValuePair> properties, VisualLexicon lexicon, View view) {
-        for (SimplePropertyValuePair property : properties) {
+    private void copyPresentationProperties(Class type, List<SimplePropertyValuePair> properties, VisualLexicon lexicon, View view)
+    {
+        for (SimplePropertyValuePair property : properties)
+        {
             VisualProperty vp = lexicon.lookup(type, property.getName());
             Object value = vp.parseSerializableString(property.getValue());
             view.setVisualProperty(vp, value);
         }
     }
 
-    private void copyPresentationProperties(Class type, List<SimplePropertyValuePair> properties, VisualLexicon lexicon, View view) {
-        for (SimplePropertyValuePair property : properties) {
-            VisualProperty vp = lexicon.lookup(type, property.getName());
-            Object value = vp.parseSerializableString(property.getValue());
-            view.setLockedValue(vp, value);
-        }
-    }
+
 
 
     private void selectedSubnetworkRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectedSubnetworkRadioActionPerformed
@@ -797,7 +780,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                ImportNetworksDialog dialog = new ImportNetworksDialog(new javax.swing.JFrame(), true);
+                ImportNetworksDialog dialog = new ImportNetworksDialog(new javax.swing.JFrame());
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

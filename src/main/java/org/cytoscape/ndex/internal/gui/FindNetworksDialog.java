@@ -35,6 +35,7 @@ import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
@@ -50,8 +51,8 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     /**
      * Creates new form SimpleSearch
      */
-    public FindNetworksDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public FindNetworksDialog(Frame parent) {
+        super(parent, true);
         initComponents();
         prepComponents();
     }
@@ -181,7 +182,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 
         jLabel1.setText("Results");
 
-        jLabel2.setText("Current Server: ");
+        jLabel2.setText("Current Source: ");
 
         serverName.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         serverName.setText("Server1");
@@ -357,7 +358,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FindNetworksDialog dialog = new FindNetworksDialog(new javax.swing.JFrame(), true);
+                FindNetworksDialog dialog = new FindNetworksDialog(new javax.swing.JFrame());
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
