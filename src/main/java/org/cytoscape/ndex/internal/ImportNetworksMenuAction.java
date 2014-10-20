@@ -60,17 +60,6 @@ public class ImportNetworksMenuAction extends AbstractCyAction
     public void actionPerformed(ActionEvent e)
     {
         JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-
-        Server currentServer = ServerManager.INSTANCE.getSelectedServer();
-        if( !currentServer.isAuthenticated() )
-        {
-            String serverName = currentServer.getName();
-            String msg = "You are not authenticed on: " + serverName + "\n";
-            msg += "Warning: You will only be able to view and retrieve PUBLIC networks.";
-            String dialogTitle = "Authentication Warning";
-            JOptionPane.showMessageDialog(parent, msg, dialogTitle, JOptionPane.WARNING_MESSAGE );
-        }
-
         FindNetworksDialog dialog = new FindNetworksDialog(parent);
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);

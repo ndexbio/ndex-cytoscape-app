@@ -545,6 +545,30 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         // while references named cyNetwork, cyNode, and cyEdge generally refer to the Cytoscape object model. 
         final Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        
+        boolean largeNetwork = false;
+        if( entireNetworkRadio.isSelected() )
+        {
+            NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+            largeNetwork = networkSummary.getEdgeCount() > 10000;
+        }
+        else
+        {
+            PropertyGraphNetwork network = NetworkManager.INSTANCE.getSelectedNetwork();
+            largeNetwork = network.getEdges().size() > 10000;
+        }
+        
+        if( largeNetwork )
+        {
+            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+            String msg = "You have chosen to download a network that has more than 10,000 edges.\n";
+            msg += "Only 10,000 edges will be downloaded. Would you like to proceed?";
+            String dialogTitle = "Proceed?";
+            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
+            if( choice == JOptionPane.NO_OPTION )
+                return;
+        }
+        
         final Component me = this;
         SwingWorker worker = new SwingWorker<Integer,Integer>()
         {
@@ -729,9 +753,15 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
     {
         for (SimplePropertyValuePair property : properties)
         {
-            VisualProperty vp = lexicon.lookup(type, property.getName());
+            String name = property.getName();
+            VisualProperty vp = lexicon.lookup(type, name);
             Object value = vp.parseSerializableString(property.getValue());
-            view.setVisualProperty(vp, value);
+            //The exceptions must be set as visual properties rather than bypasses, otherwise zooming isn't possible and
+            //nodes end up in fixed locations. Are there other properties that should be treated like this?
+            if( name.equals("NODE_X_LOCATION") || name.equals("NODE_Y_LOCATION") || name.equals("NETWORK_SCALE_FACTOR"))
+                view.setVisualProperty(vp, value);
+            else
+                view.setLockedValue(vp, value);
         }
     }
 
