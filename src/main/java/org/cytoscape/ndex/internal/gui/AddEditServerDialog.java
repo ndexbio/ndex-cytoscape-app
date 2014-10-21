@@ -42,12 +42,14 @@ public class AddEditServerDialog extends javax.swing.JDialog {
 
     public enum Mode {ADD, EDIT};
     private Mode mode = null;
+    private final ChangeNdexServerDialog parent;
     
     /**
      * Creates new form AddNDExServer
      */
-    public AddEditServerDialog(Frame parent) {
+    public AddEditServerDialog(ChangeNdexServerDialog parent) {
         super(parent, true);
+        this.parent = parent;
         initComponents();
         prepComponents();
     }
@@ -262,6 +264,8 @@ public class AddEditServerDialog extends javax.swing.JDialog {
             {
                 servers.add(server);
                 servers.save();
+                ServerManager.INSTANCE.setSelectedServer(server);
+                parent.setSelectedServer(server);
                 setVisible(false);
             }
             catch (Exception ex)
@@ -309,48 +313,6 @@ public class AddEditServerDialog extends javax.swing.JDialog {
     {//GEN-HEADEREND:event_cancelActionPerformed
         setVisible(false);
     }//GEN-LAST:event_cancelActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(AddEditServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(AddEditServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(AddEditServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(AddEditServerDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                AddEditServerDialog dialog = new AddEditServerDialog(new javax.swing.JFrame());
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancel;

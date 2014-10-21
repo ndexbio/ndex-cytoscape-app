@@ -122,6 +122,11 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         });
         guiServerList.setSelectedIndex(0);
     }
+    
+    public void setSelectedServer(Server server)
+    {
+        guiServerList.setSelectedValue(server, true);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -334,7 +339,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
     }//GEN-LAST:event_connectActionPerformed
 
     private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
-        AddEditServerDialog dialog = new AddEditServerDialog(parent);
+        AddEditServerDialog dialog = new AddEditServerDialog(this);
         dialog.setMode(AddEditServerDialog.Mode.ADD);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
@@ -342,7 +347,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
 
     private void editActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editActionPerformed
     {//GEN-HEADEREND:event_editActionPerformed
-        AddEditServerDialog dialog = new AddEditServerDialog(parent);
+        AddEditServerDialog dialog = new AddEditServerDialog(this);
         dialog.setMode(AddEditServerDialog.Mode.EDIT);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
