@@ -29,6 +29,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
@@ -184,7 +186,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         networkNameField = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         networkNameLabel = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox();
+        queryComboBox = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Download Network");
@@ -361,12 +363,12 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         networkNameLabel.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         networkNameLabel.setText("Network 7");
 
-        jComboBox1.setEditable(true);
-        jComboBox1.addActionListener(new java.awt.event.ActionListener()
+        queryComboBox.setEditable(true);
+        queryComboBox.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                jComboBox1ActionPerformed(evt);
+                queryComboBoxActionPerformed(evt);
             }
         });
 
@@ -390,7 +392,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 710, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(queryComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 710, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(query))
                     .addGroup(layout.createSequentialGroup()
@@ -412,7 +414,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(query)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(queryComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -430,6 +432,11 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void queryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queryActionPerformed
+        query();
+    }//GEN-LAST:event_queryActionPerformed
+
+    private void query()
+    {
         PropertyGraphNetwork network = null;
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
@@ -437,7 +444,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         boolean success = selectedServer.check(mal);
         if (success) {
             //The network to query.
-            String queryString = jComboBox1.getSelectedItem().toString();
+            String queryString = queryComboBox.getSelectedItem().toString();
             int depth = 1; // TODO: need to add control for depth
             NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
             UUID id = networkSummary.getExternalId();
@@ -463,8 +470,88 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         } else {
             JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }//GEN-LAST:event_queryActionPerformed
+        selectedSubnetworkRadio.setSelected(true);
+    }
+    
+    
+    private boolean disableLoad = false;
+    private void load()
+    {
+        if( disableLoad )
+        {
+            disableLoad = false;
+            return;
+        }
+        // Note: In this code, references named network, node, and edge generally refer to the NDEx object model 
+        // while references named cyNetwork, cyNode, and cyEdge generally refer to the Cytoscape object model. 
+        final Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        
+        boolean largeNetwork = false;
+        if( entireNetworkRadio.isSelected() )
+        {
+            NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+            largeNetwork = networkSummary.getEdgeCount() > 10000;
+        }
+        else
+        {
+            PropertyGraphNetwork network = NetworkManager.INSTANCE.getSelectedNetwork();
+            largeNetwork = network.getEdges().size() > 10000;
+        }
+        
+        if( largeNetwork )
+        {
+            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+            String msg = "You have chosen to download a network that has more than 10,000 edges.\n";
+            msg += "Only 10,000 edges will be downloaded. Would you like to proceed?";
+            String dialogTitle = "Proceed?";
+            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
+            if( choice == JOptionPane.NO_OPTION )
+                return;
+        }
+        
+        final Component me = this;
+        SwingWorker worker = new SwingWorker<Integer,Integer>()
+        {
 
+            @Override
+            protected Integer doInBackground() throws Exception
+            {
+                PropertyGraphNetwork network = null;
+                if (selectedSubnetworkRadio.isSelected()) {
+                    // We already have the selected subnetwork
+                    network = NetworkManager.INSTANCE.getSelectedNetwork();
+                    loadNetworkToCyNetwork(network);
+                } else if (entireNetworkRadio.isSelected()) {
+                    // For entire network, we will query again, hence will check credential
+                    boolean success = selectedServer.check(mal);
+                    if (success) {
+                        //The network to copy from.
+                        NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+                        UUID id = networkSummary.getExternalId();
+
+
+                        try {
+                            network = mal.getPropertyGraphNetwork(id.toString(), 0, 10000);
+                            loadNetworkToCyNetwork(network);
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
+                            return -1;
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(me, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                return 1;
+            }
+            
+        };
+        worker.execute();
+        findNetworksDialog.setFocusOnDone();
+        this.setVisible(false);
+    }
+    
+    
     private Object convertTo(String value, String type) {
         if (value == null) {
             return null;
@@ -539,75 +626,11 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         }
     }
 
+    
+    
 
     private void loadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadActionPerformed
-        // Note: In this code, references named network, node, and edge generally refer to the NDEx object model 
-        // while references named cyNetwork, cyNode, and cyEdge generally refer to the Cytoscape object model. 
-        final Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
-        final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        
-        boolean largeNetwork = false;
-        if( entireNetworkRadio.isSelected() )
-        {
-            NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
-            largeNetwork = networkSummary.getEdgeCount() > 10000;
-        }
-        else
-        {
-            PropertyGraphNetwork network = NetworkManager.INSTANCE.getSelectedNetwork();
-            largeNetwork = network.getEdges().size() > 10000;
-        }
-        
-        if( largeNetwork )
-        {
-            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-            String msg = "You have chosen to download a network that has more than 10,000 edges.\n";
-            msg += "Only 10,000 edges will be downloaded. Would you like to proceed?";
-            String dialogTitle = "Proceed?";
-            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
-            if( choice == JOptionPane.NO_OPTION )
-                return;
-        }
-        
-        final Component me = this;
-        SwingWorker worker = new SwingWorker<Integer,Integer>()
-        {
-
-            @Override
-            protected Integer doInBackground() throws Exception
-            {
-                PropertyGraphNetwork network = null;
-                if (selectedSubnetworkRadio.isSelected()) {
-                    // We already have the selected subnetwork
-                    network = NetworkManager.INSTANCE.getSelectedNetwork();
-                    loadNetworkToCyNetwork(network);
-                } else if (entireNetworkRadio.isSelected()) {
-                    // For entire network, we will query again, hence will check credential
-                    boolean success = selectedServer.check(mal);
-                    if (success) {
-                        //The network to copy from.
-                        NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
-                        UUID id = networkSummary.getExternalId();
-
-
-                        try {
-                            network = mal.getPropertyGraphNetwork(id.toString(), 0, 10000);
-                            loadNetworkToCyNetwork(network);
-                        } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
-                            return -1;
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(me, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-                return 1;
-            }
-            
-        };
-        worker.execute();
-        findNetworksDialog.setFocusOnDone();
-        this.setVisible(false);
+         load();
     }
 
     private void loadNetworkToCyNetwork(PropertyGraphNetwork network) {
@@ -758,7 +781,12 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             Object value = vp.parseSerializableString(property.getValue());
             //The exceptions must be set as visual properties rather than bypasses, otherwise zooming isn't possible and
             //nodes end up in fixed locations. Are there other properties that should be treated like this?
-            if( name.equals("NODE_X_LOCATION") || name.equals("NODE_Y_LOCATION") || name.equals("NETWORK_SCALE_FACTOR"))
+            Set<String> dontLock = new HashSet<>( 
+                    Arrays.asList("NODE_X_LOCATION","NODE_Y_LOCATION",
+                            "NETWORK_SCALE_FACTOR","NETWORK_CENTER_X_LOCATION",
+                            "NETWORK_CENTER_Y_LOCATION") );
+                       
+            if( dontLock.contains(name) )
                 view.setVisualProperty(vp, value);
             else
                 view.setLockedValue(vp, value);
@@ -776,14 +804,28 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         
     }//GEN-LAST:event_entireNetworkRadioActionPerformed
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
     private void backActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_backActionPerformed
     {//GEN-HEADEREND:event_backActionPerformed
         this.setVisible(false);
     }//GEN-LAST:event_backActionPerformed
+
+    String lastQuery = "";
+    
+    private boolean alreadyQueried()
+    {
+        String thisQuery = queryComboBox.getSelectedItem().toString();
+        boolean result = thisQuery.trim().equals(lastQuery.trim());
+        lastQuery = thisQuery;
+        return result;
+    }
+    
+    private void queryComboBoxActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_queryComboBoxActionPerformed
+    {//GEN-HEADEREND:event_queryComboBoxActionPerformed
+        if( alreadyQueried() )
+            return;
+        query();
+        disableLoad = true;
+    }//GEN-LAST:event_queryComboBoxActionPerformed
 
     /**
      * @param args the command line arguments
@@ -833,7 +875,6 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
     private javax.swing.JTable edgeJTable;
     private javax.swing.JPanel edgePanel;
     private javax.swing.JRadioButton entireNetworkRadio;
-    private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -849,6 +890,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
     private javax.swing.JTextField networkNameField;
     private javax.swing.JLabel networkNameLabel;
     private javax.swing.JButton query;
+    private javax.swing.JComboBox queryComboBox;
     private javax.swing.JRadioButton selectedSubnetworkRadio;
     // End of variables declaration//GEN-END:variables
 }

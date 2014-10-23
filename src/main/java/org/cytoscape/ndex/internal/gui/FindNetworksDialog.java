@@ -31,12 +31,14 @@ import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
 import org.ndexbio.model.object.network.NetworkSummary;
+import org.ndexbio.model.object.network.VisibilityType;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -207,7 +209,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         username.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         username.setText("Not Authenticated");
 
-        warning.setText("(Only PUBLIC and DISCOVERABLE networks will be visible.)");
+        warning.setText("(Only PUBLIC networks will be visible.)");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -285,7 +287,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     {//GEN-HEADEREND:event_doneActionPerformed
         setVisible(false);
     }//GEN-LAST:event_doneActionPerformed
-
+    
     private void selectNetworkActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectNetworkActionPerformed
     {//GEN-HEADEREND:event_selectNetworkActionPerformed
         int selectedIndex = resultsTable.getSelectedRow();
@@ -293,7 +295,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             JOptionPane.showMessageDialog(this, ErrorMessage.noNetworkSelected, "Error", JOptionPane.ERROR_MESSAGE);
         }
-        NetworkSummary ns = networkSummaries.get(selectedIndex);
+        NetworkSummary ns = displayedNetworkSummaries.get(selectedIndex);
         NetworkManager.INSTANCE.setSelectedNetworkSummary(ns);
         
         org.cytoscape.ndex.internal.gui.ImportNetworksDialog dialog = new org.cytoscape.ndex.internal.gui.ImportNetworksDialog(this,true);
@@ -336,6 +338,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         
     }//GEN-LAST:event_searchActionPerformed
 
+    private List<NetworkSummary> displayedNetworkSummaries = new ArrayList<>();
     private void showSearchResults()
     {
         DefaultTableModel model = new DefaultTableModel();
@@ -343,8 +346,12 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             "Network Title", "Format", "Admins", "Number of Edges", "Number of Nodes"
         });
+        displayedNetworkSummaries.clear();
         for( NetworkSummary networkSummary : networkSummaries )
         {
+            if( networkSummary.getVisibility() == VisibilityType.DISCOVERABLE )
+                continue;
+
             Vector row = new Vector();
             
             //Network Title
@@ -359,6 +366,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             row.add(networkSummary.getNodeCount());
             
             model.addRow(row);
+            displayedNetworkSummaries.add(networkSummary);
         }
         resultsTable.setModel(model);
         resultsTable.getSelectionModel().setSelectionInterval(0, 0);

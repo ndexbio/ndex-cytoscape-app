@@ -219,7 +219,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="warning">
       <Properties>
-        <Property name="text" type="java.lang.String" value="(Only PUBLIC and DISCOVERABLE networks will be visible.)"/>
+        <Property name="text" type="java.lang.String" value="(Only PUBLIC networks will be visible.)"/>
       </Properties>
     </Component>
   </SubComponents>
