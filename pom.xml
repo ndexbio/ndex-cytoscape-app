@@ -2,16 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <properties>
-        <bundle.symbolicName>org.cytoscape.ndex.NDEx-Cytoscape-App</bundle.symbolicName>
+        <bundle.symbolicName>org.cytoscape.ndex.ndex-cytoscape-app</bundle.symbolicName>
         <bundle.namespace>org.cytoscape.ndex</bundle.namespace>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.ndex</groupId>
-    <artifactId>NDEx-Cytoscape-App</artifactId>
+    <artifactId>ndex-cytoscape-app</artifactId>
     <version>1.0.0-alpha2</version>
 
-    <name>${bundle.symbolicName} [${bundle.namespace}]</name>
+    <name>NDEx Cytoscape App</name>
 	
     <packaging>bundle</packaging>
 
