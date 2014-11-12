@@ -93,6 +93,11 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                 return p.getValue();
             }
         }
+        for (NdexPropertyValuePair p : node.getProperties()) {
+            if (p.getPredicateString().equals(PropertyGraphNode.represents)) {
+                return p.getValue();
+            }
+        }
         return "NONE";
     }
 
@@ -696,6 +701,9 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             CyEdge cyEdge = cyNetwork.addEdge(sourceNode, targetNode, true);
             edgeMap.put(e.getId(), cyEdge);
             cyNetwork.getRow(cyEdge).set(CyEdge.INTERACTION, e.getPredicate());
+
+            String edgeName = getName(s) + " (" + e.getPredicate() + ") " + getName(t);
+            cyNetwork.getRow(cyEdge).set(CyNetwork.NAME, edgeName);
 
             List<NdexPropertyValuePair> edgeProperties = e.getProperties();
             CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
