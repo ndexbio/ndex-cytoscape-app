@@ -713,30 +713,30 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         //Create a view for the network
         CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getNetworkViewFactory().createNetworkView(cyNetwork);
 
-        VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
-
-        // Copy presentation properties for the network.
-        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
-        copyPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
-
-        for (PropertyGraphNode node : network.getNodes().values()) {
-            List<SimplePropertyValuePair> properties = node.getPresentationProperties();
-
-            CyNode cyNode = nodeMap.get(node.getId());
-            View cyNodeView = cyNetworkView.getNodeView(cyNode);
-
-            copyPresentationProperties(CyNode.class, properties, lexicon, cyNodeView);
-        }
-
-        for (Map.Entry<Long, PropertyGraphEdge> entry : network.getEdges().entrySet()) {
-            PropertyGraphEdge edge = entry.getValue();
-            List<SimplePropertyValuePair> properties = edge.getPresentationProperties();
-
-            CyEdge cyEdge = edgeMap.get(edge.getId());
-            View cyEdgeView = cyNetworkView.getEdgeView(cyEdge);
-
-            copyPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
-        }
+//        VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
+//
+//        // Copy presentation properties for the network.
+//        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
+//        copyPresentationProperties(CyNetwork.class, networkPresentationProperties, lexicon, cyNetworkView);
+//
+//        for (PropertyGraphNode node : network.getNodes().values()) {
+//            List<SimplePropertyValuePair> properties = node.getPresentationProperties();
+//
+//            CyNode cyNode = nodeMap.get(node.getId());
+//            View cyNodeView = cyNetworkView.getNodeView(cyNode);
+//
+//            copyPresentationProperties(CyNode.class, properties, lexicon, cyNodeView);
+//        }
+//
+//        for (Map.Entry<Long, PropertyGraphEdge> entry : network.getEdges().entrySet()) {
+//            PropertyGraphEdge edge = entry.getValue();
+//            List<SimplePropertyValuePair> properties = edge.getPresentationProperties();
+//
+//            CyEdge cyEdge = edgeMap.get(edge.getId());
+//            View cyEdgeView = cyNetworkView.getEdgeView(cyEdge);
+//
+//            copyPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
+//        }
 
         cyNetworkView.updateView();
         //Register the new network and view with the appropriate managers.
@@ -784,9 +784,21 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
     {
         for (SimplePropertyValuePair property : properties)
         {
-            String name = property.getName();
+             String name = property.getName();
             VisualProperty vp = lexicon.lookup(type, name);
-            Object value = vp.parseSerializableString(property.getValue());
+            if( vp == null || property.getValue() == null ) 
+                continue;
+            Object value = null;
+            try
+            {
+                value = vp.parseSerializableString(property.getValue());
+            }
+            catch( Throwable t)
+            {
+                t.printStackTrace();
+            }
+            if( value == null )
+                continue;
             //The exceptions must be set as visual properties rather than bypasses, otherwise zooming isn't possible and
             //nodes end up in fixed locations. Are there other properties that should be treated like this?
             Set<String> dontLock = new HashSet<>( 

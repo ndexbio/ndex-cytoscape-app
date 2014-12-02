@@ -257,21 +257,21 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         network.setName(networkName);
         
         
-        //Set network presentation properties.
-        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
-
-        for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NETWORK))
-        {
-            if( cyNetworkView.isSet(p) && p.getTargetDataType() == CyNetwork.class )
-            {
-                SimplePropertyValuePair property = new SimplePropertyValuePair();
-                property.setName(p.getIdString());
-                Object value = cyNetworkView.getVisualProperty(p);
-                property.setValue( p.toSerializableString( value ) );
-                property.setType(value.getClass().getSimpleName());
-                networkPresentationProperties.add(property);
-            }
-        }
+//        //Set network presentation properties.
+//        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
+//
+//        for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NETWORK))
+//        {
+//            if( cyNetworkView.isSet(p) && p.getTargetDataType() == CyNetwork.class )
+//            {
+//                SimplePropertyValuePair property = new SimplePropertyValuePair();
+//                property.setName(p.getIdString());
+//                Object value = cyNetworkView.getVisualProperty(p);
+//                property.setValue( p.toSerializableString( value ) );
+//                property.setType(value.getClass().getSimpleName());
+//                networkPresentationProperties.add(property);
+//            }
+//        }
         
         
         Map<Long, PropertyGraphNode> nodeMap = new HashMap<Long, PropertyGraphNode>();
@@ -303,22 +303,22 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             }
             
             //Set node presentation properties.
-            List<SimplePropertyValuePair> presentationProperties = node.getPresentationProperties();
-            View nodeView = cyNetworkView.getNodeView(cyNode);
-            
-            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NODE))
-            {
-                if( nodeView.isSet(p) )
-                {
-                    SimplePropertyValuePair property = new SimplePropertyValuePair();
-                    property.setName(p.getIdString());
-                    Object value = nodeView.getVisualProperty(p);
-                    property.setValue( p.toSerializableString( value ) );
-                    property.setType(value.getClass().getSimpleName());
-                    presentationProperties.add(property);
-                }
-            }
-      
+//            List<SimplePropertyValuePair> presentationProperties = node.getPresentationProperties();
+//            View nodeView = cyNetworkView.getNodeView(cyNode);
+//
+//            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NODE))
+//            {
+//                if( nodeView.isSet(p) )
+//                {
+//                    SimplePropertyValuePair property = new SimplePropertyValuePair();
+//                    property.setName(p.getIdString());
+//                    Object value = nodeView.getVisualProperty(p);
+//                    property.setValue( p.toSerializableString( value ) );
+//                    property.setType(value.getClass().getSimpleName());
+//                    presentationProperties.add(property);
+//                }
+//            }
+//
             nodeMap.put(id, node);
         }
         network.setNodes( nodeMap );
@@ -353,21 +353,21 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             }
             
             //Set edge presentation properties.
-            List<SimplePropertyValuePair> presentationProperties = edge.getPresentationProperties();
-            View edgeView = cyNetworkView.getEdgeView(cyEdge);
-
-            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.EDGE))
-            {
-                if( edgeView.isSet(p) )
-                {
-                    SimplePropertyValuePair property = new SimplePropertyValuePair();
-                    property.setName(p.getIdString());
-                    Object value = edgeView.getVisualProperty(p);
-                    property.setValue( p.toSerializableString( value ) );
-                    property.setType(value.getClass().getSimpleName());
-                    presentationProperties.add(property);
-                }
-            }   
+//            List<SimplePropertyValuePair> presentationProperties = edge.getPresentationProperties();
+//            View edgeView = cyNetworkView.getEdgeView(cyEdge);
+//
+//            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.EDGE))
+//            {
+//                if( edgeView.isSet(p) )
+//                {
+//                    SimplePropertyValuePair property = new SimplePropertyValuePair();
+//                    property.setName(p.getIdString());
+//                    Object value = edgeView.getVisualProperty(p);
+//                    property.setValue( p.toSerializableString( value ) );
+//                    property.setType(value.getClass().getSimpleName());
+//                    presentationProperties.add(property);
+//                }
+//            }
             edges.put(id, edge);    
         }
         network.setEdges( edges );
