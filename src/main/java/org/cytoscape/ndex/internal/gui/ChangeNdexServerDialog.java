@@ -311,6 +311,12 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         if( selectedServer.check(mal) )
         {
+            if( !selectedServer.isRunningNdexServer(mal) )
+            {
+                JOptionPane.showMessageDialog(this, ErrorMessage.notValidNdexServer, "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             try
                 {
                     NdexStatus status = mal.getServerStatus();

@@ -516,6 +516,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         }
         
         final Component me = this;
+        final boolean isLargeNetwork = largeNetwork;
         SwingWorker worker = new SwingWorker<Integer,Integer>()
         {
 
@@ -537,7 +538,10 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
 
                         try {
-                            network = mal.getPropertyGraphNetwork(id.toString(), 0, 10000);
+                            if( isLargeNetwork )
+                                network = mal.getPropertyGraphNetwork(id.toString(), 0, 10000);
+                            else
+                                network = mal.getPropertyGraphNetwork(id.toString());
                             loadNetworkToCyNetwork(network);
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
@@ -575,7 +579,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         return value;
     }
 
-    private void setData(NdexPropertyValuePair property, CyRow cyRow) {
+    private void setData(NdexPropertyValuePair property, String cyPropertyName, CyRow cyRow) {
         String dataType = property.getDataType();
         if (dataType.startsWith("List")) {
             String elementDataType = dataType.substring(dataType.indexOf(".") + 1);
@@ -585,48 +589,48 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                 }.getType();
                 Collection<Boolean> collection = gson.fromJson(property.getValue(), collectionType);
                 List<Boolean> values = collection == null ? null : new ArrayList<Boolean>(collection);
-                cyRow.set(property.getPredicateString(), values);
+                cyRow.set(cyPropertyName, values);
             }
             if (elementDataType.equals("Integer")) {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<Integer>>() {
                 }.getType();
                 Collection<Integer> collection = gson.fromJson(property.getValue(), collectionType);
                 List<Integer> values = collection == null ? null : new ArrayList<Integer>(collection);
-                cyRow.set(property.getPredicateString(), values);
+                cyRow.set(cyPropertyName, values);
             }
             if (elementDataType.equals("Long")) {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<Long>>() {
                 }.getType();
                 Collection<Long> collection = gson.fromJson(property.getValue(), collectionType);
                 List<Long> values = collection == null ? null : new ArrayList<Long>(collection);
-                cyRow.set(property.getPredicateString(), values);
+                cyRow.set(cyPropertyName, values);
             }
             if (elementDataType.equals("Double")) {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<Double>>() {
                 }.getType();
                 Collection<Double> collection = gson.fromJson(property.getValue(), collectionType);
                 List<Double> values = collection == null ? null : new ArrayList<Double>(collection);
-                cyRow.set(property.getPredicateString(), values);
+                cyRow.set(cyPropertyName, values);
             }
             if (elementDataType.equals("String")) {
                 java.lang.reflect.Type collectionType = new TypeToken<Collection<String>>() {
                 }.getType();
                 Collection<String> collection = gson.fromJson(property.getValue(), collectionType);
                 List<String> values = collection == null ? null : new ArrayList<String>(collection);
-                cyRow.set(property.getPredicateString(), values);
+                cyRow.set(cyPropertyName, values);
             }
         } else {
             Object converted = convertTo(property.getValue(), property.getDataType());
             if (converted instanceof Boolean) {
-                cyRow.set(property.getPredicateString(), (Boolean) converted);
+                cyRow.set(cyPropertyName, (Boolean) converted);
             } else if (converted instanceof Integer) {
-                cyRow.set(property.getPredicateString(), (Integer) converted);
+                cyRow.set(cyPropertyName, (Integer) converted);
             } else if (converted instanceof Long) {
-                cyRow.set(property.getPredicateString(), (Long) converted);
+                cyRow.set(cyPropertyName, (Long) converted);
             } else if (converted instanceof Double) {
-                cyRow.set(property.getPredicateString(), (Double) converted);
+                cyRow.set(cyPropertyName, (Double) converted);
             } else if (converted instanceof String) {
-                cyRow.set(property.getPredicateString(), (String) converted);
+                cyRow.set(cyPropertyName, (String) converted);
             }
         }
     }
@@ -650,7 +654,12 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         CyTable networkTable = cyNetwork.getDefaultNetworkTable();
         List<NdexPropertyValuePair> networkProperties = network.getProperties();
         for (NdexPropertyValuePair property : networkProperties) {
-            if (networkTable.getColumn(property.getPredicateString()) == null) {
+            String cyPropertyName = property.getPredicateString();
+            if( cyPropertyName.equals("description") )
+                cyPropertyName = "dc:description";
+            if( cyPropertyName.equals("version") )
+                cyPropertyName = "NDEX:version";
+            if (networkTable.getColumn(cyPropertyName) == null) {
                 Class type = String.class;
                 Class listElementType = null;
                 try {
@@ -666,13 +675,13 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                     Logger.getLogger(ImportNetworksDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 if (type == List.class) {
-                    networkTable.createListColumn(property.getPredicateString(), listElementType, false);
+                    networkTable.createListColumn(cyPropertyName, listElementType, false);
                 } else {
-                    networkTable.createColumn(property.getPredicateString(), type, false);
+                    networkTable.createColumn(cyPropertyName, type, false);
                 }
             }
             CyRow cyRow = cyNetwork.getRow(cyNetwork);
-            setData(property, cyRow);
+            setData(property, cyPropertyName, cyRow);
         }
 
         //Copy nodes   
@@ -747,6 +756,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
     private void readNdexProperties(List<NdexPropertyValuePair> ndexProperties, CyTable cyTable, CyNetwork cyNetwork, CyIdentifiable rowId) {
         for (NdexPropertyValuePair property : ndexProperties) {
+            String cyPropertyName = property.getPredicateString();
             if (cyTable.getColumn(property.getPredicateString()) == null) {
                 Class type = String.class;
                 Class listElementType = null;
@@ -769,14 +779,16 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                 }
             }
             CyRow cyRow = cyNetwork.getRow(rowId);
-            setData(property, cyRow);
             // This is a temporary hack, need to check the mapping of node names / labels...
             if (property.getPredicateString().equalsIgnoreCase("DC:Title")) {
                 cyRow.set("name", property.getValue());
+                break;
             }
-            else if (property.getPredicateString().equalsIgnoreCase("NDEx:represents")){
+            if (property.getPredicateString().equalsIgnoreCase("NDEx:represents")){
                 cyRow.set("name", property.getValue());
+                break;
             }
+            setData(property, cyPropertyName, cyRow);
         }
     }
 

@@ -90,12 +90,12 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworks("*", null, 0, 50);
+                networkSummaries = mal.findNetworks("*",true, null, 0, 50);
             }
             catch (IOException ex)
             {         
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorX", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
                 this.setVisible(false);
                 return;
             }
@@ -103,7 +103,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         }
         else
         {
-            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
             this.setVisible(false);
         }
     }
@@ -320,7 +320,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworks(searchText, me, 0, 50);
+                networkSummaries = mal.findNetworks(searchText, true, me, 0, 50);
             }
             catch (IOException ex)
             {         
@@ -349,9 +349,6 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         displayedNetworkSummaries.clear();
         for( NetworkSummary networkSummary : networkSummaries )
         {
-            if( networkSummary.getVisibility() == VisibilityType.DISCOVERABLE )
-                continue;
-
             Vector row = new Vector();
             
             //Network Title

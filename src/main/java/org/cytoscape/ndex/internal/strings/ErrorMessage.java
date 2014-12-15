@@ -38,4 +38,5 @@ public class ErrorMessage
     public static final String noNetworkSelected = "No network is selected. This should never happen.";
     public static final String failedToParseJson = "Failed to parse JSON from NDEx source.";
     public static final String noResultsFromQuery = "Your query did not return any results. Please try another.";
+    public static final String notValidNdexServer = "The URL you specified does not refer to a running NDEx source";
 }

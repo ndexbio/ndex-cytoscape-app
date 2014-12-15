@@ -26,6 +26,7 @@
 
 package org.cytoscape.ndex.internal.server;
 
+import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.rest.client.NdexRestClient;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
@@ -76,6 +77,11 @@ public class Server
         s.type = Type.DEFAULT;
         return s;
     }
+
+    public boolean isRunningNdexServer(NdexRestClientModelAccessLayer mal)
+    {
+        return mal.isServerRunningNdexServer();
+    }
     
     public boolean check(NdexRestClientModelAccessLayer mal)
     {
@@ -88,7 +94,15 @@ public class Server
         }
         else
         {
-            authenticated = mal.checkCredential();
+            try
+            {
+                authenticated = mal.checkCredential();
+            }
+            catch (NdexException e)
+            {
+                authenticated = false;
+                e.printStackTrace();
+            }
             return authenticated;
         }
     }
