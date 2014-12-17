@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.ndex</groupId>
     <artifactId>ndex-cytoscape-app</artifactId>
-    <version>1.0.0-alpha5</version>
+    <version>1.0.0-alpha8</version>
 
     <name>NDEx Cytoscape App</name>
 	

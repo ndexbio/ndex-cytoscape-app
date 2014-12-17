@@ -242,12 +242,6 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             String predicate = cyColumn.getName();
             if( predicate.equals("SUID") || predicate.equals("shared name") || predicate.equals("name") )
                 continue;
-            if( predicate.equalsIgnoreCase("ndex:uuid") )
-                predicate = "UUID";
-            if( predicate.equalsIgnoreCase("dc:description") )
-                predicate = "description";
-            if( predicate.equalsIgnoreCase("ndex:version") )
-                predicate = "version";
             Class dataType = cyColumn.getType();
             
             if( dataType == List.class )
@@ -295,7 +289,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             for(CyColumn cyColumn : nodeTable.getColumns())
             {    
                 String predicate = cyColumn.getName();
-                if( predicate.equals("SUID") || predicate.equals("shared name") )
+                if( predicate.equals("SUID") || predicate.equals("name") || predicate.equals("shared name") )
                     continue;
                 Class<?> dataType = cyColumn.getType();
                 if( dataType == List.class )
@@ -348,6 +342,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 if( predicate.equals("SUID")
                         || predicate.equals("name")
                         || predicate.equals("shared name")
+                        || predicate.equals("interaction")
                         || predicate.equals("shared interaction") )
                     continue;
                 Class<?> dataType = cyColumn.getType();

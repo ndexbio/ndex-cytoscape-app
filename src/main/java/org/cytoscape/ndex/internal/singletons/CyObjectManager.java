@@ -43,6 +43,7 @@ import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 
 import javax.swing.*;
@@ -91,6 +92,8 @@ public enum CyObjectManager
     }
     public VisualLexicon getDefaultVisualLexicon() { return adapter.getRenderingEngineManager().getDefaultVisualLexicon(); }
     public JFrame getApplicationFrame() { return adapter.getCySwingApplication().getJFrame(); }
+    public TaskManager getTaskManager() { return adapter.getDialogTaskManager(); }
+    public CyLayoutAlgorithmManager getLayoutAlgorithmManager() { return adapter.getCyLayoutAlgorithmManager(); }
 
     // Slightly More Sophisticated Getters
     public CyNetwork getCurrentNetwork()

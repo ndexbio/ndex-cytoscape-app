@@ -38,10 +38,14 @@ import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.cytoscape.view.layout.CyLayoutAlgorithm;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
 import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.SimplePropertyValuePair;
 import org.ndexbio.model.object.network.NetworkSummary;
@@ -565,15 +569,15 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         if (value == null) {
             return null;
         }
-        if (type.equals("Boolean")) {
-            return value.trim().equals("true");
-        } else if (type.equals("Integer")) {
+        if (type.equalsIgnoreCase("Boolean")) {
+            return value.trim().equals("true") || value.equals("1");
+        } else if (type.equalsIgnoreCase("Integer")) {
             return Integer.parseInt(value);
-        } else if (type.equals("Long")) {
+        } else if (type.equalsIgnoreCase("Long")) {
             return Long.parseLong(value);
-        } else if (type.equals("Double")) {
+        } else if (type.equalsIgnoreCase("Double")) {
             return Double.parseDouble(value);
-        } else if (type.equals("String")) {
+        } else if (type.equalsIgnoreCase("String")) {
             return value;
         }
         return value;
@@ -581,6 +585,8 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
     private void setData(NdexPropertyValuePair property, String cyPropertyName, CyRow cyRow) {
         String dataType = property.getDataType();
+        if( dataType == null )
+            dataType = "String";
         if (dataType.startsWith("List")) {
             String elementDataType = dataType.substring(dataType.indexOf(".") + 1);
             Gson gson = new Gson();
@@ -620,7 +626,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                 cyRow.set(cyPropertyName, values);
             }
         } else {
-            Object converted = convertTo(property.getValue(), property.getDataType());
+            Object converted = convertTo(property.getValue(), dataType);
             if (converted instanceof Boolean) {
                 cyRow.set(cyPropertyName, (Boolean) converted);
             } else if (converted instanceof Integer) {
@@ -655,10 +661,8 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         List<NdexPropertyValuePair> networkProperties = network.getProperties();
         for (NdexPropertyValuePair property : networkProperties) {
             String cyPropertyName = property.getPredicateString();
-            if( cyPropertyName.equals("description") )
-                cyPropertyName = "dc:description";
-            if( cyPropertyName.equals("version") )
-                cyPropertyName = "NDEX:version";
+            if( cyPropertyName.equalsIgnoreCase("dc:title") )
+                continue;
             if (networkTable.getColumn(cyPropertyName) == null) {
                 Class type = String.class;
                 Class listElementType = null;
@@ -747,6 +751,12 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 //            copyPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
 //        }
 
+        CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
+        CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
+        TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
+        TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
+        tm.execute(ti);
+
         cyNetworkView.updateView();
         //Register the new network and view with the appropriate managers.
         CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
@@ -757,12 +767,19 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
     private void readNdexProperties(List<NdexPropertyValuePair> ndexProperties, CyTable cyTable, CyNetwork cyNetwork, CyIdentifiable rowId) {
         for (NdexPropertyValuePair property : ndexProperties) {
             String cyPropertyName = property.getPredicateString();
+            if (cyPropertyName.equalsIgnoreCase("dc:title")) {
+                CyRow cyRow = cyNetwork.getRow(rowId);
+                cyRow.set("name", property.getValue());
+                break;
+            }
             if (cyTable.getColumn(property.getPredicateString()) == null) {
                 Class type = String.class;
                 Class listElementType = null;
                 try {
                     String ndexDataType = property.getDataType();
-                    if (ndexDataType.startsWith("List")) {
+                    if( ndexDataType == null )
+                        type = String.class;
+                    else if (ndexDataType.startsWith("List")) {
                         type = List.class;
                         String elementTypeString = ndexDataType.substring(ndexDataType.indexOf(".") + 1);
                         listElementType = Class.forName("java.lang." + elementTypeString);
@@ -780,14 +797,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             }
             CyRow cyRow = cyNetwork.getRow(rowId);
             // This is a temporary hack, need to check the mapping of node names / labels...
-            if (property.getPredicateString().equalsIgnoreCase("DC:Title")) {
-                cyRow.set("name", property.getValue());
-                break;
-            }
-            if (property.getPredicateString().equalsIgnoreCase("NDEx:represents")){
-                cyRow.set("name", property.getValue());
-                break;
-            }
+
             setData(property, cyPropertyName, cyRow);
         }
     }
@@ -829,11 +839,14 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
 
     private void selectedSubnetworkRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectedSubnetworkRadioActionPerformed
-        
+        if( !networkNameField.getText().endsWith(" query") )
+            networkNameField.setText(networkNameField.getText() + " query");
     }//GEN-LAST:event_selectedSubnetworkRadioActionPerformed
 
     private void entireNetworkRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_entireNetworkRadioActionPerformed
-        
+        String name = networkNameField.getText();
+        if( name.endsWith(" query") )
+            networkNameField.setText( name.substring(0, name.length() - " query".length()) );
     }//GEN-LAST:event_entireNetworkRadioActionPerformed
 
     private void backActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_backActionPerformed
