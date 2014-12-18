@@ -30,6 +30,7 @@ import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.model.object.network.VisibilityType;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
@@ -320,7 +321,10 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworks(searchText, true, me, 0, 50);
+                Permissions permissions = Permissions.READ;
+                if( me != null )
+                    permissions = Permissions.ADMIN;
+                networkSummaries = mal.findNetworks(searchText, true, me, permissions, false, 0, 50);
             }
             catch (IOException ex)
             {         
