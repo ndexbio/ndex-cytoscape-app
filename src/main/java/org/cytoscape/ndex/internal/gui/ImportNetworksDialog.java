@@ -784,6 +784,8 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                         String elementTypeString = ndexDataType.substring(ndexDataType.indexOf(".") + 1);
                         listElementType = Class.forName("java.lang." + elementTypeString);
                     } else {
+                        ndexDataType = ndexDataType.toLowerCase();
+                        ndexDataType = ndexDataType.substring(0,1).toUpperCase() + ndexDataType.substring(1);
                         type = Class.forName("java.lang." + ndexDataType);
                     }
                 } catch (ClassNotFoundException ex) {
