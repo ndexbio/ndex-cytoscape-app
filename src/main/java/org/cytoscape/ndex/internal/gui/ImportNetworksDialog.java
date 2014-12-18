@@ -770,7 +770,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             if (cyPropertyName.equalsIgnoreCase("dc:title")) {
                 CyRow cyRow = cyNetwork.getRow(rowId);
                 cyRow.set("name", property.getValue());
-                break;
+                continue;
             }
             if (cyTable.getColumn(property.getPredicateString()) == null) {
                 Class type = String.class;
