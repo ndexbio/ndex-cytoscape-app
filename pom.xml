@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.ndex</groupId>
     <artifactId>CyNDEx</artifactId>
-    <version>1.0.0-alpha10</version>
+    <version>1.0.0-alpha12</version>
 
     <name>cyNDEx</name>
 	

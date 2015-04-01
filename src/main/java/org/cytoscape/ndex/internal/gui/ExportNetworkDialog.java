@@ -223,8 +223,20 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void uploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadActionPerformed
-
+        
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
+        if( cyNetwork.getEdgeCount() > 10000 )
+        {
+            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+            String msg  = "You have chosen to upload a network that has more than 10,000 edges.\n";
+                   msg += "The upload will occur in the background and you can continue working,\n";
+                   msg += "but it may take a while to appear in NDEx. Would you like to proceed?";
+            String dialogTitle = "Proceed?";
+            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
+            if( choice == JOptionPane.NO_OPTION )
+                return;            
+        }
+        
         CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getCurrentNetworkView();
         VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();

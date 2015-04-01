@@ -511,8 +511,9 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         if( largeNetwork )
         {
             JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-            String msg = "You have chosen to download a network that has more than 10,000 edges.\n";
-            msg += "Only 10,000 edges will be downloaded. Would you like to proceed?";
+            String  msg = "You have chosen to download a network that has more than 10,000 edges.\n";
+                   msg += "The download will occur in the background and you can continue working,\n";
+                   msg += "but it may take a while to appear in Cytoscape. Would you like to proceed?";
             String dialogTitle = "Proceed?";
             int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
             if( choice == JOptionPane.NO_OPTION )
@@ -542,10 +543,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
 
                         try {
-                            if( isLargeNetwork )
-                                network = mal.getPropertyGraphNetwork(id.toString(), 0, 10000);
-                            else
-                                network = mal.getPropertyGraphNetwork(id.toString());
+                            network = mal.getPropertyGraphNetwork(id.toString());
                             loadNetworkToCyNetwork(network);
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);

@@ -163,9 +163,20 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             },
             new String []
             {
-                "Network Title", "Format", "Admins", "Number of Edges", "Number of Nodes"
+                "Network Title", "Format", "Admins", "Number of Nodes", "Number of Edges"
             }
-        ));
+        )
+        {
+            boolean[] canEdit = new boolean []
+            {
+                false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex)
+            {
+                return canEdit [columnIndex];
+            }
+        });
         resultsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(resultsTable);
 
@@ -348,7 +359,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         DefaultTableModel model = new DefaultTableModel();
         model.setColumnIdentifiers( new String[]
         {
-            "Network Title", "Format", "Admins", "Number of Edges", "Number of Nodes"
+            "Network Title", "Format", "Admins", "Number of Nodes", "Number of Edges"
         });
         displayedNetworkSummaries.clear();
         for( NetworkSummary networkSummary : networkSummaries )
@@ -361,11 +372,11 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             row.add("");
             //Admins
             row.add("");
-            //Number of Edges
-            row.add(networkSummary.getEdgeCount());
             //Number of Nodes
             row.add(networkSummary.getNodeCount());
-            
+            //Number of Edges
+            row.add(networkSummary.getEdgeCount());
+               
             model.addRow(row);
             displayedNetworkSummaries.add(networkSummary);
         }
