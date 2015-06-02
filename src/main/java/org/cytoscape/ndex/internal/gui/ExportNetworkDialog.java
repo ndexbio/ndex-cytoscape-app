@@ -26,6 +26,7 @@
 
 package org.cytoscape.ndex.internal.gui;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
@@ -49,6 +50,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.ndexbio.model.object.ProvenanceEntity;
 
 /**
  *
@@ -252,7 +256,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         for( CyColumn cyColumn : networkTable.getColumns() )
         {
             String predicate = cyColumn.getName();
-            if( predicate.equals("SUID") || predicate.equals("shared name") || predicate.equals("name") )
+            if( predicate.equals("SUID") || predicate.equals("shared name") || predicate.equals("name") || predicate.equals("NDEX:provenance") )
                 continue;
             Class dataType = cyColumn.getType();
             
@@ -265,6 +269,32 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 handleSimpleType(cyNetwork, cyNetwork, predicate, dataType, networkProperties);
             }
         }
+        
+        String provenanceString = cyNetwork.getRow(cyNetwork).get("NDEX:provenance", String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProvenanceEntity provenance = null;
+        try
+        {
+            if( provenanceString != null )
+                provenance = objectMapper.readValue(provenanceString, ProvenanceEntity.class);
+        }
+        catch (IOException ex)
+        {
+            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+            String msg  = "There is something wrong with the NDEX:provenance property.\n";
+                   msg += "If you proceed, all previous provenance will be discarded.\n";
+                   msg += "Would you like to proceed?";
+            String dialogTitle = "Proceed?";
+            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
+            if( choice == JOptionPane.NO_OPTION )
+                return;
+            provenance = new ProvenanceEntity();
+        }
+//        if( provenance != null )
+//        {
+//            provenance.
+//        }
+        
         //This needs to happen AFTER loading ordinary network properties.
         network.setName(networkName);
         

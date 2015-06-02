@@ -25,6 +25,8 @@
  */
 package org.cytoscape.ndex.internal.gui;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -61,6 +63,7 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ndexbio.model.object.ProvenanceEntity;
 
 /**
  *
@@ -532,7 +535,10 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                 if (selectedSubnetworkRadio.isSelected()) {
                     // We already have the selected subnetwork
                     network = NetworkManager.INSTANCE.getSelectedNetwork();
-                    loadNetworkToCyNetwork(network);
+                    NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+                    UUID id = networkSummary.getExternalId();
+                    ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
+                    loadNetworkToCyNetwork(network, provenance);
                 } else if (entireNetworkRadio.isSelected()) {
                     // For entire network, we will query again, hence will check credential
                     boolean success = selectedServer.check(mal);
@@ -540,11 +546,13 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
                         //The network to copy from.
                         NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
                         UUID id = networkSummary.getExternalId();
+                      
 
 
                         try {
                             network = mal.getPropertyGraphNetwork(id.toString());
-                            loadNetworkToCyNetwork(network);
+                            ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
+                            loadNetworkToCyNetwork(network, provenance);
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
                             return -1;
@@ -646,7 +654,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
          load();
     }
 
-    private void loadNetworkToCyNetwork(PropertyGraphNetwork network) {
+    private void loadNetworkToCyNetwork(PropertyGraphNetwork network, ProvenanceEntity provenance) {
 
         //Create the CyNetwork to copy to.
         CyNetworkFactory networkFactory = CyObjectManager.INSTANCE.getNetworkFactory();
@@ -685,6 +693,12 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             CyRow cyRow = cyNetwork.getRow(cyNetwork);
             setData(property, cyPropertyName, cyRow);
         }
+        //last ndex property is ndex:provenance
+        networkTable.createColumn("NDEX:provenance", String.class, false);
+        CyRow cyRow = cyNetwork.getRow(cyNetwork);
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode provenanceJson = objectMapper.valueToTree(provenance);
+        cyRow.set("NDEX:provenance", provenanceJson.toString());
 
         //Copy nodes   
         //Create a map to keep track of the new CyNodes we create.

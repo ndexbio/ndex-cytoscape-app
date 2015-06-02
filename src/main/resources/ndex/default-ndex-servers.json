@@ -1,7 +1,12 @@
 [
   {
     "name": "NDEx Public",
-    "url": "http://www.ndexbio.org/rest",
+    "url": "http://public.ndexbio.org/rest",
+    "type": "DEFAULT"
+  },
+  {
+    "name": "NDEx Dev",
+    "url": "http://test.ndexbio.org/rest",
     "type": "DEFAULT"
   },
   {
