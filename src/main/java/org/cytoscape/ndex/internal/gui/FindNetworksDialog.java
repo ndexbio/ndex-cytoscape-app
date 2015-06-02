@@ -140,26 +140,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         resultsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][]
             {
-                {"Network1", null, null, null, null},
-                {"Network2", null, null, null, null},
-                {"Network3", null, null, null, null},
-                {"Network4", null, null, null, null},
-                {"Network5", null, null, null, null},
-                {"Network6", null, null, null, null},
-                {"Network7", null, null, null, null},
-                {"Network8", null, null, null, null},
-                {"Network9", null, null, null, null},
-                {"Network10", null, null, null, null},
-                {"Network11", null, null, null, null},
-                {"Network12", null, null, null, null},
-                {"Network13", null, null, null, null},
-                {"Network14", null, null, null, null},
-                {"Network15", null, null, null, null},
-                {"Network16", null, null, null, null},
-                {"Network17", null, null, null, null},
-                {"Network18", null, null, null, null},
-                {"Network19", null, null, null, null},
-                {"Network20", null, null, null, null}
+
             },
             new String []
             {

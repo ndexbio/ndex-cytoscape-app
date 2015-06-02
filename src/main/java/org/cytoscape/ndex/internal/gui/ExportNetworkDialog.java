@@ -38,7 +38,9 @@ import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.ndexbio.model.object.NdexPropertyValuePair;
+import org.ndexbio.model.object.ProvenanceEvent;
 import org.ndexbio.model.object.SimplePropertyValuePair;
+import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.model.object.network.PropertyGraphEdge;
 import org.ndexbio.model.object.network.PropertyGraphNetwork;
 import org.ndexbio.model.object.network.PropertyGraphNode;
@@ -269,32 +271,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 handleSimpleType(cyNetwork, cyNetwork, predicate, dataType, networkProperties);
             }
         }
-        
-        String provenanceString = cyNetwork.getRow(cyNetwork).get("NDEX:provenance", String.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        ProvenanceEntity provenance = null;
-        try
-        {
-            if( provenanceString != null )
-                provenance = objectMapper.readValue(provenanceString, ProvenanceEntity.class);
-        }
-        catch (IOException ex)
-        {
-            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-            String msg  = "There is something wrong with the NDEX:provenance property.\n";
-                   msg += "If you proceed, all previous provenance will be discarded.\n";
-                   msg += "Would you like to proceed?";
-            String dialogTitle = "Proceed?";
-            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
-            if( choice == JOptionPane.NO_OPTION )
-                return;
-            provenance = new ProvenanceEntity();
-        }
-//        if( provenance != null )
-//        {
-//            provenance.
-//        }
-        
+
         //This needs to happen AFTER loading ordinary network properties.
         network.setName(networkName);
         
@@ -418,6 +395,29 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         }
         network.setEdges( edges );
 
+
+        String provenanceString = cyNetwork.getRow(cyNetwork).get("NDEX:provenance", String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ProvenanceEntity oldProvenance = null;
+        try
+        {
+            if( provenanceString != null )
+                oldProvenance = objectMapper.readValue(provenanceString, ProvenanceEntity.class);
+        }
+        catch (IOException ex)
+        {
+            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+            String msg  = "There is something wrong with the NDEX:provenance property.\n";
+            msg += "If you proceed, all previous provenance will be discarded.\n";
+            msg += "Would you like to proceed?";
+            String dialogTitle = "Proceed?";
+            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
+            if( choice == JOptionPane.NO_OPTION )
+                return;
+        }
+        final ProvenanceEntity finalOldProvenance = oldProvenance;
+
         SwingWorker worker = new SwingWorker<Void,Void>()
         {
 
@@ -426,7 +426,13 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             {
                 try
                 {
-                    mal.insertPropertyGraphNetwork(network);
+                    NetworkSummary uploadedNetworkSummary = mal.insertPropertyGraphNetwork(network);
+                    String networkId = uploadedNetworkSummary.getExternalId().toString();
+                    ProvenanceEntity cytoscapeProvenance = mal.getNetworkProvenance( networkId );
+                    ProvenanceEvent creationEvent = cytoscapeProvenance.getCreationEvent();
+                    creationEvent.addInput(finalOldProvenance);
+                    creationEvent.setEventType("Cytoscape Upload");
+                    mal.setNetworkProvenance(networkId, cytoscapeProvenance );
                 }
                 catch (IOException ex)
                 {

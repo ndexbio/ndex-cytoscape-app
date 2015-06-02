@@ -73,7 +73,7 @@ public class Server
     {
         Server s = new Server();
         s.name = "NDEx Public";
-        s.url = "http://www.ndexbio.org/rest";
+        s.url = "http://public.ndexbio.org/rest";
         s.type = Type.DEFAULT;
         return s;
     }
