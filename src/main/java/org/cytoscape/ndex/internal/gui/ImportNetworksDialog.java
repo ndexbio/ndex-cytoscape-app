@@ -516,7 +516,8 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
             String  msg = "You have chosen to download a network that has more than 10,000 edges.\n";
                    msg += "The download will occur in the background and you can continue working,\n";
-                   msg += "but it may take a while to appear in Cytoscape. Would you like to proceed?";
+                   msg += "but it may take a while to appear in Cytoscape. Also, no layout will be\n";
+                   msg += "applied. Would you like to proceed?";
             String dialogTitle = "Proceed?";
             int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
             if( choice == JOptionPane.NO_OPTION )
@@ -762,12 +763,14 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 //
 //            copyPresentationProperties(CyEdge.class, properties, lexicon, cyEdgeView);
 //        }
-
-        CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
-        CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
-        TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
-        TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
-        tm.execute(ti);
+        if( nodeMap.size() < 10000 )
+        {
+            CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
+            CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
+            TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
+            TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
+            tm.execute(ti);
+        }
 
         cyNetworkView.updateView();
         //Register the new network and view with the appropriate managers.
