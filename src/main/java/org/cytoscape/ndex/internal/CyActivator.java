@@ -37,6 +37,7 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNetworkTableManager;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.task.create.CreateNetworkViewTaskFactory;
@@ -99,6 +100,7 @@ public class CyActivator extends AbstractCyActivator
         //Get Cytocape objects needed by this app using the bundle context.
         CyApplicationConfiguration config = getService(context,CyApplicationConfiguration.class);
         CySwingAppAdapter appAdapter = getService(context, CySwingAppAdapter.class);
+        final CyNetworkTableManager networkTableManager = getService(context, CyNetworkTableManager.class);
         
         //Register these with the CyObjectManager singleton.
         CyObjectManager manager = CyObjectManager.INSTANCE;
@@ -106,6 +108,7 @@ public class CyActivator extends AbstractCyActivator
         configDir.mkdirs();
         manager.setConfigDir(configDir);
         manager.setCySwingAppAdapter(appAdapter);
+        manager.setNetworkTableManager(networkTableManager);
     }
 
 }

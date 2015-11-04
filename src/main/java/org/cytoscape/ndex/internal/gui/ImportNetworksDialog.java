@@ -31,9 +31,16 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
+import org.cxio.aspects.datamodels.*;
+import org.cxio.aspects.readers.*;
+import org.cxio.core.CxReader;
+import org.cxio.core.interfaces.AspectElement;
+import org.cxio.core.interfaces.AspectFragmentReader;
+import org.cytoscape.io.internal.cx_reader.CxToCy;
+import org.cytoscape.io.internal.cxio.Aspect;
+import org.cytoscape.io.internal.cxio.AspectSet;
+import org.cytoscape.io.internal.cxio.CxImporter;
 import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
@@ -59,6 +66,7 @@ import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
@@ -550,9 +558,12 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
 
                         try {
-                            network = mal.getPropertyGraphNetwork(id.toString());
-                            ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
-                            loadNetworkToCyNetwork(network, provenance);
+//                            network = mal.getPropertyGraphNetwork(id.toString());
+                            InputStream cxStream = mal.getNetworkAsCXStream(id.toString());
+                            createCyNetworkFromCX(cxStream);
+
+//                            ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
+//                            loadNetworkToCyNetwork(network, provenance);
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
                             return -1;
@@ -569,8 +580,10 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
         findNetworksDialog.setFocusOnDone();
         this.setVisible(false);
     }
-    
-    
+
+
+
+
     private Object convertTo(String value, String type) {
         if (value == null) {
             return null;
@@ -587,6 +600,22 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
             return value;
         }
         return value;
+    }
+
+    private void setData(String data, String dataType, String cyPropertyName, CyRow cyRow )
+    {
+        Object converted = convertTo(data, dataType);
+        if (converted instanceof Boolean) {
+            cyRow.set(cyPropertyName, (Boolean) converted);
+        } else if (converted instanceof Integer) {
+            cyRow.set(cyPropertyName, (Integer) converted);
+        } else if (converted instanceof Long) {
+            cyRow.set(cyPropertyName, (Long) converted);
+        } else if (converted instanceof Double) {
+            cyRow.set(cyPropertyName, (Double) converted);
+        } else if (converted instanceof String) {
+            cyRow.set(cyPropertyName, (String) converted);
+        }
     }
 
     private void setData(NdexPropertyValuePair property, String cyPropertyName, CyRow cyRow) {
@@ -652,6 +681,227 @@ public class ImportNetworksDialog extends javax.swing.JDialog {
 
     private void loadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadActionPerformed
          load();
+    }
+
+
+    private void loadAttribute(AbstractAttributesAspectElement attribute, CyTable table, CyRow row)
+    {
+        String cyPropertyName = attribute.getName();
+        String ndexDataType = "String";
+        switch( attribute.getDataType() )
+        {
+            case BOOLEAN:
+            case DOUBLE:
+            case INTEGER:
+            case LONG:
+            case STRING:
+                ndexDataType = attribute.getDataType().toString();
+                ndexDataType = Character.toUpperCase(ndexDataType.charAt(0)) + ndexDataType.substring(1);
+        }
+        if (table.getColumn(cyPropertyName) == null) {
+            Class type = String.class;
+            Class listElementType = null;
+            try {
+//                    if (ndexDataType.startsWith("List")) {
+//                        type = List.class;
+//                        String elementTypeString = ndexDataType.substring(ndexDataType.indexOf(".") + 1);
+//                        listElementType = Class.forName("java.lang." + elementTypeString);
+//                    } else {
+                type = Class.forName("java.lang." + ndexDataType);
+//                     }
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ImportNetworksDialog.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (type == List.class) {
+                table.createListColumn(cyPropertyName, listElementType, false);
+            } else {
+                table.createColumn(cyPropertyName, type, false);
+            }
+        }
+
+        setData(attribute.getValue(), ndexDataType, cyPropertyName, row);
+    }
+
+    private void createCyNetworkFromCX(InputStream cxStream) throws IOException
+    {
+//
+//        CxElementReader elementReader = CxElementReader.createInstance(cxStream, true, readers );
+//
+//        List<NodesElement> nodes = new ArrayList<>();
+//        List<EdgesElement> edges = new ArrayList<>();
+//        List<NetworkAttributesElement> networkAttributes = new ArrayList<>();
+//        List<NodeAttributesElement> nodeAttributes = new ArrayList<>();
+//        List<EdgeAttributesElement> edgeAttributes = new ArrayList<>();
+//
+//        for( AspectElement e : elementReader )
+//        {
+//            switch( e.getAspectName() )
+//            {
+//                case NodesElement.NAME:
+//                    nodes.add((NodesElement) e);
+//                    break;
+//
+//                case EdgesElement.NAME:
+//                    edges.add((EdgesElement) e);
+//                    break;
+//
+//                case NetworkAttributesElement.NAME:
+//                    networkAttributes.add((NetworkAttributesElement) e);
+//                    break;
+//
+//                case NodeAttributesElement.NAME:
+//                    nodeAttributes.add((NodeAttributesElement) e);
+//                    break;
+//
+//                case EdgeAttributesElement.NAME:
+//                    edgeAttributes.add((EdgeAttributesElement) e);
+//                    break;
+//
+//                default:
+//            }
+//        }
+
+        AspectSet aspects = new AspectSet();
+        aspects.addAspect(Aspect.NODES);
+        aspects.addAspect(Aspect.EDGES);
+        aspects.addAspect(Aspect.NETWORK_ATTRIBUTES);
+        aspects.addAspect(Aspect.NODE_ATTRIBUTES);
+        aspects.addAspect(Aspect.EDGE_ATTRIBUTES);
+        aspects.addAspect(Aspect.VISUAL_PROPERTIES);
+        aspects.addAspect(Aspect.CARTESIAN_LAYOUT);
+        aspects.addAspect(Aspect.NETWORK_RELATIONS);
+        aspects.addAspect(Aspect.SUBNETWORKS);
+        aspects.addAspect(Aspect.GROUPS);
+
+        //Create the CyNetwork to copy to.
+        CyNetworkFactory networkFactory = CyObjectManager.INSTANCE.getNetworkFactory();
+        CxToCy cxToCy = new CxToCy();
+        CxImporter cxImporter = CxImporter.createInstance();
+        //CxReader cxr = cxImporter.obtainCxReader()
+        CxReader cxr = cxImporter.obtainCxReader(aspects, cxStream);
+        SortedMap<String, List<AspectElement>> aspectMap = CxReader.parseAsMap(cxr);
+        List<CyNetwork> networks = cxToCy.createNetwork(aspectMap, null, networkFactory, null, true);
+
+        CyNetwork cyNetwork = networks.get(0);
+
+//        CyNetwork cyNetwork = networkFactory.createNetwork();
+        String networkName = networkNameField.getText();
+        cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, networkName );
+//
+//        //Copy network properties
+//        CyTable networkTable = cyNetwork.getDefaultNetworkTable();
+//        for( NetworkAttributesElement n : networkAttributes )
+//        {
+//            CyRow row = cyNetwork.getRow(cyNetwork);
+//            loadAttribute(n, networkTable, row);
+//        }
+//
+//
+//
+////        List<NdexPropertyValuePair> networkProperties = network.getProperties();
+////        for (NdexPropertyValuePair property : networkProperties) {
+////            String cyPropertyName = property.getPredicateString();
+////            if( cyPropertyName.equalsIgnoreCase("dc:title") )
+////                continue;
+////            if (networkTable.getColumn(cyPropertyName) == null) {
+////                Class type = String.class;
+////                Class listElementType = null;
+////                try {
+////                    String ndexDataType = property.getDataType();
+////                    if (ndexDataType.startsWith("List")) {
+////                        type = List.class;
+////                        String elementTypeString = ndexDataType.substring(ndexDataType.indexOf(".") + 1);
+////                        listElementType = Class.forName("java.lang." + elementTypeString);
+////                    } else {
+////                        type = Class.forName("java.lang." + ndexDataType);
+////                    }
+////                } catch (ClassNotFoundException ex) {
+////                    Logger.getLogger(ImportNetworksDialog.class.getName()).log(Level.SEVERE, null, ex);
+////                }
+////                if (type == List.class) {
+////                    networkTable.createListColumn(cyPropertyName, listElementType, false);
+////                } else {
+////                    networkTable.createColumn(cyPropertyName, type, false);
+////                }
+////            }
+////            CyRow cyRow = cyNetwork.getRow(cyNetwork);
+////            setData(property, cyPropertyName, cyRow);
+////        }
+//
+//
+//
+//        //Copy nodes
+//        //Create a map to keep track of the new CyNodes we create.
+//        Map<String, CyNode> nodeMap = new HashMap<>();
+//        for (NodesElement node : nodes) {
+//            //Create a new node and save a reference in the nodeMap for a little later.
+//            CyNode cyNode = cyNetwork.addNode();
+//            nodeMap.put(node.getId(), cyNode);
+////            List<NdexPropertyValuePair> nodeProperties = node.getProperties();
+//
+////            readNdexProperties(nodeProperties, nodeTable, cyNetwork, cyNode);
+//        }
+//
+//        CyTable nodeTable = cyNetwork.getDefaultNodeTable();
+//        for( NodeAttributesElement n : nodeAttributes )
+//        {
+//            List<String> nodeIds = n.getPropertyOf();
+//            for( String nodeId : nodeIds )
+//            {
+//                CyNode node = nodeMap.get(nodeId);
+//                CyRow row = cyNetwork.getRow(node);
+//                loadAttribute(n, nodeTable, row);
+//            }
+//
+//        }
+//
+//        //Copy edges
+//        //Create a map to keep track of the new CyEdges we create.
+//        Map<String, CyEdge> edgeMap = new HashMap<>();
+//        for (EdgesElement edge : edges) {
+//
+//            CyNode sourceNode = nodeMap.get(edge.getSource());
+//            CyNode targetNode = nodeMap.get(edge.getTarget());
+//
+//            CyEdge cyEdge = cyNetwork.addEdge(sourceNode, targetNode, true);
+//            edgeMap.put(edge.getId(), cyEdge);
+//            cyNetwork.getRow(cyEdge).set(CyEdge.INTERACTION, edge.getRelationship());
+//
+////            String edgeName = getName(s) + " (" + e.getPredicate() + ") " + getName(t);
+////            cyNetwork.getRow(cyEdge).set(CyNetwork.NAME, edgeName);
+//
+////            List<NdexPropertyValuePair> edgeProperties = e.getProperties();
+//            CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
+////            readNdexProperties(edgeProperties, edgeTable, cyNetwork, cyEdge);
+//        }
+//
+//        CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
+//        for( EdgeAttributesElement e : edgeAttributes )
+//        {
+//            List<String> edgeIds = e.getPropertyOf();
+//            for( String edgeId : edgeIds )
+//            {
+//                CyEdge edge = edgeMap.get(edgeId);
+//                CyRow row = cyNetwork.getRow(edge);
+//                loadAttribute(e, edgeTable, row);
+//            }
+//        }
+
+        //Create a view for the network
+        CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getNetworkViewFactory().createNetworkView(cyNetwork);
+
+//        CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
+//        CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
+//        TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
+//        TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
+//        tm.execute(ti);
+//
+//        cyNetworkView.updateView();
+        //Register the new network and view with the appropriate managers.
+        CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
+        CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
+
+
     }
 
     private void loadNetworkToCyNetwork(PropertyGraphNetwork network, ProvenanceEntity provenance) {

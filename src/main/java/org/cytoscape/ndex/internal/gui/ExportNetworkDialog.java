@@ -28,18 +28,22 @@ package org.cytoscape.ndex.internal.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import org.apache.http.auth.AuthenticationException;
+import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.io.internal.cx_writer.CxNetworkWriter;
 import org.cytoscape.model.*;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.View;
+import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.VisualLexicon;
-import org.cytoscape.view.model.VisualProperty;
-import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
+import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.ProvenanceEvent;
-import org.ndexbio.model.object.SimplePropertyValuePair;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.model.object.network.PropertyGraphEdge;
 import org.ndexbio.model.object.network.PropertyGraphNetwork;
@@ -48,12 +52,10 @@ import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ndexbio.model.object.ProvenanceEntity;
 
 /**
@@ -242,206 +244,286 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             if( choice == JOptionPane.NO_OPTION )
                 return;            
         }
-        
-        CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getCurrentNetworkView();
-        VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
+
+        String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
+
+        String uploadName = nameField.getText().trim();
+        cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, uploadName );
+
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        
-        final PropertyGraphNetwork network = new PropertyGraphNetwork();
-        String networkName = nameField.getText().trim();
-        
-        
-        // Upload Ordinary Network Properties
-        List<NdexPropertyValuePair> networkProperties = network.getProperties();
-        CyTable networkTable = cyNetwork.getDefaultNetworkTable();
-        for( CyColumn cyColumn : networkTable.getColumns() )
-        {
-            String predicate = cyColumn.getName();
-            if( predicate.equals("SUID") || predicate.equals("shared name") || predicate.equals("name") || predicate.equals("NDEX:provenance") )
-                continue;
-            Class dataType = cyColumn.getType();
-            
-            if( dataType == List.class )
-            {
-                handeListType(cyColumn, cyNetwork, cyNetwork, predicate, networkProperties);          
-            }
-            else
-            {
-                handleSimpleType(cyNetwork, cyNetwork, predicate, dataType, networkProperties);
-            }
-        }
-
-        //This needs to happen AFTER loading ordinary network properties.
-        network.setName(networkName);
-        
-        
-//        //Set network presentation properties.
-//        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
-//
-//        for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NETWORK))
-//        {
-//            if( cyNetworkView.isSet(p) && p.getTargetDataType() == CyNetwork.class )
-//            {
-//                SimplePropertyValuePair property = new SimplePropertyValuePair();
-//                property.setName(p.getIdString());
-//                Object value = cyNetworkView.getVisualProperty(p);
-//                property.setValue( p.toSerializableString( value ) );
-//                property.setType(value.getClass().getSimpleName());
-//                networkPresentationProperties.add(property);
-//            }
-//        }
-        
-        
-        Map<Long, PropertyGraphNode> nodeMap = new HashMap<Long, PropertyGraphNode>();
-        CyTable nodeTable = cyNetwork.getDefaultNodeTable();
-        for( CyNode cyNode : cyNetwork.getNodeList() )
-        {
-            PropertyGraphNode node = new PropertyGraphNode();
-            Long id = cyNode.getSUID();
-            node.setId(id);
-            
-            node.setName( cyNetwork.getRow(cyNode).get(CyNetwork.NAME, String.class) );
-            
-            //Set Node properties
-            List<NdexPropertyValuePair> properties = node.getProperties();
-            for(CyColumn cyColumn : nodeTable.getColumns())
-            {    
-                String predicate = cyColumn.getName();
-                if( predicate.equals("SUID") || predicate.equals("name") || predicate.equals("shared name") )
-                    continue;
-                Class<?> dataType = cyColumn.getType();
-                if( dataType == List.class )
-                {
-                    handeListType(cyColumn, cyNetwork, cyNode, predicate, properties);          
-                }
-                else
-                {
-                    handleSimpleType(cyNetwork, cyNode, predicate, dataType, properties);
-                }
-            }
-            
-            //Set node presentation properties.
-//            List<SimplePropertyValuePair> presentationProperties = node.getPresentationProperties();
-//            View nodeView = cyNetworkView.getNodeView(cyNode);
-//
-//            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NODE))
-//            {
-//                if( nodeView.isSet(p) )
-//                {
-//                    SimplePropertyValuePair property = new SimplePropertyValuePair();
-//                    property.setName(p.getIdString());
-//                    Object value = nodeView.getVisualProperty(p);
-//                    property.setValue( p.toSerializableString( value ) );
-//                    property.setType(value.getClass().getSimpleName());
-//                    presentationProperties.add(property);
-//                }
-//            }
-//
-            nodeMap.put(id, node);
-        }
-        network.setNodes( nodeMap );
-        
-        Map<Long, PropertyGraphEdge> edges = new HashMap<Long, PropertyGraphEdge>();
-        for( CyEdge cyEdge : cyNetwork.getEdgeList() )
-        {
-            PropertyGraphEdge edge = new PropertyGraphEdge();
-            Long id = cyEdge.getSUID();
-            edge.setId(id);
-            edge.setSubjectId( cyEdge.getSource().getSUID() );
-            edge.setPredicate( cyNetwork.getRow(cyEdge).get(CyEdge.INTERACTION, String.class));
-            edge.setObjectId( cyEdge.getTarget().getSUID() );
-                           
-            //Set ordinary edge properties
-            CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
-            List<NdexPropertyValuePair> properties = edge.getProperties();
-            for(CyColumn cyColumn : edgeTable.getColumns())
-            {    
-                String predicate = cyColumn.getName();
-                if( predicate.equals("SUID")
-                        || predicate.equals("name")
-                        || predicate.equals("shared name")
-                        || predicate.equals("interaction")
-                        || predicate.equals("shared interaction") )
-                    continue;
-                Class<?> dataType = cyColumn.getType();
-                if( dataType == List.class )
-                {
-                    handeListType(cyColumn, cyNetwork, cyEdge, predicate, properties);          
-                }
-                else
-                {
-                    handleSimpleType(cyNetwork, cyEdge, predicate, dataType, properties);
-                }
-            }
-            
-            //Set edge presentation properties.
-//            List<SimplePropertyValuePair> presentationProperties = edge.getPresentationProperties();
-//            View edgeView = cyNetworkView.getEdgeView(cyEdge);
-//
-//            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.EDGE))
-//            {
-//                if( edgeView.isSet(p) )
-//                {
-//                    SimplePropertyValuePair property = new SimplePropertyValuePair();
-//                    property.setName(p.getIdString());
-//                    Object value = edgeView.getVisualProperty(p);
-//                    property.setValue( p.toSerializableString( value ) );
-//                    property.setType(value.getClass().getSimpleName());
-//                    presentationProperties.add(property);
-//                }
-//            }
-            edges.put(id, edge);    
-        }
-        network.setEdges( edges );
 
 
-        String provenanceString = cyNetwork.getRow(cyNetwork).get("NDEX:provenance", String.class);
-        ObjectMapper objectMapper = new ObjectMapper();
+        PipedInputStream in = null;
+        PipedOutputStream out = null;
+        OutputStream outputStream = null;
 
-        ProvenanceEntity oldProvenance = null;
         try
         {
-            if( provenanceString != null )
-                oldProvenance = objectMapper.readValue(provenanceString, ProvenanceEntity.class);
-        }
-        catch (IOException ex)
-        {
-            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-            String msg  = "There is something wrong with the NDEX:provenance property.\n";
-            msg += "If you proceed, all previous provenance will be discarded.\n";
-            msg += "Would you like to proceed?";
-            String dialogTitle = "Proceed?";
-            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
-            if( choice == JOptionPane.NO_OPTION )
-                return;
-        }
-        final ProvenanceEntity finalOldProvenance = oldProvenance;
 
-        SwingWorker worker = new SwingWorker<Void,Void>()
+            in = new PipedInputStream();
+            out = new PipedOutputStream(in);
+
+            VisualMappingManager vmm = CyObjectManager.INSTANCE.getVisualMappingManager();
+            final CyNetworkViewManager nvm = CyObjectManager.INSTANCE.getNetworkViewManager();
+            final CyNetworkManager nm = CyObjectManager.INSTANCE.getNetworkManager();
+            final CyGroupManager gm = CyObjectManager.INSTANCE.getCyGroupManager();
+            final CyNetworkTableManager ntm = CyObjectManager.INSTANCE.getNetworkTableManager();
+            final VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
+            CxNetworkWriter writer = new CxNetworkWriter(out, cyNetwork, vmm, nvm, nm, gm, ntm, lexicon );
+            TaskIterator ti = new TaskIterator(writer);
+            TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
+            tm.execute(ti);
+
+            outputStream  = new FileOutputStream("/Users/dwelker/Work/scratch/foo1.cx");
+
+//            int read = 0;
+//            byte[] bytes = new byte[1024];
+//
+//            while ((read = in.read(bytes)) != -1) {
+//                outputStream.write(bytes, 0, read);
+//            }
+//
+//            System.out.println("Done!");
+
+            mal.createCXNetwork(in);
+            cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, networkName );
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
         {
 
-            @Override
-            protected Void doInBackground() throws Exception
-            {
-                try
-                {
-                    NetworkSummary uploadedNetworkSummary = mal.insertPropertyGraphNetwork(network);
-                    String networkId = uploadedNetworkSummary.getExternalId().toString();
-                    ProvenanceEntity cytoscapeProvenance = mal.getNetworkProvenance( networkId );
-                    ProvenanceEvent creationEvent = cytoscapeProvenance.getCreationEvent();
-                    creationEvent.addInput(finalOldProvenance);
-                    creationEvent.setEventType("Cytoscape Upload");
-                    mal.setNetworkProvenance(networkId, cytoscapeProvenance );
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                catch (IOException ex)
-                {
-                    ex.printStackTrace();
-                }
-                return null;
             }
-        };
-        worker.execute();
+            if (out != null) {
+                try {
+                    // outputStream.flush();
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            if (outputStream != null) {
+                try {
+                    // outputStream.flush();
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        //mal.
+        
+//        CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getCurrentNetworkView();
+//        VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
+//        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+//        final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+//
+//        final PropertyGraphNetwork network = new PropertyGraphNetwork();
+//        String networkName = nameField.getText().trim();
+//
+//
+//        // Upload Ordinary Network Properties
+//        List<NdexPropertyValuePair> networkProperties = network.getProperties();
+//        CyTable networkTable = cyNetwork.getDefaultNetworkTable();
+//        for( CyColumn cyColumn : networkTable.getColumns() )
+//        {
+//            String predicate = cyColumn.getName();
+//            if( predicate.equals("SUID") || predicate.equals("shared name") || predicate.equals("name") || predicate.equals("NDEX:provenance") )
+//                continue;
+//            Class dataType = cyColumn.getType();
+//
+//            if( dataType == List.class )
+//            {
+//                handeListType(cyColumn, cyNetwork, cyNetwork, predicate, networkProperties);
+//            }
+//            else
+//            {
+//                handleSimpleType(cyNetwork, cyNetwork, predicate, dataType, networkProperties);
+//            }
+//        }
+//
+//        //This needs to happen AFTER loading ordinary network properties.
+//        network.setName(networkName);
+//
+//
+////        //Set network presentation properties.
+////        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
+////
+////        for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NETWORK))
+////        {
+////            if( cyNetworkView.isSet(p) && p.getTargetDataType() == CyNetwork.class )
+////            {
+////                SimplePropertyValuePair property = new SimplePropertyValuePair();
+////                property.setName(p.getIdString());
+////                Object value = cyNetworkView.getVisualProperty(p);
+////                property.setValue( p.toSerializableString( value ) );
+////                property.setType(value.getClass().getSimpleName());
+////                networkPresentationProperties.add(property);
+////            }
+////        }
+//
+//
+//        Map<Long, PropertyGraphNode> nodeMap = new HashMap<Long, PropertyGraphNode>();
+//        CyTable nodeTable = cyNetwork.getDefaultNodeTable();
+//        for( CyNode cyNode : cyNetwork.getNodeList() )
+//        {
+//            PropertyGraphNode node = new PropertyGraphNode();
+//            Long id = cyNode.getSUID();
+//            node.setId(id);
+//
+//            node.setName( cyNetwork.getRow(cyNode).get(CyNetwork.NAME, String.class) );
+//
+//            //Set Node properties
+//            List<NdexPropertyValuePair> properties = node.getProperties();
+//            for(CyColumn cyColumn : nodeTable.getColumns())
+//            {
+//                String predicate = cyColumn.getName();
+//                if( predicate.equals("SUID") || predicate.equals("name") || predicate.equals("shared name") )
+//                    continue;
+//                Class<?> dataType = cyColumn.getType();
+//                if( dataType == List.class )
+//                {
+//                    handeListType(cyColumn, cyNetwork, cyNode, predicate, properties);
+//                }
+//                else
+//                {
+//                    handleSimpleType(cyNetwork, cyNode, predicate, dataType, properties);
+//                }
+//            }
+//
+//            //Set node presentation properties.
+////            List<SimplePropertyValuePair> presentationProperties = node.getPresentationProperties();
+////            View nodeView = cyNetworkView.getNodeView(cyNode);
+////
+////            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NODE))
+////            {
+////                if( nodeView.isSet(p) )
+////                {
+////                    SimplePropertyValuePair property = new SimplePropertyValuePair();
+////                    property.setName(p.getIdString());
+////                    Object value = nodeView.getVisualProperty(p);
+////                    property.setValue( p.toSerializableString( value ) );
+////                    property.setType(value.getClass().getSimpleName());
+////                    presentationProperties.add(property);
+////                }
+////            }
+////
+//            nodeMap.put(id, node);
+//        }
+//        network.setNodes( nodeMap );
+//
+//        Map<Long, PropertyGraphEdge> edges = new HashMap<Long, PropertyGraphEdge>();
+//        for( CyEdge cyEdge : cyNetwork.getEdgeList() )
+//        {
+//            PropertyGraphEdge edge = new PropertyGraphEdge();
+//            Long id = cyEdge.getSUID();
+//            edge.setId(id);
+//            edge.setSubjectId( cyEdge.getSource().getSUID() );
+//            edge.setPredicate( cyNetwork.getRow(cyEdge).get(CyEdge.INTERACTION, String.class));
+//            edge.setObjectId( cyEdge.getTarget().getSUID() );
+//
+//            //Set ordinary edge properties
+//            CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
+//            List<NdexPropertyValuePair> properties = edge.getProperties();
+//            for(CyColumn cyColumn : edgeTable.getColumns())
+//            {
+//                String predicate = cyColumn.getName();
+//                if( predicate.equals("SUID")
+//                        || predicate.equals("name")
+//                        || predicate.equals("shared name")
+//                        || predicate.equals("interaction")
+//                        || predicate.equals("shared interaction") )
+//                    continue;
+//                Class<?> dataType = cyColumn.getType();
+//                if( dataType == List.class )
+//                {
+//                    handeListType(cyColumn, cyNetwork, cyEdge, predicate, properties);
+//                }
+//                else
+//                {
+//                    handleSimpleType(cyNetwork, cyEdge, predicate, dataType, properties);
+//                }
+//            }
+//
+//            //Set edge presentation properties.
+////            List<SimplePropertyValuePair> presentationProperties = edge.getPresentationProperties();
+////            View edgeView = cyNetworkView.getEdgeView(cyEdge);
+////
+////            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.EDGE))
+////            {
+////                if( edgeView.isSet(p) )
+////                {
+////                    SimplePropertyValuePair property = new SimplePropertyValuePair();
+////                    property.setName(p.getIdString());
+////                    Object value = edgeView.getVisualProperty(p);
+////                    property.setValue( p.toSerializableString( value ) );
+////                    property.setType(value.getClass().getSimpleName());
+////                    presentationProperties.add(property);
+////                }
+////            }
+//            edges.put(id, edge);
+//        }
+//        network.setEdges( edges );
+//
+//
+//        String provenanceString = cyNetwork.getRow(cyNetwork).get("NDEX:provenance", String.class);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//
+//        ProvenanceEntity oldProvenance = null;
+//        try
+//        {
+//            if( provenanceString != null )
+//                oldProvenance = objectMapper.readValue(provenanceString, ProvenanceEntity.class);
+//        }
+//        catch (IOException ex)
+//        {
+//            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+//            String msg  = "There is something wrong with the NDEX:provenance property.\n";
+//            msg += "If you proceed, all previous provenance will be discarded.\n";
+//            msg += "Would you like to proceed?";
+//            String dialogTitle = "Proceed?";
+//            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
+//            if( choice == JOptionPane.NO_OPTION )
+//                return;
+//        }
+//        final ProvenanceEntity finalOldProvenance = oldProvenance;
+//
+//        SwingWorker worker = new SwingWorker<Void,Void>()
+//        {
+//
+//            @Override
+//            protected Void doInBackground() throws Exception
+//            {
+//                try
+//                {
+//                    NetworkSummary uploadedNetworkSummary = mal.insertPropertyGraphNetwork(network);
+//                    String networkId = uploadedNetworkSummary.getExternalId().toString();
+//                    ProvenanceEntity cytoscapeProvenance = mal.getNetworkProvenance( networkId );
+//                    ProvenanceEvent creationEvent = cytoscapeProvenance.getCreationEvent();
+//                    if( finalOldProvenance != null )
+//                        creationEvent.addInput(finalOldProvenance);
+//                    creationEvent.setEventType("Cytoscape Upload");
+//                    mal.setNetworkProvenance(networkId, cytoscapeProvenance );
+//                }
+//                catch (IOException ex)
+//                {
+//                    ex.printStackTrace();
+//                }
+//                return null;
+//            }
+//        };
+//        worker.execute();
 
         this.setVisible(false);
     }//GEN-LAST:event_uploadActionPerformed

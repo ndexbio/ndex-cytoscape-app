@@ -1,5 +1,10 @@
 [
   {
+    "name": "Dev 2",
+    "url": "http://dev2.ndexbio.org/rest",
+    "type": "DEFAULT"
+  },
+  {
     "name": "NDEx Public",
     "url": "http://public.ndexbio.org/rest",
     "type": "DEFAULT"

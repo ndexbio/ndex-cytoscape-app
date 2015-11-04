@@ -32,9 +32,11 @@ import org.cytoscape.app.swing.CySwingAppAdapter;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNetworkTableManager;
 import org.cytoscape.task.create.CreateNetworkViewTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
@@ -59,6 +61,8 @@ public enum CyObjectManager
     private File configDir;
     // The Cytoscape helper class that allows us to easily get all sorts of Cytoscape objects.
     private CySwingAppAdapter adapter;
+    // The network table manager.
+    private CyNetworkTableManager networkTableManager;
 
     public File getConfigDir()
     {
@@ -94,6 +98,12 @@ public enum CyObjectManager
     public JFrame getApplicationFrame() { return adapter.getCySwingApplication().getJFrame(); }
     public TaskManager getTaskManager() { return adapter.getDialogTaskManager(); }
     public CyLayoutAlgorithmManager getLayoutAlgorithmManager() { return adapter.getCyLayoutAlgorithmManager(); }
+    public VisualMappingManager getVisualMappingManager() { return adapter.getVisualMappingManager(); }
+    public CyGroupManager getCyGroupManager() { return adapter.getCyGroupManager(); }
+
+
+    public void setNetworkTableManager(CyNetworkTableManager networkTableManager) { this.networkTableManager = networkTableManager; }
+    public CyNetworkTableManager getNetworkTableManager() { return networkTableManager; }
 
     // Slightly More Sophisticated Getters
     public CyNetwork getCurrentNetwork()
