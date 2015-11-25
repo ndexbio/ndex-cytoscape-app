@@ -44,7 +44,9 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.presentation.RenderingEngineManager;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 
@@ -100,7 +102,11 @@ public enum CyObjectManager
     public CyLayoutAlgorithmManager getLayoutAlgorithmManager() { return adapter.getCyLayoutAlgorithmManager(); }
     public VisualMappingManager getVisualMappingManager() { return adapter.getVisualMappingManager(); }
     public CyGroupManager getCyGroupManager() { return adapter.getCyGroupManager(); }
-
+    public VisualStyleFactory getVisualStyleFactory() { return adapter.getVisualStyleFactory(); }
+    public VisualMappingFunctionFactory getVisualMappingFunctionContinuousFactory() { return adapter.getVisualMappingFunctionContinuousFactory(); }
+    public VisualMappingFunctionFactory getVisualMappingFunctionDiscreteFactory() { return adapter.getVisualMappingFunctionDiscreteFactory(); }
+    public VisualMappingFunctionFactory getVisualMappingFunctionPassthroughFactory() { return adapter.getVisualMappingFunctionPassthroughFactory(); }
+    public RenderingEngineManager getRenderingEngineManager() { return adapter.getRenderingEngineManager(); }
 
     public void setNetworkTableManager(CyNetworkTableManager networkTableManager) { this.networkTableManager = networkTableManager; }
     public CyNetworkTableManager getNetworkTableManager() { return networkTableManager; }

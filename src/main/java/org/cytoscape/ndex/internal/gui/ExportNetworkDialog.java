@@ -32,6 +32,8 @@ import org.apache.http.auth.AuthenticationException;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.io.internal.cx_writer.CxNetworkWriter;
 import org.cytoscape.model.*;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
@@ -56,6 +58,8 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import org.ndexbio.model.object.ProvenanceEntity;
 
 /**
@@ -101,6 +105,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     {
 
         jButton1 = new javax.swing.JButton();
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -113,6 +118,10 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         jLabel9 = new javax.swing.JLabel();
         upload = new javax.swing.JButton();
         cancel = new javax.swing.JButton();
+        networkRadio = new javax.swing.JRadioButton();
+        collectionRadio = new javax.swing.JRadioButton();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Upload Network to NDEx");
@@ -127,7 +136,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         jLabel4.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         jLabel4.setText("Username");
 
-        jLabel5.setText("Save Network to NDEx As:");
+        jLabel5.setText("With name:");
 
         nameField.setText("Default Network Name");
 
@@ -159,19 +168,44 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             }
         });
 
+        buttonGroup1.add(networkRadio);
+        networkRadio.setSelected(true);
+        networkRadio.setText("Network");
+        networkRadio.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                networkRadioActionPerformed(evt);
+            }
+        });
+
+        buttonGroup1.add(collectionRadio);
+        collectionRadio.setText("Collection");
+        collectionRadio.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                collectionRadioActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setText("Save Cytoscape");
+
+        jLabel11.setText("as an NDEx network");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(cancel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(upload))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(nameField, javax.swing.GroupLayout.DEFAULT_SIZE, 217, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
@@ -190,12 +224,22 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(jLabel8)
                                             .addComponent(jLabel9))))
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(cancel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(upload)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(nameField)))))
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(networkRadio)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(collectionRadio)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel11)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -208,11 +252,17 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(jLabel4))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(networkRadio)
+                    .addComponent(collectionRadio)
+                    .addComponent(jLabel10)
+                    .addComponent(jLabel11))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(jLabel8))
@@ -224,7 +274,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(upload)
                     .addComponent(cancel))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -245,10 +295,14 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 return;            
         }
 
-        String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
-
+        CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
+        String collectionName = rootNetwork.getRow(rootNetwork).get(CyNetwork.NAME, String.class);
         String uploadName = nameField.getText().trim();
-        cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, uploadName );
+        String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
+//        cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, uploadName );
+        rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, uploadName);
+        if( networkRadio.isSelected() )
+            cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, uploadName);
 
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
@@ -258,9 +312,9 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         PipedOutputStream out = null;
         OutputStream outputStream = null;
 
+        UUID networkUUID = null;
         try
         {
-
             in = new PipedInputStream();
             out = new PipedOutputStream(in);
 
@@ -271,12 +325,14 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             final CyNetworkTableManager ntm = CyObjectManager.INSTANCE.getNetworkTableManager();
             final VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
             CxNetworkWriter writer = new CxNetworkWriter(out, cyNetwork, vmm, nvm, nm, gm, ntm, lexicon );
+            boolean writeEntireCollection = collectionRadio.isSelected();
+            writer.setWriteSiblings(writeEntireCollection);
             TaskIterator ti = new TaskIterator(writer);
             TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
             tm.execute(ti);
 
-            outputStream  = new FileOutputStream("/Users/dwelker/Work/scratch/foo1.cx");
-
+//            outputStream  = new FileOutputStream("/Users/dwelker/Work/scratch/foo1.cx");
+//
 //            int read = 0;
 //            byte[] bytes = new byte[1024];
 //
@@ -286,8 +342,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 //
 //            System.out.println("Done!");
 
-            mal.createCXNetwork(in);
-            cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, networkName );
+            networkUUID = mal.createCXNetwork(in);
+
         }
         catch (Exception e)
         {
@@ -305,7 +361,6 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             }
             if (out != null) {
                 try {
-                    // outputStream.flush();
                     out.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -314,248 +369,90 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             }
             if (outputStream != null) {
                 try {
-                    // outputStream.flush();
                     outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+            rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, collectionName );
+            cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, networkName);
         }
 
-        //mal.
-        
-//        CyNetworkView cyNetworkView = CyObjectManager.INSTANCE.getCurrentNetworkView();
-//        VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
-//        Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
-//        final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-//
-//        final PropertyGraphNetwork network = new PropertyGraphNetwork();
-//        String networkName = nameField.getText().trim();
-//
-//
-//        // Upload Ordinary Network Properties
-//        List<NdexPropertyValuePair> networkProperties = network.getProperties();
-//        CyTable networkTable = cyNetwork.getDefaultNetworkTable();
-//        for( CyColumn cyColumn : networkTable.getColumns() )
-//        {
-//            String predicate = cyColumn.getName();
-//            if( predicate.equals("SUID") || predicate.equals("shared name") || predicate.equals("name") || predicate.equals("NDEX:provenance") )
-//                continue;
-//            Class dataType = cyColumn.getType();
-//
-//            if( dataType == List.class )
-//            {
-//                handeListType(cyColumn, cyNetwork, cyNetwork, predicate, networkProperties);
-//            }
-//            else
-//            {
-//                handleSimpleType(cyNetwork, cyNetwork, predicate, dataType, networkProperties);
-//            }
-//        }
-//
-//        //This needs to happen AFTER loading ordinary network properties.
-//        network.setName(networkName);
-//
-//
-////        //Set network presentation properties.
-////        List<SimplePropertyValuePair> networkPresentationProperties = network.getPresentationProperties();
-////
-////        for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NETWORK))
-////        {
-////            if( cyNetworkView.isSet(p) && p.getTargetDataType() == CyNetwork.class )
-////            {
-////                SimplePropertyValuePair property = new SimplePropertyValuePair();
-////                property.setName(p.getIdString());
-////                Object value = cyNetworkView.getVisualProperty(p);
-////                property.setValue( p.toSerializableString( value ) );
-////                property.setType(value.getClass().getSimpleName());
-////                networkPresentationProperties.add(property);
-////            }
-////        }
-//
-//
-//        Map<Long, PropertyGraphNode> nodeMap = new HashMap<Long, PropertyGraphNode>();
-//        CyTable nodeTable = cyNetwork.getDefaultNodeTable();
-//        for( CyNode cyNode : cyNetwork.getNodeList() )
-//        {
-//            PropertyGraphNode node = new PropertyGraphNode();
-//            Long id = cyNode.getSUID();
-//            node.setId(id);
-//
-//            node.setName( cyNetwork.getRow(cyNode).get(CyNetwork.NAME, String.class) );
-//
-//            //Set Node properties
-//            List<NdexPropertyValuePair> properties = node.getProperties();
-//            for(CyColumn cyColumn : nodeTable.getColumns())
-//            {
-//                String predicate = cyColumn.getName();
-//                if( predicate.equals("SUID") || predicate.equals("name") || predicate.equals("shared name") )
-//                    continue;
-//                Class<?> dataType = cyColumn.getType();
-//                if( dataType == List.class )
-//                {
-//                    handeListType(cyColumn, cyNetwork, cyNode, predicate, properties);
-//                }
-//                else
-//                {
-//                    handleSimpleType(cyNetwork, cyNode, predicate, dataType, properties);
-//                }
-//            }
-//
-//            //Set node presentation properties.
-////            List<SimplePropertyValuePair> presentationProperties = node.getPresentationProperties();
-////            View nodeView = cyNetworkView.getNodeView(cyNode);
-////
-////            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.NODE))
-////            {
-////                if( nodeView.isSet(p) )
-////                {
-////                    SimplePropertyValuePair property = new SimplePropertyValuePair();
-////                    property.setName(p.getIdString());
-////                    Object value = nodeView.getVisualProperty(p);
-////                    property.setValue( p.toSerializableString( value ) );
-////                    property.setType(value.getClass().getSimpleName());
-////                    presentationProperties.add(property);
-////                }
-////            }
-////
-//            nodeMap.put(id, node);
-//        }
-//        network.setNodes( nodeMap );
-//
-//        Map<Long, PropertyGraphEdge> edges = new HashMap<Long, PropertyGraphEdge>();
-//        for( CyEdge cyEdge : cyNetwork.getEdgeList() )
-//        {
-//            PropertyGraphEdge edge = new PropertyGraphEdge();
-//            Long id = cyEdge.getSUID();
-//            edge.setId(id);
-//            edge.setSubjectId( cyEdge.getSource().getSUID() );
-//            edge.setPredicate( cyNetwork.getRow(cyEdge).get(CyEdge.INTERACTION, String.class));
-//            edge.setObjectId( cyEdge.getTarget().getSUID() );
-//
-//            //Set ordinary edge properties
-//            CyTable edgeTable = cyNetwork.getDefaultEdgeTable();
-//            List<NdexPropertyValuePair> properties = edge.getProperties();
-//            for(CyColumn cyColumn : edgeTable.getColumns())
-//            {
-//                String predicate = cyColumn.getName();
-//                if( predicate.equals("SUID")
-//                        || predicate.equals("name")
-//                        || predicate.equals("shared name")
-//                        || predicate.equals("interaction")
-//                        || predicate.equals("shared interaction") )
-//                    continue;
-//                Class<?> dataType = cyColumn.getType();
-//                if( dataType == List.class )
-//                {
-//                    handeListType(cyColumn, cyNetwork, cyEdge, predicate, properties);
-//                }
-//                else
-//                {
-//                    handleSimpleType(cyNetwork, cyEdge, predicate, dataType, properties);
-//                }
-//            }
-//
-//            //Set edge presentation properties.
-////            List<SimplePropertyValuePair> presentationProperties = edge.getPresentationProperties();
-////            View edgeView = cyNetworkView.getEdgeView(cyEdge);
-////
-////            for(VisualProperty p : lexicon.getAllDescendants(BasicVisualLexicon.EDGE))
-////            {
-////                if( edgeView.isSet(p) )
-////                {
-////                    SimplePropertyValuePair property = new SimplePropertyValuePair();
-////                    property.setName(p.getIdString());
-////                    Object value = edgeView.getVisualProperty(p);
-////                    property.setValue( p.toSerializableString( value ) );
-////                    property.setType(value.getClass().getSimpleName());
-////                    presentationProperties.add(property);
-////                }
-////            }
-//            edges.put(id, edge);
-//        }
-//        network.setEdges( edges );
-//
-//
-//        String provenanceString = cyNetwork.getRow(cyNetwork).get("NDEX:provenance", String.class);
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        ProvenanceEntity oldProvenance = null;
-//        try
-//        {
-//            if( provenanceString != null )
-//                oldProvenance = objectMapper.readValue(provenanceString, ProvenanceEntity.class);
-//        }
-//        catch (IOException ex)
-//        {
-//            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-//            String msg  = "There is something wrong with the NDEX:provenance property.\n";
-//            msg += "If you proceed, all previous provenance will be discarded.\n";
-//            msg += "Would you like to proceed?";
-//            String dialogTitle = "Proceed?";
-//            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
-//            if( choice == JOptionPane.NO_OPTION )
-//                return;
-//        }
-//        final ProvenanceEntity finalOldProvenance = oldProvenance;
-//
-//        SwingWorker worker = new SwingWorker<Void,Void>()
-//        {
-//
-//            @Override
-//            protected Void doInBackground() throws Exception
-//            {
-//                try
-//                {
-//                    NetworkSummary uploadedNetworkSummary = mal.insertPropertyGraphNetwork(network);
-//                    String networkId = uploadedNetworkSummary.getExternalId().toString();
-//                    ProvenanceEntity cytoscapeProvenance = mal.getNetworkProvenance( networkId );
-//                    ProvenanceEvent creationEvent = cytoscapeProvenance.getCreationEvent();
-//                    if( finalOldProvenance != null )
-//                        creationEvent.addInput(finalOldProvenance);
-//                    creationEvent.setEventType("Cytoscape Upload");
-//                    mal.setNetworkProvenance(networkId, cytoscapeProvenance );
-//                }
-//                catch (IOException ex)
-//                {
-//                    ex.printStackTrace();
-//                }
-//                return null;
-//            }
-//        };
-//        worker.execute();
+        final String networkId = networkUUID.toString();
+
+        //Provenance
+        String provenanceString = rootNetwork.getRow(rootNetwork).get("NDEX:provenance", String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ProvenanceEntity oldProvenance = null;
+        try
+        {
+            if( provenanceString != null )
+                oldProvenance = objectMapper.readValue(provenanceString, ProvenanceEntity.class);
+        }
+        catch (IOException ex)
+        {
+            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+            String msg  = "There is something wrong with the NDEX:provenance property.\n";
+            msg += "If you proceed, all previous provenance will be discarded.\n";
+            msg += "Would you like to proceed?";
+            String dialogTitle = "Proceed?";
+            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
+            if( choice == JOptionPane.NO_OPTION )
+                return;
+        }
+        final ProvenanceEntity finalOldProvenance = oldProvenance;
+
+        SwingWorker worker = new SwingWorker<Void,Void>()
+        {
+
+            @Override
+            protected Void doInBackground() throws Exception
+            {
+                try
+                {
+                    ProvenanceEntity cytoscapeProvenance = mal.getNetworkProvenance( networkId );
+                    ProvenanceEvent creationEvent = cytoscapeProvenance.getCreationEvent();
+                    if( finalOldProvenance != null )
+                        creationEvent.addInput(finalOldProvenance);
+                    creationEvent.setEventType("Cytoscape Upload");
+                    mal.setNetworkProvenance(networkId, cytoscapeProvenance );
+                }
+                catch (IOException ex)
+                {
+                    ex.printStackTrace();
+                }
+                return null;
+            }
+        };
+        worker.execute();
 
         this.setVisible(false);
     }//GEN-LAST:event_uploadActionPerformed
-
-    private void handleSimpleType(CyNetwork cyNetwork, CyIdentifiable rowId, String predicate, Class<?> dataType, List<NdexPropertyValuePair> properties)
-    {
-        Object value = cyNetwork.getRow(rowId).get(predicate, dataType);
-        NdexPropertyValuePair property = new NdexPropertyValuePair();
-        property.setPredicateString(predicate);
-        String valueString = value != null ? value.toString() : null;
-        property.setValue(valueString);
-        property.setDataType(dataType.getSimpleName());
-        properties.add(property);
-    }
-
-    private void handeListType(CyColumn cyColumn, CyNetwork cyNetwork, CyIdentifiable rowId, String predicate, List<NdexPropertyValuePair> networkProperties)
-    {
-        Class listElementType = cyColumn.getListElementType();
-        String typeName = "List."+listElementType.getSimpleName();
-        List list = cyNetwork.getRow(rowId).getList(predicate, listElementType);
-        NdexPropertyValuePair property = new NdexPropertyValuePair();
-        property.setPredicateString(predicate);
-        Gson gson = new Gson();
-        property.setValue( gson.toJson(list) );
-        property.setDataType(typeName);
-        networkProperties.add(property);
-    }
 
     private void cancelActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelActionPerformed
     {//GEN-HEADEREND:event_cancelActionPerformed
         this.setVisible(false);
     }//GEN-LAST:event_cancelActionPerformed
+
+    private void collectionRadioActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_collectionRadioActionPerformed
+    {//GEN-HEADEREND:event_collectionRadioActionPerformed
+        // TODO add your handling code here:
+        CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
+        CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
+        String collectionName = rootNetwork.getRow(rootNetwork).get(CyNetwork.NAME, String.class);
+        nameField.setText(collectionName);
+
+    }//GEN-LAST:event_collectionRadioActionPerformed
+
+    private void networkRadioActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_networkRadioActionPerformed
+    {//GEN-HEADEREND:event_networkRadioActionPerformed
+        // TODO add your handling code here:
+        CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
+        String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
+        nameField.setText(networkName);
+
+    }//GEN-LAST:event_networkRadioActionPerformed
 
     /**
      * @param args the command line arguments
@@ -601,9 +498,13 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton cancel;
+    private javax.swing.JRadioButton collectionRadio;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -613,6 +514,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField nameField;
+    private javax.swing.JRadioButton networkRadio;
     private javax.swing.JButton upload;
     // End of variables declaration//GEN-END:variables
 
