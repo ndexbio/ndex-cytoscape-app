@@ -105,7 +105,6 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     {
 
         jButton1 = new javax.swing.JButton();
-        buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -118,10 +117,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         jLabel9 = new javax.swing.JLabel();
         upload = new javax.swing.JButton();
         cancel = new javax.swing.JButton();
-        networkRadio = new javax.swing.JRadioButton();
-        collectionRadio = new javax.swing.JRadioButton();
-        jLabel10 = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
+        networkOrCollectionCombo = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Upload Network to NDEx");
@@ -168,30 +164,14 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             }
         });
 
-        buttonGroup1.add(networkRadio);
-        networkRadio.setSelected(true);
-        networkRadio.setText("Network");
-        networkRadio.addActionListener(new java.awt.event.ActionListener()
+        networkOrCollectionCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Save this network (default)", "Save complete collection" }));
+        networkOrCollectionCombo.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                networkRadioActionPerformed(evt);
+                networkOrCollectionComboActionPerformed(evt);
             }
         });
-
-        buttonGroup1.add(collectionRadio);
-        collectionRadio.setText("Collection");
-        collectionRadio.addActionListener(new java.awt.event.ActionListener()
-        {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
-            {
-                collectionRadioActionPerformed(evt);
-            }
-        });
-
-        jLabel10.setText("Save Cytoscape");
-
-        jLabel11.setText("as an NDEx network");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -201,7 +181,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(cancel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 245, Short.MAX_VALUE)
                         .addComponent(upload))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
@@ -232,13 +212,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel10)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(networkRadio)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(collectionRadio)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel11)
+                .addComponent(networkOrCollectionCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -252,13 +226,9 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(jLabel4))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(networkRadio)
-                    .addComponent(collectionRadio)
-                    .addComponent(jLabel10)
-                    .addComponent(jLabel11))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+                .addComponent(networkOrCollectionCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -301,7 +271,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
 //        cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, uploadName );
         rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, uploadName);
-        if( networkRadio.isSelected() )
+        //If network is selected
+        if( networkOrCollectionCombo.getSelectedIndex() == 0)
             cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, uploadName);
 
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
@@ -325,7 +296,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             final CyNetworkTableManager ntm = CyObjectManager.INSTANCE.getNetworkTableManager();
             final VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
             CxNetworkWriter writer = new CxNetworkWriter(out, cyNetwork, vmm, nvm, nm, gm, ntm, lexicon );
-            boolean writeEntireCollection = collectionRadio.isSelected();
+            boolean writeEntireCollection = networkOrCollectionCombo.getSelectedIndex() == 1;
             writer.setWriteSiblings(writeEntireCollection);
             TaskIterator ti = new TaskIterator(writer);
             TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
@@ -435,24 +406,24 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         this.setVisible(false);
     }//GEN-LAST:event_cancelActionPerformed
 
-    private void collectionRadioActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_collectionRadioActionPerformed
-    {//GEN-HEADEREND:event_collectionRadioActionPerformed
-        // TODO add your handling code here:
+    private void networkOrCollectionComboActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_networkOrCollectionComboActionPerformed
+    {//GEN-HEADEREND:event_networkOrCollectionComboActionPerformed
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
-        CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
-        String collectionName = rootNetwork.getRow(rootNetwork).get(CyNetwork.NAME, String.class);
-        nameField.setText(collectionName);
-
-    }//GEN-LAST:event_collectionRadioActionPerformed
-
-    private void networkRadioActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_networkRadioActionPerformed
-    {//GEN-HEADEREND:event_networkRadioActionPerformed
-        // TODO add your handling code here:
-        CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
-        String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
-        nameField.setText(networkName);
-
-    }//GEN-LAST:event_networkRadioActionPerformed
+        
+        //Network selected to be saved.
+        if( this.networkOrCollectionCombo.getSelectedIndex() == 0 )
+        {
+            String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
+            this.nameField.setText(networkName);
+        }
+        //Network collection selected to be saved.
+        else
+        {
+            CyNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
+            String rootNetworkName = rootNetwork.getRow(rootNetwork).get(CyNetwork.NAME, String.class);
+            this.nameField.setText(rootNetworkName);
+        }
+    }//GEN-LAST:event_networkOrCollectionComboActionPerformed
 
     /**
      * @param args the command line arguments
@@ -498,13 +469,9 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton cancel;
-    private javax.swing.JRadioButton collectionRadio;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -514,7 +481,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField nameField;
-    private javax.swing.JRadioButton networkRadio;
+    private javax.swing.JComboBox networkOrCollectionCombo;
     private javax.swing.JButton upload;
     // End of variables declaration//GEN-END:variables
 

@@ -570,14 +570,16 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         if (largeNetwork)
         {
             JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-            String msg = "You have chosen to download a network that has more than 10,000 edges.\n";
+            String  msg = "You have chosen to download a network that has more than 10,000 edges.\n";
             msg += "The download will occur in the background and you can continue working,\n";
-            msg += "but it may take a while to appear in Cytoscape. Would you like to proceed?";
+            msg += "but it may take a while to appear in Cytoscape. Also, no layout will be\n";
+            msg += "applied. Would you like to proceed?";
             String dialogTitle = "Proceed?";
             int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION);
             if (choice == JOptionPane.NO_OPTION)
                 return;
         }
+        final boolean finalLargeNetwork = largeNetwork;
 
         final Component me = this;
         final boolean isLargeNetwork = largeNetwork;
@@ -613,7 +615,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
                     {
                         ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
                         InputStream cxStream = mal.getNeighborhoodAsCXStream(id.toString(), query);
-                        createCyNetworkFromCX(cxStream, provenance, true);
+                        createCyNetworkFromCX(cxStream, provenance, true, finalLargeNetwork);
                     }
                     catch (IOException ex)
                     {
@@ -634,7 +636,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
                         {
                             ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
                             InputStream cxStream = mal.getNetworkAsCXStream(id.toString());
-                            createCyNetworkFromCX(cxStream, provenance, false);
+                            createCyNetworkFromCX(cxStream, provenance, false, finalLargeNetwork);
                         }
                         catch (IOException ex)
                         {
@@ -696,7 +698,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         }
     }
 
-    private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, boolean doLayout) throws IOException
+    private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, boolean doLayout, boolean stopLayout) throws IOException
     {
         AspectSet aspects = new AspectSet();
         aspects.addAspect(Aspect.NODES);
@@ -721,6 +723,8 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 //            return;
         CxReader cxr = cxImporter.obtainCxReader(aspects, cxStream);
         SortedMap<String, List<AspectElement>> aspectMap = CxReader.parseAsMap(cxr);
+        if( !aspectMap.containsKey(CartesianLayoutElement.ASPECT_NAME) )
+            doLayout = true;
         List<CyNetwork> networks = cxToCy.createNetwork(aspectMap, null, networkFactory, null, true);
 
         CyRootNetwork rootNetwork = ((CySubNetwork)networks.get(0)).getRootNetwork();
@@ -757,19 +761,17 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             VisualMappingFunctionFactory vmffp = CyObjectManager.INSTANCE.getVisualMappingFunctionPassthroughFactory();
 
             CyNetworkView cyNetworkView = ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp);
-            if( doLayout )
+            if( doLayout && !stopLayout)
             {
                 CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
                 CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
                 TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
                 TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
                 tm.execute(ti);
-
-                vmm.getCurrentVisualStyle().apply(cyNetworkView);
-                cyNetworkView.updateView();
-
-
             }
+            vmm.getCurrentVisualStyle().apply(cyNetworkView);
+            cyNetworkView.updateView();
+
 
 
             CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);

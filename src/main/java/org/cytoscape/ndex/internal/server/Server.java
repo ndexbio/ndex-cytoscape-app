@@ -72,8 +72,8 @@ public class Server
     public static Server createDefaultServer()
     {
         Server s = new Server();
-        s.name = "NDEx Public";
-        s.url = "http://public.ndexbio.org/rest";
+        s.name = "NDEx Dev";
+        s.url = "http://dev.ndexbio.org/rest";
         s.type = Type.DEFAULT;
         return s;
     }

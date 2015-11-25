@@ -1,27 +1,7 @@
 [
   {
-    "name": "Dev 2",
-    "url": "http://dev2.ndexbio.org/rest",
-    "type": "DEFAULT"
-  },
-  {
-    "name": "NDEx Public",
-    "url": "http://public.ndexbio.org/rest",
-    "type": "DEFAULT"
-  },
-  {
     "name": "NDEx Dev",
-    "url": "http://test.ndexbio.org/rest",
-    "type": "DEFAULT"
-  },
-  {
-    "name": "NDEx Local",
-    "url": "http://localhost:8080/ndexbio-rest",
-    "type": "DEFAULT"
-  },
-  {
-    "name": "NDEx Test",
-    "url": "http://test.ndexbio.org/rest",
+    "url": "http://dev.ndexbio.org/rest",
     "type": "DEFAULT"
   }
 ]
