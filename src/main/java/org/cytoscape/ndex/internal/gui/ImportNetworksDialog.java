@@ -750,7 +750,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 
         for( CyNetwork cyNetwork : networks )
         {
-
+            CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
 
             CyNetworkViewFactory nvf = CyObjectManager.INSTANCE.getNetworkViewFactory();
             RenderingEngineManager rem = CyObjectManager.INSTANCE.getRenderingEngineManager();
@@ -768,13 +768,13 @@ public class ImportNetworksDialog extends javax.swing.JDialog
                 TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
                 TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
                 tm.execute(ti);
+                cyNetworkView.updateView();
             }
             vmm.getCurrentVisualStyle().apply(cyNetworkView);
-            cyNetworkView.updateView();
+            if( cyNetworkView != null )
+                cyNetworkView.updateView();
 
 
-
-            CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
             CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
         }
     }
