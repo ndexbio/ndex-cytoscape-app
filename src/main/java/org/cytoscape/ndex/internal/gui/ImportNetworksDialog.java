@@ -589,7 +589,6 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             @Override
             protected Integer doInBackground() throws Exception
             {
-                PropertyGraphNetwork network = null;
                 if (selectedSubnetworkRadio.isSelected())
                 {
                     // We already have the selected subnetwork
@@ -615,7 +614,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
                     {
                         ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
                         InputStream cxStream = mal.getNeighborhoodAsCXStream(id.toString(), query);
-                        createCyNetworkFromCX(cxStream, provenance, true, finalLargeNetwork);
+                        createCyNetworkFromCX(cxStream, provenance, networkSummary, true, finalLargeNetwork);
                     }
                     catch (IOException ex)
                     {
@@ -636,7 +635,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
                         {
                             ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
                             InputStream cxStream = mal.getNetworkAsCXStream(id.toString());
-                            createCyNetworkFromCX(cxStream, provenance, false, finalLargeNetwork);
+                            createCyNetworkFromCX(cxStream, provenance, networkSummary, false, finalLargeNetwork);
                         }
                         catch (IOException ex)
                         {
@@ -698,7 +697,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         }
     }
 
-    private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, boolean doLayout, boolean stopLayout) throws IOException
+    private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, NetworkSummary networkSummary, boolean doLayout, boolean stopLayout) throws IOException
     {
         AspectSet aspects = new AspectSet();
         aspects.addAspect(Aspect.NODES);
@@ -741,6 +740,18 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode provenanceJson = objectMapper.valueToTree(provenance);
         cyRow.set("NDEX:provenance", provenanceJson.toString());
+
+        if (networkTable.getColumn("NDEX:uuid") == null)
+        {
+            networkTable.createColumn("NDEX:uuid", String.class, false);
+        }
+        cyRow.set("NDEX:uuid", networkSummary.getExternalId().toString());
+
+        if (networkTable.getColumn("NDEX:modificationTime") == null)
+        {
+            networkTable.createColumn("NDEX:modificationTime", String.class, false);
+        }
+        cyRow.set("NDEX:modificationTime", networkSummary.getModificationTime().toString());
 
         if( networks.size() == 1 )
         {

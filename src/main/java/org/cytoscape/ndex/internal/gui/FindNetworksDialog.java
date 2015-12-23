@@ -30,6 +30,7 @@ import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.model.object.network.VisibilityType;
@@ -91,7 +92,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworks("*",true, null, 0, 50);
+                networkSummaries = mal.findNetworks("*",true, null, 0, 10000);
             }
             catch (IOException ex)
             {         
@@ -140,17 +141,17 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         resultsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][]
             {
-
+                {null, null, null, null, null, null}
             },
             new String []
             {
-                "Network Title", "Format", "Admins", "Number of Nodes", "Number of Edges"
+                "Network Title", "Format", "Number of Nodes", "Number of Edges", "Owned By", "Last Modified"
             }
         )
         {
             boolean[] canEdit = new boolean []
             {
-                false, false, false, false, false
+                false, false, false, false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex)
@@ -211,7 +212,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 864, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1066, Short.MAX_VALUE)
                     .addComponent(jSeparator1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -340,7 +341,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         DefaultTableModel model = new DefaultTableModel();
         model.setColumnIdentifiers( new String[]
         {
-            "Network Title", "Format", "Admins", "Number of Nodes", "Number of Edges"
+            "Network Title", "Format", "Number of Nodes", "Number of Edges", "Owned By", "Last Modified"
         });
         displayedNetworkSummaries.clear();
         for( NetworkSummary networkSummary : networkSummaries )
@@ -350,19 +351,31 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             //Network Title
             row.add(networkSummary.getName());
             //Format
-            row.add("");
-            //Admins
-            row.add("");
+            row.add(getSourceFormat(networkSummary));
             //Number of Nodes
             row.add(networkSummary.getNodeCount());
             //Number of Edges
             row.add(networkSummary.getEdgeCount());
+            //Owned By
+            row.add(networkSummary.getOwner());
+            //Last Modified
+            row.add(networkSummary.getModificationTime());
                
             model.addRow(row);
             displayedNetworkSummaries.add(networkSummary);
         }
         resultsTable.setModel(model);
         resultsTable.getSelectionModel().setSelectionInterval(0, 0);
+    }
+
+    private String getSourceFormat(NetworkSummary ns)
+    {
+        for(NdexPropertyValuePair vp : ns.getProperties() )
+        {
+            if( vp.getPredicateString().equals("sourceFormat") )
+                return vp.getValue();
+        }
+        return "Unknown";
     }
 
     /**
