@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.ndex</groupId>
     <artifactId>CyNDEx</artifactId>
-    <version>1.3.0-rc4</version>
+    <version>1.3.0-rc5</version>
     <!--<version>1.0.0-dev</version>-->
 
     <name>cyNDEx</name>
@@ -172,7 +172,7 @@
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>cx-impl</artifactId>
-            <version>3.3.0-SNAPSHOT</version>
+            <version>0.9.04</version>
         </dependency>
 
         <!-- Logging -->
