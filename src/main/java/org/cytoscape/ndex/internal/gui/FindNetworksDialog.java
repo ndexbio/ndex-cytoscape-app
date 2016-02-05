@@ -92,7 +92,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworks("*",true, null, 0, 10000);
+                networkSummaries = mal.findNetworks("*",true, selectedServer.getUsername(), 0, 10000);
             }
             catch (IOException ex)
             {         
