@@ -217,12 +217,18 @@ public class Server
 
     public void setUsername(String username)
     {
-        this.username = username;
+        if( username != null && username.trim().equals("") )
+            this.username = null;
+        else
+            this.username = username;
     }
 
     public void setPassword(String password)
     {
-        this.password = password;
+        if( password != null && password.trim().equals("") )
+            this.password = null;
+        else
+            this.password = password;
     }
 
     public void setType(Type type)

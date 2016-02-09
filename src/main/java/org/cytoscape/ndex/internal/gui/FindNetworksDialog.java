@@ -78,12 +78,12 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         if( selectedServer.isAuthenticated() )
         {
             username.setText( selectedServer.getUsername() );
-            warning.setVisible(false);
+            administeredByMe.setVisible(true);
         }
         else
         {
             username.setText("Not Authenticated");
-            warning.setVisible(true);
+            administeredByMe.setVisible(false);
         }
         
         
@@ -92,7 +92,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworks("*",true, selectedServer.getUsername(), 0, 10000);
+                networkSummaries = mal.findNetworks("*",true, null, Permissions.READ, false, 0, 10000);
             }
             catch (IOException ex)
             {         
@@ -133,7 +133,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         serverName = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         username = new javax.swing.JLabel();
-        warning = new javax.swing.JLabel();
+        hiddenLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Find Networks");
@@ -203,7 +203,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         username.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         username.setText("Not Authenticated");
 
-        warning.setText("(Only PUBLIC networks will be visible.)");
+        hiddenLabel.setText(" ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -224,7 +224,9 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                             .addComponent(searchField, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(administeredByMe)
-                                .addGap(614, 614, 614)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(hiddenLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(search))
                     .addGroup(layout.createSequentialGroup()
@@ -237,10 +239,8 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(username)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(warning)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addComponent(username)))
+                        .addGap(0, 821, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -253,14 +253,15 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(username)
-                    .addComponent(warning))
+                    .addComponent(username))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(searchField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(search, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(administeredByMe)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(administeredByMe)
+                    .addComponent(hiddenLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -317,7 +318,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                 Permissions permissions = Permissions.READ;
                 if( me != null )
                     permissions = Permissions.ADMIN;
-                networkSummaries = mal.findNetworks(searchText, true, me, permissions, false, 0, 50);
+                networkSummaries = mal.findNetworks(searchText, true, me, permissions, false, 0, 10000);
             }
             catch (IOException ex)
             {         
@@ -423,6 +424,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox administeredByMe;
     private javax.swing.JButton done;
+    private javax.swing.JLabel hiddenLabel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -434,7 +436,6 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     private javax.swing.JButton selectNetwork;
     private javax.swing.JLabel serverName;
     private javax.swing.JLabel username;
-    private javax.swing.JLabel warning;
     // End of variables declaration//GEN-END:variables
 
     
