@@ -68,15 +68,6 @@ public class Server
         description = s.description;
         authenticated = s.authenticated;
     }
-    
-    public static Server createDefaultServer()
-    {
-        Server s = new Server();
-        s.name = "NDEx v1.3 Dev";
-        s.url = "http://dev.ndexbio.org/rest";
-        s.type = Type.DEFAULT;
-        return s;
-    }
 
     public boolean isRunningNdexServer(NdexRestClientModelAccessLayer mal)
     {

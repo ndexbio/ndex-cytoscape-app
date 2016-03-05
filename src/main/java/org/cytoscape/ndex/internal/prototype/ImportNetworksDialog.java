@@ -23,12 +23,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.cytoscape.ndex.internal.gui;
+package org.cytoscape.ndex.internal.prototype;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.cxio.aspects.datamodels.*;
 import org.cxio.core.CxReader;
 import org.cxio.core.interfaces.AspectElement;
@@ -43,6 +41,7 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;

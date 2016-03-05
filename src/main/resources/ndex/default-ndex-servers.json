@@ -1,7 +1,7 @@
 [
   {
-    "name": "NDEx v1.3 Dev",
-    "url": "http://dev.ndexbio.org/rest",
+    "name": "PUBLIC",
+    "url": "http://public.ndexbio.org/rest",
     "type": "DEFAULT"
   }
 ]

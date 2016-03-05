@@ -59,16 +59,23 @@ import org.cytoscape.ndex.internal.strings.ResourcePath;
 public class ServerList extends AbstractListModel
 {
     //A list of servers, both DEFAULT and ADDED, displayed to the user.
-    private List<Server> serverList = new ArrayList<Server>();
+    private List<Server> serverList = new ArrayList<>();
     //A list of default servers with CREDENTIALS.
-    private List<Server> defaultServerCredentials = new ArrayList<Server>();
+    private List<Server> defaultServerCredentials = new ArrayList<>();
     //Efficiently tracks server names already used to prevent duplicates.
-    private HashSet<String> namesUsed = new HashSet<String>();
+    private HashSet<String> namesUsed = new HashSet<>();
+    //A list of DEFAULT servers
+    private List<Server> defaultServerList = new ArrayList<>();
     
     public ServerList()
     {
         super();
         readServers();
+    }
+
+    public Server getDefaultServer()
+    {
+        return defaultServerList.get(0);
     }
     
     private void readServers()
@@ -83,6 +90,7 @@ public class ServerList extends AbstractListModel
     {
         Collection<Server> defaultServers = readServerCollection(ResourcePath.DEFAULT_NDEX_SERVERS); 
         serverList.addAll(defaultServers);
+        defaultServerList.addAll(defaultServers);
         for( Server server : defaultServers )
             namesUsed.add( server.getName() );
     }

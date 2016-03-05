@@ -43,7 +43,6 @@
                               <Component id="administeredByMe" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="hiddenLabel" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -137,7 +136,7 @@
     </Container>
     <Component class="javax.swing.JButton" name="selectNetwork">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Select Network"/>
+        <Property name="text" type="java.lang.String" value="Load Network"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectNetworkActionPerformed"/>
@@ -163,8 +162,11 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="administeredByMe">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Administered By Me"/>
+        <Property name="text" type="java.lang.String" value="My Networks"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="administeredByMeActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JSeparator" name="jSeparator1">
     </Component>

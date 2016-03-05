@@ -81,6 +81,8 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         ServerManager manager = ServerManager.INSTANCE;
         final ServerList availableServers = manager.getAvailableServers();
         guiServerList.setModel(availableServers);
+
+
         guiServerList.addListSelectionListener(new ListSelectionListener()
         {
             @Override
@@ -120,7 +122,15 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
 
             
         });
-        guiServerList.setSelectedIndex(0);
+
+        for( int i = 0; i < availableServers.getSize(); i++ )
+        {
+            if( availableServers.get(i).equals( ServerManager.INSTANCE.getSelectedServer()) )
+            {
+                guiServerList.setSelectedIndex(i);
+                break;
+            }
+        }
     }
     
     public void setSelectedServer(Server server)

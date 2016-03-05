@@ -41,6 +41,7 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.ndexbio.model.exceptions.NdexException;
+import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.ProvenanceEvent;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
@@ -74,7 +75,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         rootPane.setDefaultButton(upload);
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
         boolean updatePossible = updateIsPossible();
-        updateCheckbox.setSelected(updatePossible);
+        updateCheckbox.setSelected(false);
         if( !updatePossible )
             updateCheckbox.setEnabled(false);
         String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
@@ -113,10 +114,32 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             return null;
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        try
+        {
+            java.util.List<NetworkSummary> writeableNetworks = mal.findNetworks("", true, null, Permissions.WRITE, false, 0, 10000);
+            boolean networkFoundAmongWriteableNetworks = false;
+            for( NetworkSummary ns : writeableNetworks)
+            {
+                if( networkId.equals(ns.getExternalId().toString()) )
+                {
+                    networkFoundAmongWriteableNetworks = true;
+                    break;
+                }
+            }
+            if( !networkFoundAmongWriteableNetworks )
+                return null;
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
+
         NetworkSummary ns = null;
         try
         {
             ns = mal.getNetworkSummaryById(networkId);
+            if( ns.getReadOnlyCacheId() != -1L || ns.getReadOnlyCommitId() != -1L )
+                return null;
         }
         catch (IOException e)
         {

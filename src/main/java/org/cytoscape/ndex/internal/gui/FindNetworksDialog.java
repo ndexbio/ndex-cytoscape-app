@@ -26,13 +26,43 @@
 
 package org.cytoscape.ndex.internal.gui;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cxio.aspects.datamodels.*;
+import org.cxio.core.CxReader;
+import org.cxio.core.interfaces.AspectElement;
+import org.cytoscape.io.internal.cx_reader.CxToCy;
+import org.cytoscape.io.internal.cx_reader.ViewMaker;
+import org.cytoscape.io.internal.cxio.Aspect;
+import org.cytoscape.io.internal.cxio.AspectSet;
+import org.cytoscape.io.internal.cxio.CxImporter;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyTable;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.ndex.internal.server.Server;
+import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.cytoscape.view.layout.CyLayoutAlgorithm;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
+import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.presentation.RenderingEngineManager;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyleFactory;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
+import org.ndexbio.model.object.CXSimplePathQuery;
 import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.Permissions;
+import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.network.NetworkSummary;
+import org.ndexbio.model.object.network.PropertyGraphNetwork;
 import org.ndexbio.model.object.network.VisibilityType;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
@@ -40,9 +70,9 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.util.*;
 import java.util.List;
-import java.util.Vector;
 
 /**
  *
@@ -92,7 +122,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
             try
             {
-                networkSummaries = mal.findNetworks("*",true, null, Permissions.READ, false, 0, 10000);
+                networkSummaries = mal.findNetworks("*",true, null, null, false, 0, 10000);
             }
             catch (IOException ex)
             {         
@@ -108,6 +138,202 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
             this.setVisible(false);
         }
+    }
+
+    private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, NetworkSummary networkSummary, boolean doLayout, boolean stopLayout) throws IOException
+    {
+        AspectSet aspects = new AspectSet();
+        aspects.addAspect(Aspect.NODES);
+        aspects.addAspect(Aspect.EDGES);
+        aspects.addAspect(Aspect.NETWORK_ATTRIBUTES);
+        aspects.addAspect(Aspect.NODE_ATTRIBUTES);
+        aspects.addAspect(Aspect.EDGE_ATTRIBUTES);
+        aspects.addAspect(Aspect.VISUAL_PROPERTIES);
+        aspects.addAspect(Aspect.CARTESIAN_LAYOUT);
+        aspects.addAspect(Aspect.NETWORK_RELATIONS);
+        aspects.addAspect(Aspect.SUBNETWORKS);
+        aspects.addAspect(Aspect.GROUPS);
+
+        //Create the CyNetwork to copy to.
+        CyNetworkFactory networkFactory = CyObjectManager.INSTANCE.getNetworkFactory();
+        CxToCy cxToCy = new CxToCy();
+        CxImporter cxImporter = CxImporter.createInstance();
+        //CxReader cxr = cxImporter.obtainCxReader()
+//        writeStreamToFile(cxStream, "/Users/dwelker/Work/scratch/queryFoo1.cx");
+//        boolean exitNow = true;
+//        if( exitNow )
+//            return;
+        CxReader cxr = cxImporter.obtainCxReader(aspects, cxStream);
+        SortedMap<String, List<AspectElement>> aspectMap = CxReader.parseAsMap(cxr);
+        if( !aspectMap.containsKey(CartesianLayoutElement.ASPECT_NAME) )
+            doLayout = true;
+        List<CyNetwork> networks = cxToCy.createNetwork(aspectMap, null, networkFactory, null, true);
+
+        CyRootNetwork rootNetwork = ((CySubNetwork)networks.get(0)).getRootNetwork();
+        String collectionName = networkSummary.getName();
+        rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, collectionName);
+
+        //last ndex property is ndex:provenance
+        CyTable networkTable = rootNetwork.getDefaultNetworkTable();
+        if (networkTable.getColumn("NDEX:provenance") == null)
+        {
+            networkTable.createColumn("NDEX:provenance", String.class, false);
+        }
+        CyRow cyRow = rootNetwork.getRow(rootNetwork);
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode provenanceJson = objectMapper.valueToTree(provenance);
+        cyRow.set("NDEX:provenance", provenanceJson.toString());
+
+        if (networkTable.getColumn("NDEX:uuid") == null)
+        {
+            networkTable.createColumn("NDEX:uuid", String.class, false);
+        }
+        cyRow.set("NDEX:uuid", networkSummary.getExternalId().toString());
+
+        if (networkTable.getColumn("NDEX:modificationTime") == null)
+        {
+            networkTable.createColumn("NDEX:modificationTime", String.class, false);
+        }
+        cyRow.set("NDEX:modificationTime", networkSummary.getModificationTime().toString());
+
+        if( networks.size() == 1 )
+        {
+            CyNetwork cyNetwork = networks.get(0);
+            cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, collectionName);
+        }
+
+        for( CyNetwork cyNetwork : networks )
+        {
+            CyObjectManager.INSTANCE.getNetworkManager().addNetwork(cyNetwork);
+
+            CyNetworkViewFactory nvf = CyObjectManager.INSTANCE.getNetworkViewFactory();
+            RenderingEngineManager rem = CyObjectManager.INSTANCE.getRenderingEngineManager();
+            VisualMappingManager vmm = CyObjectManager.INSTANCE.getVisualMappingManager();
+            VisualStyleFactory vsf = CyObjectManager.INSTANCE.getVisualStyleFactory();
+            VisualMappingFunctionFactory vmffc = CyObjectManager.INSTANCE.getVisualMappingFunctionContinuousFactory();
+            VisualMappingFunctionFactory vmffd = CyObjectManager.INSTANCE.getVisualMappingFunctionDiscreteFactory();
+            VisualMappingFunctionFactory vmffp = CyObjectManager.INSTANCE.getVisualMappingFunctionPassthroughFactory();
+
+            CyNetworkView cyNetworkView = ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp);
+            if( doLayout && !stopLayout)
+            {
+                CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
+                CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
+                TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
+                TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
+                tm.execute(ti);
+                cyNetworkView.updateView();
+            }
+            vmm.getCurrentVisualStyle().apply(cyNetworkView);
+            if( cyNetworkView != null )
+                cyNetworkView.updateView();
+
+
+            CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
+        }
+    }
+
+    private void load()
+    {
+        // Note: In this code, references named network, node, and edge generally refer to the NDEx object model
+        // while references named cyNetwork, cyNode, and cyEdge generally refer to the Cytoscape object model.
+        final Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
+        final NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+
+        boolean largeNetwork = false;
+        //if (entireNetworkRadio.isSelected())
+        {
+            NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+            largeNetwork = networkSummary.getEdgeCount() > 10000;
+        }
+
+        if (largeNetwork)
+        {
+            JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
+            String  msg = "You have chosen to download a network that has more than 10,000 edges.\n";
+            msg += "The download will occur in the background and you can continue working,\n";
+            msg += "but it may take a while to appear in Cytoscape. Also, no layout will be\n";
+            msg += "applied. Would you like to proceed?";
+            String dialogTitle = "Proceed?";
+            int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION);
+            if (choice == JOptionPane.NO_OPTION)
+                return;
+        }
+        final boolean finalLargeNetwork = largeNetwork;
+
+        final Component me = this;
+        final boolean isLargeNetwork = largeNetwork;
+        SwingWorker worker = new SwingWorker<Integer, Integer>()
+        {
+
+            @Override
+            protected Integer doInBackground() throws Exception
+            {
+//                if (selectedSubnetworkRadio.isSelected())
+//                {
+//                    // We already have the selected subnetwork
+//                    String queryString = queryComboBox.getSelectedItem().toString();
+//                    int depth = 1; // TODO: need to add control for depth
+//                    int edgeLimit = 1500; // TODO: need to add control for edge limit?
+//                    CXSimplePathQuery query = new CXSimplePathQuery();
+//                    query.setSearchDepth(depth);
+//                    query.setSearchString(queryString);
+//                    query.setEdgeLimit(edgeLimit);
+//
+//                    Set<String> aspects = new TreeSet<>();
+//                    aspects.add(NodesElement.ASPECT_NAME);
+//                    aspects.add(EdgesElement.ASPECT_NAME);
+//                    aspects.add(NetworkAttributesElement.ASPECT_NAME);
+//                    aspects.add(NodeAttributesElement.ASPECT_NAME);
+//                    aspects.add(EdgeAttributesElement.ASPECT_NAME);
+//
+//                    query.setAspects(aspects);
+//                    NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+//                    UUID id = networkSummary.getExternalId();
+//                    try
+//                    {
+//                        ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
+//                        InputStream cxStream = mal.getNeighborhoodAsCXStream(id.toString(), query);
+//                        createCyNetworkFromCX(cxStream, provenance, networkSummary, true, finalLargeNetwork);
+//                    }
+//                    catch (IOException ex)
+//                    {
+//                        JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
+//                        return -1;
+//                    }
+//
+//                } else if (entireNetworkRadio.isSelected())
+                {
+                    // For entire network, we will query again, hence will check credential
+                    boolean success = selectedServer.check(mal);
+                    if (success)
+                    {
+                        //The network to copy from.
+                        NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+                        UUID id = networkSummary.getExternalId();
+                        try
+                        {
+                            ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
+                            InputStream cxStream = mal.getNetworkAsCXStream(id.toString());
+                            createCyNetworkFromCX(cxStream, provenance, networkSummary, false, finalLargeNetwork);
+                        }
+                        catch (IOException ex)
+                        {
+                            JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
+                            return -1;
+                        }
+                    } else
+                    {
+                        JOptionPane.showMessageDialog(me, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                return 1;
+            }
+
+        };
+        worker.execute();
+//        findNetworksDialog.setFocusOnDone();
+//        this.setVisible(false);
     }
 
     /**
@@ -162,7 +388,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         resultsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(resultsTable);
 
-        selectNetwork.setText("Select Network");
+        selectNetwork.setText("Load Network");
         selectNetwork.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -189,7 +415,14 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             }
         });
 
-        administeredByMe.setText("Administered By Me");
+        administeredByMe.setText("My Networks");
+        administeredByMe.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                administeredByMeActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Results");
 
@@ -225,8 +458,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(administeredByMe)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(hiddenLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addComponent(hiddenLabel)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(search))
                     .addGroup(layout.createSequentialGroup()
@@ -292,33 +524,32 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         }
         NetworkSummary ns = displayedNetworkSummaries.get(selectedIndex);
         NetworkManager.INSTANCE.setSelectedNetworkSummary(ns);
+
+        load();
         
-        org.cytoscape.ndex.internal.gui.ImportNetworksDialog dialog = new org.cytoscape.ndex.internal.gui.ImportNetworksDialog(this,true);
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
+//        org.cytoscape.ndex.internal.prototype.ImportNetworksDialog dialog = new org.cytoscape.ndex.internal.prototype.ImportNetworksDialog(this,true);
+//        dialog.setLocationRelativeTo(this);
+//        dialog.setVisible(true);
     }//GEN-LAST:event_selectNetworkActionPerformed
 
-    private void searchActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_searchActionPerformed
-    {//GEN-HEADEREND:event_searchActionPerformed
+    private void search()
+    {
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
-        
-        String me = null;
+
+        Permissions permissions = null;
         if( administeredByMe.isSelected() )
-            me = selectedServer.getUsername();
+            permissions = Permissions.READ;
         
         String searchText = searchField.getText();
         if( searchText.isEmpty() )
-            searchText = "*";
+            searchText = "";
         
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         if( selectedServer.check(mal) )
         {
             try
             {
-                Permissions permissions = Permissions.READ;
-                if( me != null )
-                    permissions = Permissions.ADMIN;
-                networkSummaries = mal.findNetworks(searchText, true, me, permissions, false, 0, 10000);
+                networkSummaries = mal.findNetworks(searchText, true, null, permissions, false, 0, 10000);
             }
             catch (IOException ex)
             {         
@@ -333,8 +564,19 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
             this.setVisible(false);
         }
+    }
+    
+    private void searchActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_searchActionPerformed
+    {//GEN-HEADEREND:event_searchActionPerformed
+        search();
         
-    }//GEN-LAST:event_searchActionPerformed
+    }
+//GEN-LAST:event_searchActionPerformed
+
+    private void administeredByMeActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_administeredByMeActionPerformed
+    {//GEN-HEADEREND:event_administeredByMeActionPerformed
+        search();
+    }//GEN-LAST:event_administeredByMeActionPerformed
 
     private List<NetworkSummary> displayedNetworkSummaries = new ArrayList<>();
     private void showSearchResults()
