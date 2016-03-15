@@ -41,6 +41,7 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.ndexbio.model.exceptions.NdexException;
+import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.ProvenanceEvent;
 import org.ndexbio.model.object.network.NetworkSummary;
@@ -49,7 +50,7 @@ import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.util.UUID;
+import java.util.*;
 
 import org.ndexbio.model.object.ProvenanceEntity;
 
@@ -95,7 +96,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
         CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
         CyRow r = rootNetwork.getRow(rootNetwork);
-        String modificationTime = r.get("NDEX:modificationTime", String.class);
+        String modificationTime = r.get("ndex:modificationTime", String.class);
         return !modificationTime.equals(ns.getModificationTime().toString());
     }
 
@@ -106,10 +107,13 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     private NetworkSummary updateIsPossibleHelper()
     {
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
+        String sourceFormat = cyNetwork.getRow(cyNetwork).get("ndex:sourceFormat", String.class);
+        if( sourceFormat != null && !sourceFormat.trim().equals("Unknown") && !sourceFormat.trim().equals("XGMML") )
+            return null;
         CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
         CyRow r = rootNetwork.getRow(rootNetwork);
-        String modificationTime = r.get("NDEX:modificationTime", String.class);
-        String networkId = r.get("NDEX:uuid", String.class);
+        String modificationTime = r.get("ndex:modificationTime", String.class);
+        String networkId = r.get("ndex:uuid", String.class);
         if( modificationTime == null || networkId == null )
             return null;
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
@@ -157,8 +161,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
         CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
         CyRow r = rootNetwork.getRow(rootNetwork);
-        String modificationTime = r.get("NDEX:modificationTime", String.class);
-        String networkId = r.get("NDEX:uuid", String.class);
+        String modificationTime = r.get("ndex:modificationTime", String.class);
+        String networkId = r.get("ndex:uuid", String.class);
         if( modificationTime == null || networkId == null )
             return;
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
@@ -172,7 +176,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         {
             return;
         }
-        r.set("NDEX:modificationTime", ns.getModificationTime().toString());
+        r.set("ndex:modificationTime", ns.getModificationTime().toString());
     }
 
 
@@ -379,9 +383,19 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 
         CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
 
+        CyTable networkTable = cyNetwork.getDefaultNetworkTable();
+        String sourceFormat = null;
+        if (networkTable.getColumn("ndex:sourceFormat") != null)
+        {
+            sourceFormat = cyNetwork.getRow(cyNetwork).get("ndex:sourceFormat", String.class);
+            networkTable.deleteColumn("ndex:sourceFormat");
+        }
+
+
         String collectionName = rootNetwork.getRow(rootNetwork).get(CyNetwork.NAME, String.class);
         String uploadName = nameField.getText().trim();
         String networkName = cyNetwork.getRow(cyNetwork).get(CyNetwork.NAME, String.class);
+
 
         rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, uploadName);
         //If network is selected
@@ -403,7 +417,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 
             if( updateCheckbox.isSelected() )
             {
-                String networkId = rootNetwork.getRow(rootNetwork).get("NDEX:uuid", String.class);
+                String networkId = rootNetwork.getRow(rootNetwork).get("ndex:uuid", String.class);
                 if (networkId == null)
                 {
                     JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
@@ -506,6 +520,11 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             }
             rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, collectionName );
             cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, networkName);
+            if( sourceFormat != null )
+            {
+                networkTable.createColumn("ndex:sourceFormat", String.class, false);
+                cyNetwork.getRow(cyNetwork).set("ndex:sourceFormat", sourceFormat);
+            }
             CyObjectManager.INSTANCE.getApplicationFrame().revalidate();
         }
 
@@ -520,7 +539,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         final String networkId = networkUUID.toString();
 
         //Provenance
-        String provenanceString = rootNetwork.getRow(rootNetwork).get("NDEX:provenance", String.class);
+        String provenanceString = rootNetwork.getRow(rootNetwork).get("ndex:provenance", String.class);
         ObjectMapper objectMapper = new ObjectMapper();
 
         ProvenanceEntity oldProvenance = null;
@@ -532,7 +551,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         catch (IOException ex)
         {
             JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-            String msg  = "There is something wrong with the NDEX:provenance property.\n";
+            String msg  = "There is something wrong with the ndex:provenance property.\n";
                    msg += "If you proceed, all previous provenance will be discarded.\n";
                    msg += "Would you like to proceed?";
             String dialogTitle = "Proceed?";

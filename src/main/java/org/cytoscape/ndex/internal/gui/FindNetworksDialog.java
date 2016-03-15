@@ -175,26 +175,26 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 
         //last ndex property is ndex:provenance
         CyTable networkTable = rootNetwork.getDefaultNetworkTable();
-        if (networkTable.getColumn("NDEX:provenance") == null)
+        if (networkTable.getColumn("ndex:provenance") == null)
         {
-            networkTable.createColumn("NDEX:provenance", String.class, false);
+            networkTable.createColumn("ndex:provenance", String.class, false);
         }
         CyRow cyRow = rootNetwork.getRow(rootNetwork);
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode provenanceJson = objectMapper.valueToTree(provenance);
-        cyRow.set("NDEX:provenance", provenanceJson.toString());
+        cyRow.set("ndex:provenance", provenanceJson.toString());
 
-        if (networkTable.getColumn("NDEX:uuid") == null)
+        if (networkTable.getColumn("ndex:uuid") == null)
         {
-            networkTable.createColumn("NDEX:uuid", String.class, false);
+            networkTable.createColumn("ndex:uuid", String.class, false);
         }
-        cyRow.set("NDEX:uuid", networkSummary.getExternalId().toString());
+        cyRow.set("ndex:uuid", networkSummary.getExternalId().toString());
 
-        if (networkTable.getColumn("NDEX:modificationTime") == null)
+        if (networkTable.getColumn("ndex:modificationTime") == null)
         {
-            networkTable.createColumn("NDEX:modificationTime", String.class, false);
+            networkTable.createColumn("ndex:modificationTime", String.class, false);
         }
-        cyRow.set("NDEX:modificationTime", networkSummary.getModificationTime().toString());
+        cyRow.set("ndex:modificationTime", networkSummary.getModificationTime().toString());
 
         if( networks.size() == 1 )
         {
@@ -360,6 +360,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         jLabel3 = new javax.swing.JLabel();
         username = new javax.swing.JLabel();
         hiddenLabel = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Find Networks");
@@ -438,6 +439,8 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 
         hiddenLabel.setText(" ");
 
+        jLabel4.setText("WARNING: In some cases, not all network information stored in NDEx will be available within Cytoscape after loading.");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -449,9 +452,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                     .addComponent(jSeparator1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(done, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(selectNetwork, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(done, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(searchField, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -472,7 +473,11 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(username)))
-                        .addGap(0, 821, Short.MAX_VALUE)))
+                        .addGap(0, 821, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(selectNetwork, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -501,7 +506,9 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(selectNetwork)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(selectNetwork)
+                    .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(done)
                 .addContainerGap())
@@ -670,6 +677,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTable resultsTable;
