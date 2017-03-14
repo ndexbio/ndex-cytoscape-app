@@ -31,22 +31,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cxio.aspects.datamodels.*;
 import org.cxio.core.CxReader;
 import org.cxio.core.interfaces.AspectElement;
-import org.cytoscape.io.internal.cx_reader.CxToCy;
-import org.cytoscape.io.internal.cx_reader.ViewMaker;
-import org.cytoscape.io.internal.cxio.Aspect;
-import org.cytoscape.io.internal.cxio.AspectSet;
-import org.cytoscape.io.internal.cxio.CxImporter;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.ndex.internal.cx_reader.CxToCy;
+import org.cytoscape.ndex.internal.cx_reader.ViewMaker;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.cytoscape.ndex.io.cxio.Aspect;
+import org.cytoscape.ndex.io.cxio.AspectSet;
+import org.cytoscape.ndex.io.cxio.CxImporter;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
@@ -62,7 +62,6 @@ import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.network.NetworkSummary;
-import org.ndexbio.model.object.network.PropertyGraphNetwork;
 import org.ndexbio.model.object.network.VisibilityType;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
@@ -80,7 +79,11 @@ import java.util.List;
  */
 public class FindNetworksDialog extends javax.swing.JDialog {
 
-    private List<NetworkSummary> networkSummaries;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private List<NetworkSummary> networkSummaries;
     
     /**
      * Creates new form SimpleSearch
@@ -142,6 +145,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 
     private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, NetworkSummary networkSummary, boolean doLayout, boolean stopLayout) throws IOException
     {
+    	
         AspectSet aspects = new AspectSet();
         aspects.addAspect(Aspect.NODES);
         aspects.addAspect(Aspect.EDGES);
@@ -214,7 +218,12 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             VisualMappingFunctionFactory vmffd = CyObjectManager.INSTANCE.getVisualMappingFunctionDiscreteFactory();
             VisualMappingFunctionFactory vmffp = CyObjectManager.INSTANCE.getVisualMappingFunctionPassthroughFactory();
 
-            CyNetworkView cyNetworkView = ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp);
+            Map<CyNetworkView, Boolean> cyNetworkViewMap = ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp);
+            CyNetworkView cyNetworkView = null;
+            for ( CyNetworkView v : cyNetworkViewMap.keySet()) {
+            	cyNetworkView = v;
+            	break;
+            }
             if( doLayout && !stopLayout)
             {
                 CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();

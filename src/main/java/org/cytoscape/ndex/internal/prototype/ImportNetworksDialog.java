@@ -30,23 +30,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cxio.aspects.datamodels.*;
 import org.cxio.core.CxReader;
 import org.cxio.core.interfaces.AspectElement;
-import org.cytoscape.io.internal.cx_reader.CxToCy;
-import org.cytoscape.io.internal.cx_reader.ViewMaker;
-import org.cytoscape.io.internal.cxio.Aspect;
-import org.cytoscape.io.internal.cxio.AspectSet;
-import org.cytoscape.io.internal.cxio.CxImporter;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.ndex.internal.cx_reader.CxToCy;
+import org.cytoscape.ndex.internal.cx_reader.ViewMaker;
 import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.cytoscape.ndex.io.cxio.Aspect;
+import org.cytoscape.ndex.io.cxio.AspectSet;
+import org.cytoscape.ndex.io.cxio.CxImporter;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
@@ -61,9 +61,6 @@ import org.ndexbio.model.object.CXSimplePathQuery;
 import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.network.NetworkSummary;
-import org.ndexbio.model.object.network.PropertyGraphEdge;
-import org.ndexbio.model.object.network.PropertyGraphNetwork;
-import org.ndexbio.model.object.network.PropertyGraphNode;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
 import javax.swing.*;
@@ -107,7 +104,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         this.findNetworksDialog = parent;
     }
 
-    private String getName(PropertyGraphNode node)
+   /* private String getName(PropertyGraphNode node)
     {
         for (NdexPropertyValuePair p : node.getProperties())
         {
@@ -124,7 +121,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             }
         }
         return "NONE";
-    }
+    }*/
 
     private void prepComponents()
     {
@@ -144,7 +141,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         if (success)
         {
             UUID id = networkSummary.getExternalId();
-            PropertyGraphNetwork network = null;
+      /*      PropertyGraphNetwork network = null;
             try
             {
                 network = mal.getPropertyGraphNetwork(id.toString(), 0, 25);
@@ -159,7 +156,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
                 JOptionPane.showMessageDialog(this, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
                 this.setVisible(false);
                 return;
-            }
+            }*/
 
         } else
         {
@@ -168,7 +165,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         }
     }
 
-    private void updateEdgeTable(PropertyGraphNetwork network)
+ /*   private void updateEdgeTable(PropertyGraphNetwork network)
     {
         DefaultTableModel model = new DefaultTableModel();
         model.setColumnIdentifiers(new String[]{
@@ -192,7 +189,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             model.addRow(row);
         }
         edgeJTable.setModel(model);
-    }
+    } */
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -495,7 +492,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 
     private void query()
     {
-        PropertyGraphNetwork network = null;
+ //       PropertyGraphNetwork network = null;
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         // First re-check credentials
@@ -509,7 +506,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
             UUID id = networkSummary.getExternalId();
 
-            try
+       /*     try
             {
 
 
@@ -531,7 +528,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             {
                 JOptionPane.showMessageDialog(this, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
                 return;
-            }
+            } */
         } else
         {
             JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
@@ -562,8 +559,8 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             largeNetwork = networkSummary.getEdgeCount() > 10000;
         } else
         {
-            PropertyGraphNetwork network = NetworkManager.INSTANCE.getSelectedNetwork();
-            largeNetwork = network.getEdges().size() > 10000;
+      //      PropertyGraphNetwork network = NetworkManager.INSTANCE.getSelectedNetwork();
+      //      largeNetwork = network.getEdges().size() > 10000;
         }
 
         if (largeNetwork)
@@ -770,7 +767,12 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             VisualMappingFunctionFactory vmffd = CyObjectManager.INSTANCE.getVisualMappingFunctionDiscreteFactory();
             VisualMappingFunctionFactory vmffp = CyObjectManager.INSTANCE.getVisualMappingFunctionPassthroughFactory();
 
-            CyNetworkView cyNetworkView = ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp);
+            Map<CyNetworkView,Boolean> cyNetworkViewMap = ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp);
+            CyNetworkView cyNetworkView = null;
+            for ( CyNetworkView v : cyNetworkViewMap.keySet()) {
+            	cyNetworkView = v;
+            	break;
+            }
             if( doLayout && !stopLayout)
             {
                 CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();

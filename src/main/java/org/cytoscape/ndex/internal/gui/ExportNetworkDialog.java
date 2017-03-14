@@ -28,13 +28,13 @@ package org.cytoscape.ndex.internal.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cytoscape.group.CyGroupManager;
-import org.cytoscape.io.internal.cx_writer.CxNetworkWriter;
 import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
+import org.cytoscape.ndex.io.cx_writer.CxNetworkWriter;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingManager;
@@ -142,8 +142,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         try
         {
             ns = mal.getNetworkSummaryById(networkId);
-            if( ns.getReadOnlyCacheId() != -1L || ns.getReadOnlyCommitId() != -1L )
-                return null;
+         //   if( ns.getReadOnlyCacheId() != -1L || ns.getReadOnlyCommitId() != -1L )
+         //       return null;
         }
         catch (IOException e)
         {
