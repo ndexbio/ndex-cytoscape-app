@@ -9,11 +9,11 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.ndex</groupId>
-    <artifactId>CyNDEx</artifactId>
-    <version>2.0.0</version>
+    <artifactId>CyNDEx2</artifactId>
+    <version>1.0.0</version>
     <!--<version>1.0.0-dev</version>-->
 
-    <name>cyNDEx</name>
+    <name>cyNDEx2</name>
 	
     <packaging>bundle</packaging>
 

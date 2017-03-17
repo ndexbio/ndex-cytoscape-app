@@ -57,7 +57,7 @@ public final class ViewMaker {
         final long t0 = System.currentTimeMillis();
         final VisualElementCollectionMap collection = cx_to_cy.getVisualElementCollectionMap();
         final CyNetworkView view = networkview_factory.createNetworkView(network);
-        hasLayoutMap.put(view, false);
+        hasLayoutMap.put(view, Boolean.FALSE);
         
         if ((collection == null) || collection.isEmpty()) {
             return hasLayoutMap;
@@ -162,7 +162,7 @@ public final class ViewMaker {
                     }
                 }
             }
-            hasLayoutMap.put(view, true);
+            hasLayoutMap.put(view, Boolean.TRUE);
         }
 
         if (have_default_visual_properties) {
@@ -566,10 +566,10 @@ public final class ViewMaker {
             return s;
         }
         else if (type.equals("integer")) {
-            return Double.valueOf(s).intValue();
+            return Double.valueOf(s);
         }
         else if (type.equals("long")) {
-            return Double.valueOf(s).longValue();
+            return Double.valueOf(s);
         }
         else if (type.equals("double") || type.equals("float")) {
             return Double.valueOf(s);

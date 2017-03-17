@@ -168,7 +168,7 @@ public class CytoscapeCxNetworkReader extends AbstractCyNetworkReader {
 
         final CxImporter cx_importer = CxImporter.createInstance();
 
-        SortedMap<String, List<AspectElement>> res = null;
+        Map<String, List<AspectElement>> res = null;
 
         final CxReader cxr = cx_importer.obtainCxReader(aspects, _in);
         final long t0 = System.currentTimeMillis();

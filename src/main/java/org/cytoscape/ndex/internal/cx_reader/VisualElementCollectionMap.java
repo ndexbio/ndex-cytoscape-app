@@ -14,7 +14,7 @@ final public class VisualElementCollectionMap {
     private final Map<Long, VisualElementCollection> _data;
 
     public VisualElementCollectionMap() {
-        _data = new HashMap<Long, VisualElementCollection>();
+        _data = new HashMap<>();
     }
 
     public final void addCartesianLayoutElement(final Long subnet,

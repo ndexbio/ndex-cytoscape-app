@@ -4,7 +4,7 @@ public final class Settings {
 
     public final static Settings INSTANCE                                                              = new Settings();
 
-    private static final boolean IGNORE_SELECTED_COLUMN_DEFAULT                                        = false;
+    private static final boolean IGNORE_SELECTED_COLUMN_DEFAULT                                        = true;
     private static final boolean IGNORE_SUID_COLUMN_DEFAULT                                            = true;
     private static final boolean WRITE_SELECTED_ONLY_IF_TRUE_DEFAULT                                   = false;
     private static final boolean DEBUG_DEFAULT                                                         = false;

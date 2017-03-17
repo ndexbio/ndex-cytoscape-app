@@ -26,9 +26,23 @@
 
 package org.cytoscape.ndex.internal.gui;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cxio.aspects.datamodels.*;
+import java.awt.Component;
+import java.awt.Frame;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.UUID;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
+import javax.swing.table.DefaultTableModel;
+
+import org.cxio.aspects.datamodels.CartesianLayoutElement;
 import org.cxio.core.CxReader;
 import org.cxio.core.interfaces.AspectElement;
 import org.cytoscape.model.CyNetwork;
@@ -57,21 +71,14 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
-import org.ndexbio.model.object.CXSimplePathQuery;
 import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.network.NetworkSummary;
-import org.ndexbio.model.object.network.VisibilityType;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -271,8 +278,8 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         final boolean finalLargeNetwork = largeNetwork;
 
         final Component me = this;
-        final boolean isLargeNetwork = largeNetwork;
-        SwingWorker worker = new SwingWorker<Integer, Integer>()
+       // final boolean isLargeNetwork = largeNetwork;
+        SwingWorker<Integer,Integer> worker = new SwingWorker<Integer, Integer>()
         {
 
             @Override

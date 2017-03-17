@@ -58,33 +58,33 @@ public final class VisualPropertiesGatherer {
      * @return a List of AspectElement
      */
     public static final List<AspectElement> gatherVisualPropertiesAsAspectElements(final CyNetworkView view,
-                                                                                   final CyNetwork network,
                                                                                    final VisualMappingManager visual_mapping_manager,
                                                                                    final VisualLexicon lexicon,
-                                                                                   final Set<VisualPropertyType> types) {
+                                                                                   final Set<VisualPropertyType> types,
+                                                                                   boolean writeSiblings) {
 
-        final List<AspectElement> elements = new ArrayList<AspectElement>();
+        final List<AspectElement> elements = new ArrayList<>();
         final VisualStyle current_visual_style = visual_mapping_manager.getVisualStyle(view);
         final Set<VisualProperty<?>> all_visual_properties = lexicon.getAllVisualProperties();
 
         if (types.contains(VisualPropertyType.NETWORK)) {
-            gatherNetworkVisualProperties(view, network, elements, current_visual_style, all_visual_properties);
+            gatherNetworkVisualProperties(view, elements, current_visual_style, all_visual_properties, writeSiblings);
         }
 
         if (types.contains(VisualPropertyType.NODES_DEFAULT)) {
-            gatherNodesDefaultVisualProperties(view, network, elements, current_visual_style, all_visual_properties);
+            gatherNodesDefaultVisualProperties(view, elements, current_visual_style, all_visual_properties, writeSiblings);
         }
 
         if (types.contains(VisualPropertyType.EDGES_DEFAULT)) {
-            gatherEdgesDefaultVisualProperties(view, network, elements, current_visual_style, all_visual_properties);
+            gatherEdgesDefaultVisualProperties(view, elements, current_visual_style, all_visual_properties, writeSiblings);
         }
 
         if (types.contains(VisualPropertyType.NODES)) {
-            gatherNodeVisualProperties(view, network, elements, all_visual_properties);
+            gatherNodeVisualProperties(view, elements, all_visual_properties, writeSiblings);
         }
 
         if (types.contains(VisualPropertyType.EDGES)) {
-            gatherEdgeVisualProperties(view, network, elements, all_visual_properties);
+            gatherEdgeVisualProperties(view, elements, all_visual_properties, writeSiblings);
         }
 
         return elements;
@@ -302,18 +302,18 @@ public final class VisualPropertiesGatherer {
 
     @SuppressWarnings("rawtypes")
     private static void gatherEdgesDefaultVisualProperties(final CyNetworkView view,
-                                                           final CyNetwork network,
                                                            final List<AspectElement> visual_properties,
                                                            final VisualStyle current_visual_style,
-                                                           final Set<VisualProperty<?>> all_visual_properties) {
+                                                           final Set<VisualProperty<?>> all_visual_properties,
+                                                           boolean writeSiblings) {
 
         final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.EDGES_DEFAULT.asString(),
-                                                                          view.getSUID());
+                                                                          writeSiblings? view.getSUID(): null);
         e.setApplies_to(view.getSUID());
         for (final VisualProperty visual_property : all_visual_properties) {
             if (visual_property.getTargetDataType() == CyEdge.class) {
                 addDefaultProperties(current_visual_style, visual_property, e);
-                final CyTable table = network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
+                final CyTable table = view.getModel().getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
                 addMappings(current_visual_style, visual_property, e, table);
             }
         }
@@ -323,13 +323,13 @@ public final class VisualPropertiesGatherer {
 
     @SuppressWarnings("rawtypes")
     private static void gatherEdgeVisualProperties(final CyNetworkView view,
-                                                   final CyNetwork network,
                                                    final List<AspectElement> visual_properties,
-                                                   final Set<VisualProperty<?>> all_visual_properties) {
-        for (final CyEdge edge : network.getEdgeList()) {
+                                                   final Set<VisualProperty<?>> all_visual_properties,
+                                                   boolean writeSiblings) {
+        for (final CyEdge edge : view.getModel().getEdgeList()) {
             final View<CyEdge> edge_view = view.getEdgeView(edge);
             final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.EDGES.asString(),
-                                                                              view.getSUID());
+                                                                             writeSiblings ? view.getSUID() : null);
             e.setApplies_to(edge.getSUID());
             for (final VisualProperty visual_property : all_visual_properties) {
                 if (visual_property.getTargetDataType() == CyEdge.class) {
@@ -345,12 +345,12 @@ public final class VisualPropertiesGatherer {
 
     @SuppressWarnings("rawtypes")
     private static void gatherNetworkVisualProperties(final CyNetworkView view,
-                                                      final CyNetwork network,
                                                       final List<AspectElement> visual_properties,
                                                       final VisualStyle current_visual_style,
-                                                      final Set<VisualProperty<?>> all_visual_properties) {
+                                                      final Set<VisualProperty<?>> all_visual_properties,
+                                                      boolean writeSiblings) {
         final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.NETWORK.asString(),
-                                                                          view.getSUID());
+                                                                         writeSiblings? view.getSUID() : null);
         e.setApplies_to(view.getSUID());
         for (final VisualProperty visual_property : all_visual_properties) {
             if (visual_property.getTargetDataType() == CyNetwork.class) {
@@ -362,17 +362,17 @@ public final class VisualPropertiesGatherer {
 
     @SuppressWarnings("rawtypes")
     private static void gatherNodesDefaultVisualProperties(final CyNetworkView view,
-                                                           final CyNetwork network,
                                                            final List<AspectElement> visual_properties,
                                                            final VisualStyle current_visual_style,
-                                                           final Set<VisualProperty<?>> all_visual_properties) {
+                                                           final Set<VisualProperty<?>> all_visual_properties,
+                                                           boolean writeSiblings) {
         final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.NODES_DEFAULT.asString(),
-                                                                          view.getSUID());
+                                                                          writeSiblings? view.getSUID(): null);
         e.setApplies_to(view.getSUID());
         for (final VisualProperty visual_property : all_visual_properties) {
             if (visual_property.getTargetDataType() == CyNode.class) {
                 addDefaultProperties(current_visual_style, visual_property, e);
-                final CyTable table = network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
+                final CyTable table = view.getModel().getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
                 addMappings(current_visual_style, visual_property, e, table);
             }
         }
@@ -394,13 +394,13 @@ public final class VisualPropertiesGatherer {
 
     @SuppressWarnings("rawtypes")
     private static void gatherNodeVisualProperties(final CyNetworkView view,
-                                                   final CyNetwork network,
                                                    final List<AspectElement> visual_properties,
-                                                   final Set<VisualProperty<?>> all_visual_properties) {
-        for (final CyNode cy_node : network.getNodeList()) {
+                                                   final Set<VisualProperty<?>> all_visual_properties,
+                                                   boolean writeSiblings) {
+        for (final CyNode cy_node : view.getModel().getNodeList()) {
             final View<CyNode> node_view = view.getNodeView(cy_node);
             final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.NODES.asString(),
-                                                                              view.getSUID());
+                                                                             writeSiblings? view.getSUID() : null);
             e.setApplies_to(cy_node.getSUID());
             for (final VisualProperty visual_property : all_visual_properties) {
                 if (visual_property.getTargetDataType() == CyNode.class) {

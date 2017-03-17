@@ -45,6 +45,8 @@ import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkTableManager;
+import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
+import org.cytoscape.model.events.NetworkAddedListener;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.ndex.internal.cx_reader.CytoscapeCxFileFilter;
 import org.cytoscape.ndex.internal.cx_reader.CytoscapeCxNetworkReaderFactory;
@@ -204,7 +206,8 @@ public class CyActivator extends AbstractCyActivator
         reader_factory_properties.put(ID, "cytoscapeCxNetworkReaderFactory");
         registerService(bc, cx_reader_factory, InputStreamTaskFactory.class, reader_factory_properties);
 
-        
+        //
+        registerService(bc,new NdexNetworkAboutToBeDestroyedListener(), NetworkAboutToBeDestroyedListener.class, new Properties());
         
     }
 

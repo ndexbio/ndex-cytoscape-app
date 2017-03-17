@@ -9,6 +9,7 @@ public final class CxUtil {
     public final static String SHARED_NAME_COL                = "shared name";
     public final static String NAME_COL                       = "name";
     public final static String SHARED_INTERACTION             = "shared interaction";
+    public final static String INTERACTION             		  = "interaction";
     public final static String CONTINUOUS_MAPPING             = "CONTINUOUS_MAPPING_";
     public final static String DISCRETE_MAPPING               = "DISCRETE_MAPPING_";
     public final static String PASSTHROUGH_MAPPING            = "PASSTHROUGH_MAPPING_";

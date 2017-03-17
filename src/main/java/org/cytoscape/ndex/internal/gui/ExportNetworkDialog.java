@@ -61,6 +61,10 @@ import org.ndexbio.model.object.ProvenanceEntity;
 public class ExportNetworkDialog extends javax.swing.JDialog {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * Creates new form UploadNetwork
      */
     public ExportNetworkDialog(Frame parent)
@@ -367,7 +371,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 
     private void uploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadActionPerformed
         
-        CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
+        CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();  // get the current subNetwork
 
         if( cyNetwork.getEdgeCount() > 10000 )
         {
@@ -563,7 +567,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         final ProvenanceEntity finalOldProvenance = oldProvenance;
 
         final boolean finalNetworkUpdated = networkUpdated;
-        SwingWorker worker = new SwingWorker<Void,Void>()
+        SwingWorker<Void, Void> worker = new SwingWorker<Void,Void>()
         {
 
             @Override
@@ -618,6 +622,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     private void updateCheckboxActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_updateCheckboxActionPerformed
     {//GEN-HEADEREND:event_updateCheckboxActionPerformed
         // TODO add your handling code here:
+    	System.out.println("update checked.");
     }//GEN-LAST:event_updateCheckboxActionPerformed
 
     /**
