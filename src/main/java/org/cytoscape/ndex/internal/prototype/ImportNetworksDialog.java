@@ -79,7 +79,11 @@ import java.util.List;
 public class ImportNetworksDialog extends javax.swing.JDialog
 {
 
-    FindNetworksDialog findNetworksDialog;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	FindNetworksDialog findNetworksDialog;
 
     /**
      * Creates new form QueryNetwork
@@ -695,7 +699,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 
     private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, NetworkSummary networkSummary, boolean doLayout, boolean stopLayout) throws IOException
     {
-        AspectSet aspects = new AspectSet();
+   /*     AspectSet aspects = new AspectSet();
         aspects.addAspect(Aspect.NODES);
         aspects.addAspect(Aspect.EDGES);
         aspects.addAspect(Aspect.NETWORK_ATTRIBUTES);
@@ -705,19 +709,18 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         aspects.addAspect(Aspect.CARTESIAN_LAYOUT);
         aspects.addAspect(Aspect.NETWORK_RELATIONS);
         aspects.addAspect(Aspect.SUBNETWORKS);
-        aspects.addAspect(Aspect.GROUPS);
+        aspects.addAspect(Aspect.GROUPS); */
 
         //Create the CyNetwork to copy to.
-        CyNetworkFactory networkFactory = CyObjectManager.INSTANCE.getNetworkFactory();
+    /*    CyNetworkFactory networkFactory = CyObjectManager.INSTANCE.getNetworkFactory();
         CxToCy cxToCy = new CxToCy();
-        CxImporter cxImporter = CxImporter.createInstance();
+        CxImporter cxImporter = new CxImporter();
         //CxReader cxr = cxImporter.obtainCxReader()
 //        writeStreamToFile(cxStream, "/Users/dwelker/Work/scratch/queryFoo1.cx");
 //        boolean exitNow = true;
 //        if( exitNow )
 //            return;
-        CxReader cxr = cxImporter.obtainCxReader(aspects, cxStream);
-        SortedMap<String, List<AspectElement>> aspectMap = CxReader.parseAsMap(cxr);
+        NiceCXNetwork niceCX = cxImporter.getCXNetworkFromStream(aspects, in)
         if( !aspectMap.containsKey(CartesianLayoutElement.ASPECT_NAME) )
             doLayout = true;
         List<CyNetwork> networks = cxToCy.createNetwork(aspectMap, null, networkFactory, null, true);
@@ -788,7 +791,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 
 
             CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
-        }
+        }*/
     }
 
     private void selectedSubnetworkRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectedSubnetworkRadioActionPerformed

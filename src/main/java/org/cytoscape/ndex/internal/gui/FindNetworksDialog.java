@@ -71,6 +71,7 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
+import org.ndexbio.model.cx.NiceCXNetwork;
 import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.ProvenanceEntity;
@@ -150,10 +151,10 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         }
     }
 
-    private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, NetworkSummary networkSummary, boolean doLayout, boolean stopLayout) throws IOException
+    private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, NetworkSummary networkSummary, boolean stopLayout) throws IOException
     {
     	
-        AspectSet aspects = new AspectSet();
+   /*     AspectSet aspects = new AspectSet();
         aspects.addAspect(Aspect.NODES);
         aspects.addAspect(Aspect.EDGES);
         aspects.addAspect(Aspect.NETWORK_ATTRIBUTES);
@@ -163,22 +164,22 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         aspects.addAspect(Aspect.CARTESIAN_LAYOUT);
         aspects.addAspect(Aspect.NETWORK_RELATIONS);
         aspects.addAspect(Aspect.SUBNETWORKS);
-        aspects.addAspect(Aspect.GROUPS);
+        aspects.addAspect(Aspect.GROUPS);  */
 
         //Create the CyNetwork to copy to.
         CyNetworkFactory networkFactory = CyObjectManager.INSTANCE.getNetworkFactory();
         CxToCy cxToCy = new CxToCy();
-        CxImporter cxImporter = CxImporter.createInstance();
+        CxImporter cxImporter = new CxImporter();
         //CxReader cxr = cxImporter.obtainCxReader()
 //        writeStreamToFile(cxStream, "/Users/dwelker/Work/scratch/queryFoo1.cx");
 //        boolean exitNow = true;
 //        if( exitNow )
 //            return;
-        CxReader cxr = cxImporter.obtainCxReader(aspects, cxStream);
-        SortedMap<String, List<AspectElement>> aspectMap = CxReader.parseAsMap(cxr);
-        if( !aspectMap.containsKey(CartesianLayoutElement.ASPECT_NAME) )
-            doLayout = true;
-        List<CyNetwork> networks = cxToCy.createNetwork(aspectMap, null, networkFactory, null, true);
+        NiceCXNetwork niceCX = cxImporter.getCXNetworkFromStream(cxStream);
+        
+        boolean doLayout = niceCX.getNodeAssociatedAspect(CartesianLayoutElement.ASPECT_NAME) == null;
+           
+        List<CyNetwork> networks = cxToCy.createNetwork(niceCX, null, networkFactory, null, true);
 
         CyRootNetwork rootNetwork = ((CySubNetwork)networks.get(0)).getRootNetwork();
         String collectionName = networkSummary.getName();
@@ -331,7 +332,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                         {
                             ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
                             InputStream cxStream = mal.getNetworkAsCXStream(id.toString());
-                            createCyNetworkFromCX(cxStream, provenance, networkSummary, false, finalLargeNetwork);
+                            createCyNetworkFromCX(cxStream, provenance, networkSummary, finalLargeNetwork);
                         }
                         catch (IOException ex)
                         {

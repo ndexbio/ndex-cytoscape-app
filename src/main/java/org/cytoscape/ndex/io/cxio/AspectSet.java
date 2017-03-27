@@ -3,10 +3,8 @@ package org.cytoscape.ndex.io.cxio;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.cxio.aspects.datamodels.CyTableColumnElement;
 import org.cxio.aspects.readers.CartesianLayoutFragmentReader;
 import org.cxio.aspects.readers.CyGroupsFragmentReader;
 import org.cxio.aspects.readers.CyTableColumnFragmentReader;
@@ -55,7 +53,7 @@ public final class AspectSet {
      *
      */
     public AspectSet() {
-        _aspects = new TreeSet<Aspect>();
+        _aspects = new TreeSet<>();
     }
 
     /**
@@ -65,7 +63,7 @@ public final class AspectSet {
      *            the Aspects to initialize this AspectSet with
      */
     public AspectSet(final Collection<Aspect> aspects) {
-        _aspects = new TreeSet<Aspect>();
+        _aspects = new TreeSet<>();
         _aspects.addAll(aspects);
     }
 
@@ -87,8 +85,8 @@ public final class AspectSet {
         return _aspects.contains(aspect);
     }
 
-    final Set<AspectFragmentWriter> getAspectFragmentWriters() {
-        final Set<AspectFragmentWriter> writers = new HashSet<AspectFragmentWriter>();
+    final Set<AspectFragmentWriter> getCySupportedAspectFragmentWriters() {
+        final Set<AspectFragmentWriter> writers = new HashSet<>();
         if (_aspects.contains(Aspect.CARTESIAN_LAYOUT)) {
             writers.add(CartesianLayoutFragmentWriter.createInstance());
         }
@@ -131,8 +129,8 @@ public final class AspectSet {
         return writers;
     }
 
-    final Set<AspectFragmentReader> getAspectFragmentReaders() {
-        final Set<AspectFragmentReader> readers = new HashSet<AspectFragmentReader>();
+    final Set<AspectFragmentReader> getCySupportedAspectFragmentReaders() {
+        final Set<AspectFragmentReader> readers = new HashSet<>();
         if (_aspects.contains(Aspect.CARTESIAN_LAYOUT)) {
             readers.add(CartesianLayoutFragmentReader.createInstance());
         }

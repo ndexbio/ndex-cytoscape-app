@@ -25,7 +25,7 @@ public final class FilterSet {
      *
      */
     public FilterSet() {
-        _filters = new TreeSet<AspectKeyFilter>();
+        _filters = new TreeSet<>();
     }
 
     /**
@@ -35,7 +35,7 @@ public final class FilterSet {
      *            the AspectKeyFilters to initialize this FilterSet with
      */
     public FilterSet(final Collection<AspectKeyFilter> filters) {
-        _filters = new TreeSet<AspectKeyFilter>();
+        _filters = new TreeSet<>();
         _filters.addAll(filters);
     }
 
@@ -57,7 +57,7 @@ public final class FilterSet {
         if (_filters == null) {
             return null;
         }
-        final SortedMap<String, AspectKeyFilter> filters_map = new TreeMap<String, AspectKeyFilter>();
+        final SortedMap<String, AspectKeyFilter> filters_map = new TreeMap<>();
         for (final AspectKeyFilter filter : _filters) {
             final String aspect = filter.getAspectName();
             if (filters_map.containsKey(aspect)) {

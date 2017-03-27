@@ -8,8 +8,29 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.cxio.aspects.datamodels.CartesianLayoutElement;
+import org.cxio.aspects.datamodels.EdgeAttributesElement;
+import org.cxio.aspects.datamodels.EdgesElement;
+import org.cxio.aspects.datamodels.NetworkAttributesElement;
+import org.cxio.aspects.datamodels.NodeAttributesElement;
+import org.cxio.aspects.datamodels.NodesElement;
+import org.cxio.aspects.datamodels.SubNetworkElement;
+import org.cxio.core.CxElementReader2;
 import org.cxio.core.CxReader;
+import org.cxio.core.interfaces.AspectElement;
 import org.cxio.core.interfaces.AspectFragmentReader;
+import org.cxio.metadata.MetaDataCollection;
+import org.cxio.misc.OpaqueElement;
+import org.ndexbio.model.cx.CitationElement;
+import org.ndexbio.model.cx.EdgeCitationLinksElement;
+import org.ndexbio.model.cx.EdgeSupportLinksElement;
+import org.ndexbio.model.cx.FunctionTermElement;
+import org.ndexbio.model.cx.NdexNetworkStatus;
+import org.ndexbio.model.cx.NiceCXNetwork;
+import org.ndexbio.model.cx.NodeCitationLinksElement;
+import org.ndexbio.model.cx.NodeSupportLinksElement;
+import org.ndexbio.model.cx.Provenance;
+import org.ndexbio.model.cx.SupportElement;
 
 /**
  * This class is for de-serializing CX formatted networks, views, and attribute
@@ -75,10 +96,30 @@ import org.cxio.core.interfaces.AspectFragmentReader;
  */
 public final class CxImporter {
 
-    private final SortedSet<AspectFragmentReader> _additional_readers;
+    private final Set<AspectFragmentReader> all_readers ;
 
-    private CxImporter() {
-        _additional_readers = new TreeSet<AspectFragmentReader>();
+    public CxImporter() {
+        
+        AspectSet aspects = new AspectSet();
+        aspects.addAspect(Aspect.NODES);
+        aspects.addAspect(Aspect.EDGES);
+        aspects.addAspect(Aspect.NETWORK_ATTRIBUTES);
+        aspects.addAspect(Aspect.NODE_ATTRIBUTES);
+        aspects.addAspect(Aspect.EDGE_ATTRIBUTES);
+        aspects.addAspect(Aspect.VISUAL_PROPERTIES);
+        aspects.addAspect(Aspect.CARTESIAN_LAYOUT);
+        aspects.addAspect(Aspect.NETWORK_RELATIONS);
+        aspects.addAspect(Aspect.SUBNETWORKS);
+        aspects.addAspect(Aspect.GROUPS);
+        aspects.addAspect(Aspect.HIDDEN_ATTRIBUTES);
+        aspects.addAspect(Aspect.TABLE_COLUMN_LABELS);
+        aspects.addAspect(Aspect.VIEWS);
+        
+        all_readers = new HashSet<>();
+        for (final AspectFragmentReader reader : aspects.getCySupportedAspectFragmentReaders()) {
+            all_readers.add(reader);
+        }
+        
     }
 
     /**
@@ -86,9 +127,9 @@ public final class CxImporter {
      *
      * @return a new CxImporter
      */
-    public final static CxImporter createInstance() {
+/*    public final static CxImporter createInstance() {
         return new CxImporter();
-    }
+    } */
 
     /**
      * To use custom readers for other aspects than the standard nodes, edges,
@@ -98,9 +139,9 @@ public final class CxImporter {
      * @param additional_readers
      *            a collection of additional custom readers to add
      */
-    public final void addAdditionalReaders(final Collection<AspectFragmentReader> additional_readers) {
+ /*   public final void addAdditionalReaders(final Collection<AspectFragmentReader> additional_readers) {
         _additional_readers.addAll(additional_readers);
-    }
+    } */
 
     /**
      * To use a custom reader for another aspect than the standard nodes, edges,
@@ -110,10 +151,10 @@ public final class CxImporter {
      * @param additional_reader
      *            an additional custom readers to add
      */
-    public final void addAdditionalReader(final AspectFragmentReader additional_reader) {
+ /*   public final void addAdditionalReader(final AspectFragmentReader additional_reader) {
         _additional_readers.add(additional_reader);
     }
-
+*/
     /**
      * This is the primary method to parse a CX formatted input stream by
      * returning a CxReader for a given InputStream and set of Aspects. The
@@ -156,15 +197,15 @@ public final class CxImporter {
      * @see AspectSet
      * @see Aspect
      */
-    public final CxReader obtainCxReader(final AspectSet aspects, final InputStream in) throws IOException {
-        final Set<AspectFragmentReader> all_readers = getAllAspectFragmentReaders(aspects.getAspectFragmentReaders());
+  /*  public final CxReader obtainCxReader(final AspectSet aspects, final InputStream in) throws IOException {
+        final Set<AspectFragmentReader> all_readers = getAllAspectFragmentReaders(aspects.getCySupportedAspectFragmentReaders());
         final CxReader r = CxReader.createInstance(in, all_readers);
         return r;
     }
 
     private Set<AspectFragmentReader> getAllAspectFragmentReaders(final Set<AspectFragmentReader> readers) {
 
-        final Set<AspectFragmentReader> all = new HashSet<AspectFragmentReader>();
+        final Set<AspectFragmentReader> all = new HashSet<>();
         for (final AspectFragmentReader reader : readers) {
             all.add(reader);
         }
@@ -174,6 +215,51 @@ public final class CxImporter {
             }
         }
         return all;
+    } */
+    
+    public NiceCXNetwork getCXNetworkFromStream( final InputStream in) throws IOException {
+        CxElementReader2 r = new CxElementReader2(in, all_readers, true);
+        
+        MetaDataCollection metadata = r.getPreMetaData();
+		
+        NiceCXNetwork niceCX = new NiceCXNetwork ();
+        
+     	for ( AspectElement elmt : r ) {
+     		switch ( elmt.getAspectName() ) {
+     			case NodesElement.ASPECT_NAME :       //Node
+     					niceCX.addNode((NodesElement) elmt);
+     					break;
+     				case NdexNetworkStatus.ASPECT_NAME:   //ndexStatus we ignore this in CX
+     					break; 
+     				case EdgesElement.ASPECT_NAME:       // Edge
+     					EdgesElement ee = (EdgesElement) elmt;
+     					niceCX.addEdge(ee);
+     					break;
+     				case NodeAttributesElement.ASPECT_NAME:  // node attributes
+     					niceCX.addNodeAttribute((NodeAttributesElement) elmt );
+     					break;
+     				case NetworkAttributesElement.ASPECT_NAME: //network attributes
+     					niceCX.addNetworkAttribute(( NetworkAttributesElement) elmt);
+     					break;
+     					
+     				case EdgeAttributesElement.ASPECT_NAME:
+     					niceCX.addEdgeAttribute((EdgeAttributesElement)elmt);
+     					break;
+     				case CartesianLayoutElement.ASPECT_NAME:
+     					CartesianLayoutElement e = (CartesianLayoutElement)elmt;
+     					niceCX.addNodeAssociatedAspectElement(e.getNode(), e);
+     					break;
+     				default:    // opaque aspect
+     					niceCX.addOpapqueAspect(elmt);
+     			}
+
+     	} 
+     	
+     	MetaDataCollection postMetaData = r.getPostMetaData();
+     	
+        
+        return niceCX;
     }
+    
 
 }

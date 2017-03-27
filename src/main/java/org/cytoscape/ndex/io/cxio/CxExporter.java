@@ -200,10 +200,10 @@ public final class CxExporter {
         final CxWriter w = CxWriter.createInstance(out, _use_default_pretty_printing);
 
         if ((filters != null) && !filters.getFilters().isEmpty()) {
-            addAspectFragmentWriters(w, aspects.getAspectFragmentWriters(), filters.getFiltersAsMap());
+            addAspectFragmentWriters(w, aspects.getCySupportedAspectFragmentWriters(), filters.getFiltersAsMap());
         }
         else {
-            addAspectFragmentWriters(w, aspects.getAspectFragmentWriters());
+            addAspectFragmentWriters(w, aspects.getCySupportedAspectFragmentWriters());
         }
 
         if (_write_pre_metdata) {
