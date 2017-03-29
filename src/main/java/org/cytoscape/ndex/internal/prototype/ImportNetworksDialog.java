@@ -141,7 +141,15 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        boolean success = selectedServer.check(mal);
+        boolean success = false;
+        try {
+        	success = selectedServer.check(mal);
+        } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to query NDEx:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+		}
         if (success)
         {
             UUID id = networkSummary.getExternalId();
@@ -491,10 +499,17 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 
     private void queryActionPerformed(java.awt.event.ActionEvent evt)
     {//GEN-FIRST:event_queryActionPerformed
-        query();
+        try {
+			query();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to query NDEx:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+		}
     }//GEN-LAST:event_queryActionPerformed
 
-    private void query()
+    private void query() throws IOException
     {
  //       PropertyGraphNetwork network = null;
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
@@ -824,7 +839,14 @@ public class ImportNetworksDialog extends javax.swing.JDialog
     {//GEN-HEADEREND:event_queryComboBoxActionPerformed
         if( alreadyQueried() )
             return;
-        query();
+        try {
+			query();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to query NDEx:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+		}
         disableLoad = true;
     }//GEN-LAST:event_queryComboBoxActionPerformed
 

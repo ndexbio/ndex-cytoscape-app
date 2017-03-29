@@ -28,6 +28,7 @@ package org.cytoscape.ndex.internal.gui;
 
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.HeadlessException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.ndexbio.model.cx.NiceCXNetwork;
+import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.ProvenanceEntity;
@@ -129,26 +131,33 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         
         
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        if( selectedServer.check(mal) )
-        {
-            try
-            {
-                networkSummaries = mal.findNetworks("*",true, null, null, false, 0, 10000);
-            }
-            catch (IOException ex)
-            {         
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-                this.setVisible(false);
-                return;
-            }
-            showSearchResults( ); 
-        }
-        else
-        {
-            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-            this.setVisible(false);
-        }
+        try {
+			if( selectedServer.check(mal) )
+			{
+			    try
+			    {
+			        networkSummaries = mal.findNetworks("*", null, null, true, 0, 10000).getNetworks();
+			    }
+			    catch (IOException | NdexException ex)
+			    {         
+			        ex.printStackTrace();
+			        JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+			        this.setVisible(false);
+			        return;
+			    }
+			    showSearchResults( ); 
+			}
+			else
+			{
+			    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+			    this.setVisible(false);
+			}
+		} catch (HeadlessException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+
+		}
     }
 
     private void createCyNetworkFromCX(InputStream cxStream, ProvenanceEntity provenance, NetworkSummary networkSummary, boolean stopLayout) throws IOException
@@ -556,38 +565,47 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 //        dialog.setVisible(true);
     }//GEN-LAST:event_selectNetworkActionPerformed
 
-    private void search()
+    private void search() 
     {
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
 
-        Permissions permissions = null;
-        if( administeredByMe.isSelected() )
-            permissions = Permissions.READ;
+    /*    if( administeredByMe.isSelected() )
+            permissions = Permissions.READ; */
         
         String searchText = searchField.getText();
         if( searchText.isEmpty() )
             searchText = "";
         
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        if( selectedServer.check(mal) )
-        {
-            try
-            {
-                networkSummaries = mal.findNetworks(searchText, true, null, permissions, false, 0, 10000);
-            }
-            catch (IOException ex)
-            {         
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            showSearchResults( ); 
-        }
-        else
-        {
-            JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
-            this.setVisible(false);
-        }
+        try {
+			if( selectedServer.check(mal) )
+			{
+			    try
+			    {
+			    	if ( administeredByMe.isSelected() )
+				        networkSummaries = mal.getMyNetworks(selectedServer.getUserId());
+			    	else 
+			            networkSummaries = mal.findNetworks(searchText, null, null, true, 0, 10000).getNetworks();
+			    }
+			    catch (IOException |NdexException ex)
+			    {         
+			        ex.printStackTrace();
+			        JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			        return;
+			    }
+			    showSearchResults( ); 
+			}
+			else
+			{
+			    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+			    this.setVisible(false);
+			}
+		} catch (HeadlessException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+
+		}
     }
     
     private void searchActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_searchActionPerformed

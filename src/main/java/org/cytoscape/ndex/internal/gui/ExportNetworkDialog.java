@@ -124,7 +124,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         try
         {
-            java.util.List<NetworkSummary> writeableNetworks = mal.findNetworks("", true, null, Permissions.WRITE, false, 0, 10000);
+            java.util.List<NetworkSummary> writeableNetworks = mal.findNetworks("", null, Permissions.WRITE, false, 0, 10000).getNetworks();
             boolean networkFoundAmongWriteableNetworks = false;
             for( NetworkSummary ns : writeableNetworks)
             {
@@ -137,7 +137,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             if( !networkFoundAmongWriteableNetworks )
                 return null;
         }
-        catch (IOException e)
+        catch (IOException | NdexException e)
         {
             return null;
         }

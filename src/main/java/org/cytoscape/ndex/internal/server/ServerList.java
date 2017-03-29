@@ -58,7 +58,11 @@ import org.cytoscape.ndex.internal.strings.ResourcePath;
  */
 public class ServerList extends AbstractListModel
 {
-    //A list of servers, both DEFAULT and ADDED, displayed to the user.
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	//A list of servers, both DEFAULT and ADDED, displayed to the user.
     private List<Server> serverList = new ArrayList<>();
     //A list of default servers with CREDENTIALS.
     private List<Server> defaultServerCredentials = new ArrayList<>();

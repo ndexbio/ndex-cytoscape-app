@@ -32,7 +32,6 @@ import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.server.ServerList;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 
-import java.awt.*;
 
 /**
  *
@@ -40,7 +39,11 @@ import java.awt.*;
  */
 public class AddEditServerDialog extends javax.swing.JDialog {
 
-    public enum Mode {ADD, EDIT};
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public enum Mode {ADD, EDIT};
     private Mode mode = null;
     private final ChangeNdexServerDialog parent;
     

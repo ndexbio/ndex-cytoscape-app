@@ -1,7 +1,7 @@
 [
   {
     "name": "PUBLIC",
-    "url": "http://public.ndexbio.org/rest",
+    "url": "http://public.ndexbio.org/v2",
     "type": "DEFAULT"
   }
 ]

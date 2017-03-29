@@ -26,7 +26,11 @@
 
 package org.cytoscape.ndex.internal.server;
 
+import java.io.IOException;
+import java.util.UUID;
+
 import org.ndexbio.model.exceptions.NdexException;
+import org.ndexbio.model.object.User;
 import org.ndexbio.rest.client.NdexRestClient;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
@@ -44,6 +48,7 @@ public class Server
     private String password;
     private String description;
     private Type type;
+    private UUID userId;
     
     private boolean authenticated;
     
@@ -67,6 +72,7 @@ public class Server
         type = s.type;
         description = s.description;
         authenticated = s.authenticated;
+        userId = s.getUserId();
     }
 
     public boolean isRunningNdexServer(NdexRestClientModelAccessLayer mal)
@@ -74,7 +80,7 @@ public class Server
         return mal.isServerRunningNdexServer();
     }
     
-    public boolean check(NdexRestClientModelAccessLayer mal)
+    public boolean check(NdexRestClientModelAccessLayer mal) throws IOException
     {
         boolean usernamePresent = username != null && !username.isEmpty();
         boolean passwordPresent = password != null && !username.isEmpty();
@@ -87,7 +93,10 @@ public class Server
         {
             try
             {
-                authenticated = mal.checkCredential();
+            	User user = mal.authenticateUser(mal.getUserName(),mal.getPassword());
+                authenticated = user !=null;
+                if (user!=null) 
+                	userId = user.getExternalId();
             }
             catch (NdexException e)
             {
@@ -119,12 +128,12 @@ public class Server
         result += "Password: " + password +"\n";
         result += "Type: " + type +"\n";
         result += "Authenticated: " + authenticated +"\n";
+        result += "UUID: " + userId +"\n";
         return result;
     }
     
     public String getHeader()
     {
-        String username = this.username;
         if( username == null )
             username = "None";
         
@@ -242,5 +251,13 @@ public class Server
         this.authenticated = authenticated;
     }
     // </editor-fold>
+
+	public UUID getUserId() {
+		return userId;
+	}
+
+	public void setUserId(UUID userId) {
+		this.userId = userId;
+	}
     
 }

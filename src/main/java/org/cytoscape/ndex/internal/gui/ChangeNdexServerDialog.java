@@ -25,6 +25,7 @@
  */
 package org.cytoscape.ndex.internal.gui;
 
+import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +48,11 @@ import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 public class ChangeNdexServerDialog extends javax.swing.JDialog
 {
 
-    private JFrame parent;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JFrame parent;
 
     /**
      * Creates new form SelectServerDialog. This is for prototyping.
@@ -195,9 +200,18 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         connect.setText("Connect");
         connect.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                connectActionPerformed(evt);
+                try {
+					connectActionPerformed(evt);
+				} catch (HeadlessException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					
+	                JOptionPane.showMessageDialog(parent, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+				}
             }
         });
 
@@ -316,7 +330,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         }
     }//GEN-LAST:event_copyActionPerformed
 
-    private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
+    private void connectActionPerformed(java.awt.event.ActionEvent evt) throws HeadlessException, IOException {//GEN-FIRST:event_connectActionPerformed
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         if( selectedServer.check(mal) )
