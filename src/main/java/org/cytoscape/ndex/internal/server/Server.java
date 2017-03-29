@@ -42,7 +42,7 @@ public class Server
 {
     public enum Type {DEFAULT, CREDENTIALS, ADDED}
     
-    private String name;
+    private String name;  // unique in the ServerList
     private String url;
     private String username;
     private String password;
@@ -259,5 +259,14 @@ public class Server
 	public void setUserId(UUID userId) {
 		this.userId = userId;
 	}
+	
+	
+	// give each server an unique ID 
+	/* static final AtomicLong NEXT_ID = new AtomicLong(0);
+	 final long id = NEXT_ID.getAndIncrement();
+
+	 public long getId() {
+	         return id;
+	 } */
     
 }

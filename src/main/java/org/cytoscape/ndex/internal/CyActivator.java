@@ -129,7 +129,7 @@ public class CyActivator extends AbstractCyActivator
         
         // copied from cxio-impl
         BundleContext bc = context;
-        final StreamUtil streamUtil = getService(bc, StreamUtil.class);
+    /*    final StreamUtil streamUtil = getService(bc, StreamUtil.class);
         final CyLayoutAlgorithmManager layoutManager = getService(bc, CyLayoutAlgorithmManager.class);
 
         final CytoscapeCxFileFilter cx_filter = new CytoscapeCxFileFilter(new String[] { "cx" },
@@ -205,7 +205,7 @@ public class CyActivator extends AbstractCyActivator
         // can use this service by using this ID.
         reader_factory_properties.put(ID, "cytoscapeCxNetworkReaderFactory");
         registerService(bc, cx_reader_factory, InputStreamTaskFactory.class, reader_factory_properties);
-
+*/
         //
         registerService(bc,new NdexNetworkAboutToBeDestroyedListener(), NetworkAboutToBeDestroyedListener.class, new Properties());
         

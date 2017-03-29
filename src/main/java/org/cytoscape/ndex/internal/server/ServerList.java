@@ -26,14 +26,8 @@
 
 package org.cytoscape.ndex.internal.server;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,17 +40,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.AbstractListModel;
+
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
 import org.cytoscape.ndex.internal.strings.FilePath;
 import org.cytoscape.ndex.internal.strings.ResourcePath;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 /**
  *
  * @author David Welker
  */
-public class ServerList extends AbstractListModel
+public class ServerList extends AbstractListModel<Server>
 {
     /**
 	 * 
@@ -157,35 +159,27 @@ public class ServerList extends AbstractListModel
         {
             return readServerCollection( new FileReader(jsonFile) );
         }
-        catch (FileNotFoundException ex)
-        {
-            Logger.getLogger(ServerList.class.getName()).log(Level.SEVERE, null, ex);
-            //Return an empty server list, because sometimes a file won't exist and that is perfectly normal.
-            return new ArrayList<Server>();
-        }
-    }
-    
-    private Collection<Server> readServerCollection(Reader reader)
-    {
-        BufferedReader br = null;
-        br = new BufferedReader( reader );
-        Gson gson = new Gson();
-        Type collectionType = new TypeToken<Collection<Server>>(){}.getType();
-        Collection<Server> result =  gson.fromJson(br, collectionType);
-        try
-        {
-            br.close();
-        }
         catch (IOException ex)
         {
             Logger.getLogger(ServerList.class.getName()).log(Level.SEVERE, null, ex);
+            //Return an empty server list, because sometimes a file won't exist and that is perfectly normal.
+            return new ArrayList<>();
         }
-        return result;
+    }
+    
+    private Collection<Server> readServerCollection(Reader reader) throws IOException
+    {
+        try (BufferedReader br = new BufferedReader( reader )) {
+        	Gson gson = new Gson();
+        	Type collectionType = new TypeToken<Collection<Server>>(){}.getType();
+        	Collection<Server> result =  gson.fromJson(br, collectionType);
+            return result;        
+        }
     }
     
     private List<Server> getAddedServers()
     {
-        List<Server> result = new ArrayList<Server>();
+        List<Server> result = new ArrayList<>();
         for( Server s : serverList )
         {
             if( s.getType() == Server.Type.ADDED )
@@ -196,7 +190,7 @@ public class ServerList extends AbstractListModel
     
     private List<Server> getDefaultServers()
     {
-        List<Server> result = new ArrayList<Server>();
+        List<Server> result = new ArrayList<>();
         for( Server s : serverList )
         {
             if( s.getType() == Server.Type.DEFAULT )
@@ -225,10 +219,10 @@ public class ServerList extends AbstractListModel
         saveServerList( defaultServerCredentials, defaultServerCredentialsFile.getAbsolutePath() );
     }
     
-    private void saveServerList( List<Server> serverList, String filePath )
+    private void saveServerList( List<Server> serverList2, String filePath )
     {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String json = gson.toJson( serverList );
+        String json = gson.toJson( serverList2 );
         File serverFile = new File( filePath );
         try
         {
@@ -263,10 +257,10 @@ public class ServerList extends AbstractListModel
         fireContentsChanged(this, indexOfEditedServer, indexOfEditedServer);
     }
     
-    public void rename(Server server)
+ /*   public void rename(Server server)
     {
         //TODO Implement this
-    }
+    } */
     
     public void delete(Server server)
     {
@@ -350,7 +344,7 @@ public class ServerList extends AbstractListModel
     }
 
     @Override
-    public Object getElementAt(int index)
+    public Server getElementAt(int index)
     {
         return serverList.get(index);
     }

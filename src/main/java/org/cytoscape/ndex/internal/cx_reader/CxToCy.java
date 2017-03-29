@@ -27,7 +27,6 @@ import org.cxio.aspects.datamodels.NodesElement;
 import org.cxio.aspects.datamodels.SubNetworkElement;
 import org.cxio.core.interfaces.AspectElement;
 import org.cxio.util.CxioUtil;
-import org.cytoscape.group.CyGroup;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
@@ -50,7 +49,7 @@ public final class CxToCy {
     
 	private static final Logger logger = LoggerFactory.getLogger(CxToCy.class);
 
-    private static final long          DEFAULT_SUBNET = -Long.MAX_VALUE;
+    private static final Long          DEFAULT_SUBNET = Long.valueOf(-Long.MAX_VALUE);
 
     private Set<CyNode>                _nodes_with_visual_properties;
     private Set<CyEdge>                _edges_with_visual_properties;
@@ -188,343 +187,6 @@ public final class CxToCy {
 		
 	}
 
-/*    private final List<CyNetwork> createNetwork(final Map<String, List<AspectElement>> aspect_collection,
-            CyRootNetwork root_network,
-            final CyNetworkFactory network_factory,
-            final CyGroupFactory group_factory,
-            final String collection_name,
-            final boolean perform_basic_integrity_checks) throws IOException {
-
-final List<AspectElement> nodes = aspect_collection.get(NodesElement.ASPECT_NAME);
-final List<AspectElement> edges = aspect_collection.get(EdgesElement.ASPECT_NAME);
-final List<AspectElement> cartesian_layout_elements = aspect_collection.get(CartesianLayoutElement.ASPECT_NAME);
-final List<AspectElement> node_attributes = aspect_collection.get(NodeAttributesElement.ASPECT_NAME);
-final List<AspectElement> edge_attributes = aspect_collection.get(EdgeAttributesElement.ASPECT_NAME);
-final List<? extends AspectElement> network_attributes = aspect_collection.get(NetworkAttributesElement.ASPECT_NAME);
-final List<AspectElement> hidden_attributes = aspect_collection.get(HiddenAttributesElement.ASPECT_NAME);
-final List<AspectElement> visual_properties = aspect_collection.get(CyVisualPropertiesElement.ASPECT_NAME);
-final List<AspectElement> subnetworks = aspect_collection.get(SubNetworkElement.ASPECT_NAME);
-final List<AspectElement> network_relations = aspect_collection.get(NetworkRelationsElement.ASPECT_NAME);
-final List<AspectElement> groups = aspect_collection.get(CyGroupsElement.ASPECT_NAME);
-final List<AspectElement> views = aspect_collection.get(CyViewsElement.ASPECT_NAME);
-final List<AspectElement> table_columns = aspect_collection.get(CyTableColumnElement.ASPECT_NAME);
-
-// cx node id -> node attribute list 
-final Map<Long, List<NodeAttributesElement>> node_attributes_map = new HashMap<>();
-
-// cx edge id -> edge attribute list
-final Map<Long, List<EdgeAttributesElement>> edge_attributes_map = new HashMap<>();
-
-// subnetwork id -> network attribute list  
-final Map<Long, List<NetworkAttributesElement>> network_attributes_map = new HashMap<>();
-
-final Map<Long, List<HiddenAttributesElement>> hidden_attributes_map = new HashMap<>();
-final Map<Long, List<CyGroupsElement>> view_to_groups_map = new HashMap<>();
-final Map<Long, List<CyTableColumnElement>> subnetwork_to_col_labels_map = new HashMap<>();
-
-if (nodes == null || nodes.isEmpty()) {
-throw new IOException("no nodes in input");
-}
-
-final Set<Long> node_ids = new HashSet<>();  // holds all the cx node ids.
-
-if (perform_basic_integrity_checks) {
-checkNodeIds(nodes,
-node_ids);
-}
-
-final Set<Long> edge_ids = new HashSet<>();  // holds all the cx edge ids.
-
-if (edges != null && perform_basic_integrity_checks) {
-checkEdgeIds(edges,
-edge_ids);
-}
-
-_network_suid_to_networkrelations_map = new HashMap<>();
-_visual_element_collections = new VisualElementCollectionMap();
-_cxid_to_cynode_map = new HashMap<>();
-_cxid_to_cyedge_map = new HashMap<>();
-
-if (subnetworks != null && !subnetworks.isEmpty()) {
-for (final AspectElement element : subnetworks) {
-final SubNetworkElement subnetwork_element = (SubNetworkElement) element;
-_visual_element_collections.addSubNetworkElement(subnetwork_element.getId(),
-                              subnetwork_element);
-}
-}
-
-// Dealing with subnetwork relations:
-Long parent_network_id = null;
-List<Long> subnetwork_ids;
-int number_of_subnetworks;
-boolean subnet_info_present;
-
-_view_to_subnet_map = new HashMap<>();
-_subnet_to_views_map = new HashMap<>();
-Map<Long, String> subnet_to_subnet_name_map = new HashMap<>();
-if (network_relations != null && !network_relations.isEmpty()) {
-subnet_info_present = true;
-final Set<Long> subnetwork_parent_ids = getAllSubNetworkParentNetworkIds(network_relations);
-if (subnetwork_parent_ids == null || subnetwork_parent_ids.size() < 1) {
-throw new IOException("no subnetwork parent network id");
-}
-else if (subnetwork_parent_ids.size() > 1) {
-throw new IOException("multiple subnetwork parent network ids: " + subnetwork_parent_ids);
-}
-for (final Long s : subnetwork_parent_ids) {
-parent_network_id = s;
-}
-if (Settings.INSTANCE.isDebug()) {
-System.out.println("parent_network_id: " + parent_network_id);
-}
-
-subnetwork_ids = getSubNetworkIds(parent_network_id,
-           network_relations);
-if (Settings.INSTANCE.isDebug()) {
-System.out.println("subnetwork_ids: " + subnetwork_ids);
-}
-if (subnetwork_ids == null || subnetwork_ids.isEmpty()) {
-throw new IOException("no subnetwork ids for: " + parent_network_id);
-}
-number_of_subnetworks = subnetwork_ids.size();
-_view_to_subnet_map = makeViewToSubNetworkMap(network_relations);
-_subnet_to_views_map = makeSubNetworkToViewsMap(network_relations);
-subnet_to_subnet_name_map = makeSubNetworkToNameMap(network_relations);
-if (Settings.INSTANCE.isDebug()) {
-System.out.println("view to subnet:");
-System.out.println(_view_to_subnet_map);
-System.out.println("subnet to views:");
-System.out.println(_subnet_to_views_map);
-System.out.println("subnet to names:");
-System.out.println(subnet_to_subnet_name_map);
-}
-}
-else {
-if (Settings.INSTANCE.isDebug()) {
-System.out.println("no network relations");
-}
-subnet_info_present = false;
-number_of_subnetworks = 1;
-subnetwork_ids = new ArrayList<Long>();
-}
-
-final CySubNetwork[] subnetworks_ary = new CySubNetwork[number_of_subnetworks];
-for (int i = 0; i < number_of_subnetworks; ++i) {
-
-CySubNetwork sub_network;
-if (root_network != null) {
-// Root network exists
-sub_network = root_network.addSubNetwork();
-}
-else {
-sub_network = (CySubNetwork) network_factory.createNetwork();
-root_network = sub_network.getRootNetwork();
-if (!CxioUtil.isEmpty(collection_name)) {
-
-root_network.getRow(root_network).set(CyNetwork.NAME,
-                       collection_name);
-}
-}
-subnetworks_ary[i] = sub_network;
-}
-
-addNetworkCollectionAttributes((List<NetworkAttributesElement>) network_attributes, root_network);
-
-
-processColumnLabels(table_columns,
-subnetwork_to_col_labels_map,
-subnet_info_present);
-
-processNodeAttributes(node_attributes,
-node_attributes_map,
-perform_basic_integrity_checks,
-node_ids,
-subnet_info_present);
-
-processEdgeAttributes(edge_attributes,
-edge_attributes_map,
-perform_basic_integrity_checks,
-edge_ids,
-subnet_info_present);
-
-processNetworkAttributes(network_attributes,
-network_attributes_map,
-subnet_info_present,
-subnetwork_ids);
-// System.out.println(network_attributes_map);
-
-processHiddenAttributes(hidden_attributes,
-hidden_attributes_map);
-
-processGroups(groups,
-view_to_groups_map,
-subnet_info_present);
-
-
-final List<CyNetwork> new_networks = new ArrayList<>();
-
-if (Settings.INSTANCE.isDebug()) {
-System.out.println("number of subnetworks: " + number_of_subnetworks);
-}
-
-for (int i = 0; i < number_of_subnetworks; ++i) {
-
-final CySubNetwork sub_network = subnetworks_ary[i];
-
-final Long subnetwork_id = subnetwork_ids.size() > 0 ? subnetwork_ids.get(i) : sub_network.getSUID();
-
-_network_suid_to_networkrelations_map.put(sub_network.getSUID(),
-                   subnetwork_id);
-if (Settings.INSTANCE.isDebug()) {
-System.out.println("network suid->network-relations: " + sub_network.getSUID() + "->" + subnetwork_id);
-}
-
-if (!subnet_info_present) {
-_view_to_subnet_map.put(subnetwork_id,
-     subnetwork_id);
-final List<Long> l = new ArrayList<>();
-l.add(subnetwork_id);
-_subnet_to_views_map.put(subnetwork_id,
-      l);
-}
-
-Set<Long> nodes_in_subnet = null;
-Set<Long> edges_in_subnet = null;
-
-if (_visual_element_collections != null) {
-if (_visual_element_collections.getSubNetworkElement(subnetwork_id) != null) {
-nodes_in_subnet = new HashSet<>(_visual_element_collections.getSubNetworkElement(subnetwork_id)
-.getNodes());
-edges_in_subnet = new HashSet<>(_visual_element_collections.getSubNetworkElement(subnetwork_id)
-.getEdges());
-if (Settings.INSTANCE.isDebug()) {
-System.out.println("sub-network nodes/edges: " + nodes_in_subnet.size() + "/"
-+ edges_in_subnet.size());
-}
-}
-}
-
-addNodes(sub_network,
-nodes,
-nodes_in_subnet,
-node_attributes_map,
-subnetwork_id,
-subnet_info_present);
-
-if (edges != null) {
-addEdges(sub_network,
-edges,
-edges_in_subnet,
-edge_attributes_map,
-subnetwork_id,
-node_ids,
-perform_basic_integrity_checks,
-subnet_info_present);
-}
-
-addColumns(sub_network,
-subnetwork_to_col_labels_map,
-subnetwork_id,
-subnet_info_present);
-
-if (network_attributes_map.containsKey(subnetwork_id)) {
-addNetworkAttributeData(network_attributes_map.get(subnetwork_id),
-     sub_network,
-     sub_network.getTable(CyNetwork.class,
-                          CyNetwork.LOCAL_ATTRS));
-}
-else if (network_attributes_map.containsKey(DEFAULT_SUBNET)) {
-// This is the root network! 
-if (Settings.INSTANCE.isDebug()) {
-System.out.println("adding network attributes lacking sub-network information");
-}
-
-addNetworkAttributeData(network_attributes_map.get(DEFAULT_SUBNET),
-     sub_network,
-     sub_network.getTable(CyNetwork.class,
-                          CyNetwork.DEFAULT_ATTRS));
-}
-if (subnet_to_subnet_name_map != null && !subnet_to_subnet_name_map.isEmpty()) {
-addNetworkNames(sub_network,
-subnet_to_subnet_name_map,
-subnetwork_id,
-sub_network.getTable(CyNetwork.class,
-                  CyNetwork.LOCAL_ATTRS));
-}
-
-final CyTable hidden_attribute_table = sub_network.getTable(CyNetwork.class,
-                                     CyNetwork.HIDDEN_ATTRS);
-// TODO
-// addHiddenAttributeData(hidden_attributes_map.get(subnetwork_id),
-// sub_network, hidden_attribute_table);
-
-if (visual_properties != null) {
-_nodes_with_visual_properties = new HashSet<>();
-_edges_with_visual_properties = new HashSet<>();
-for (final AspectElement element : visual_properties) {
-final CyVisualPropertiesElement vpe = (CyVisualPropertiesElement) element;
-
-final Long view = vpe.getView() != null ? vpe.getView() : subnetwork_id;
-
-if (vpe.getPropertyOf().equals(VisualPropertyType.NETWORK.asString())) {
-_visual_element_collections.addNetworkVisualPropertiesElement(view,
-                                                   vpe);
-}
-else if (vpe.getPropertyOf().equals(VisualPropertyType.NODES_DEFAULT.asString())) {
-_visual_element_collections.addNodesDefaultVisualPropertiesElement(view,
-                                                        vpe);
-}
-else if (vpe.getPropertyOf().equals(VisualPropertyType.EDGES_DEFAULT.asString())) {
-_visual_element_collections.addEdgesDefaultVisualPropertiesElement(view,
-                                                        vpe);
-}
-else if (vpe.getPropertyOf().equals(VisualPropertyType.NODES.asString())) {
-Long applies_to_node = vpe.getApplies_to();
-_nodes_with_visual_properties.add(_cxid_to_cynode_map.get(applies_to_node));
-_visual_element_collections.addNodeVisualPropertiesElement(view,
-                                                    _cxid_to_cynode_map
-                                                            .get(applies_to_node),
-                                                    vpe);
-
-}
-else if (vpe.getPropertyOf().equals(VisualPropertyType.EDGES.asString())) {
-Long applies_to_edge = vpe.getApplies_to();
-_edges_with_visual_properties.add(_cxid_to_cyedge_map.get(applies_to_edge));
-_visual_element_collections.addEdgeVisualPropertiesElement(view,
-                                                    _cxid_to_cyedge_map
-                                                            .get(applies_to_edge),
-                                                    vpe);
-
-}
-}
-}
-
-if (cartesian_layout_elements != null && !cartesian_layout_elements.isEmpty()) {
-if (subnetwork_ids.size() > 0) {
-addPositions(cartesian_layout_elements,
-_cxid_to_cynode_map);
-}
-else {
-addPositions(cartesian_layout_elements,
-_cxid_to_cynode_map,
-subnetwork_id);
-}
-}
-
-if (group_factory != null && view_to_groups_map != null && !view_to_groups_map.isEmpty()) {
-addGroups(group_factory,
-view_to_groups_map,
-sub_network,
-subnetwork_id);
-}
-
-new_networks.add(sub_network);
-
-}
-
-return new_networks;
-}
-*/	
 	
     public final List<CyNetwork> createNetwork(final NiceCXNetwork niceCX, 
                                                CyRootNetwork root_network,
@@ -542,7 +204,7 @@ return new_networks;
             throw new IOException("no nodes in input");
         }
 
-        final Set<Long> node_ids = new HashSet<>();  // holds all the cx node ids.
+  //      final Set<Long> node_ids = new HashSet<>();  // holds all the cx node ids.
 
    /*     if (perform_basic_integrity_checks) {
             checkNodeIds(nodes,
@@ -731,8 +393,8 @@ return new_networks;
                          niceCX,
                          edges_in_subnet,
                          subnetwork_id,
-                         node_ids,
-                         perform_basic_integrity_checks,
+                     //    node_ids,
+                     //    perform_basic_integrity_checks,
                          IsCollection);
             
 
@@ -860,23 +522,22 @@ return new_networks;
 
                 final List<CyGroupsElement> g = view_to_groups_map.get(v);
                 for (final CyGroupsElement ge : g) {
-                    final List<CyNode> nodes_for_group = new ArrayList<CyNode>();
+                    final List<CyNode> nodes_for_group = new ArrayList<>();
                     for (final Long nod : ge.getNodes()) {
                         nodes_for_group.add(_cxid_to_cynode_map.get(nod));
                     }
-                    final List<CyEdge> edges_for_group = new ArrayList<CyEdge>();
+                    final List<CyEdge> edges_for_group = new ArrayList<>();
                     for (final Long ed : ge.getInternalEdges()) {
                         edges_for_group.add(_cxid_to_cyedge_map.get(ed));
                     }
                     for (final Long ed : ge.getExternalEdges()) {
                         edges_for_group.add(_cxid_to_cyedge_map.get(ed));
                     }
-                    final CyNode group_node = sub_network.addNode();
-                    final CyGroup gr = group_factory.createGroup(sub_network,
-                                                                 /* group_node, */
-                                                                 nodes_for_group,
-                                                                 edges_for_group,
-                                                                 true);
+                    sub_network.addNode();
+                    group_factory.createGroup(sub_network,
+                                              nodes_for_group,
+                                              edges_for_group,
+                                              true);
                 }
             }
         }
@@ -902,9 +563,9 @@ return new_networks;
                                 final NiceCXNetwork niceCX,
                                 final Set<Long> edges_in_subnet,
                                 final Long subnetwork_id,
-                                final Set<Long> node_ids,
-                                final boolean perform_basic_integrity_checks,
-                                final boolean subnet_info_present) throws IOException {
+//                                final Set<Long> node_ids,
+//                                final boolean perform_basic_integrity_checks,
+                                final boolean subnet_info_present) {
 
         for (final EdgesElement edge_element : niceCX.getEdges().values()) {
 

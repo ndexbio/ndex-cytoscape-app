@@ -18,6 +18,7 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.TaskIterator;
 
+@Deprecated
 public class CytoscapeCxNetworkReaderFactory extends AbstractInputStreamTaskFactory {
 
     private static final boolean               PERFORM_BASIC_INTEGRITY_CHECKS = true;
@@ -35,7 +36,7 @@ public class CytoscapeCxNetworkReaderFactory extends AbstractInputStreamTaskFact
     private final VisualMappingFunctionFactory _vmf_factory_p;
     private final CyLayoutAlgorithmManager layoutManager;
 
-    public CytoscapeCxNetworkReaderFactory(final CyFileFilter filter,
+    private CytoscapeCxNetworkReaderFactory(final CyFileFilter filter,
                                            final CyApplicationManager application_manager,
                                            final CyNetworkFactory network_factory,
                                            final CyNetworkManager network_manager,
@@ -67,8 +68,8 @@ public class CytoscapeCxNetworkReaderFactory extends AbstractInputStreamTaskFact
 
     @Override
     public TaskIterator createTaskIterator(final InputStream is, final String collection_name) {
-        try {
-            return new TaskIterator(new CytoscapeCxNetworkReader(collection_name,
+  //      try {
+            return  null; /*new TaskIterator(new CytoscapeCxNetworkReader(collection_name,
                                                                  is,
                                                                  _application_manager,
                                                                  _network_factory,
@@ -82,12 +83,12 @@ public class CytoscapeCxNetworkReaderFactory extends AbstractInputStreamTaskFact
                                                                  _vmf_factory_c,
                                                                  _vmf_factory_d,
                                                                  _vmf_factory_p,
-                                                                 PERFORM_BASIC_INTEGRITY_CHECKS, layoutManager));
-        }
-        catch (final IOException e) {
+                                                                 PERFORM_BASIC_INTEGRITY_CHECKS, layoutManager)); */
+   //     }
+      /*  catch (final IOException e) {
 
             e.printStackTrace();
             return null;
-        }
+        } */
     }
 }

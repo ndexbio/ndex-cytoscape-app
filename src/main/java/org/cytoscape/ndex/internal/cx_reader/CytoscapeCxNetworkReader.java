@@ -5,13 +5,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
-import org.cxio.misc.AspectElementCounts;
 import org.cxio.aspects.datamodels.ATTRIBUTE_DATA_TYPE;
 import org.cxio.aspects.datamodels.NetworkAttributesElement;
-import org.cxio.core.CxReader;
-import org.cxio.core.interfaces.AspectElement;
 import org.cxio.metadata.MetaDataCollection;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.group.CyGroupFactory;
@@ -21,8 +17,6 @@ import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
-import org.cytoscape.ndex.io.cxio.Aspect;
-import org.cytoscape.ndex.io.cxio.AspectSet;
 import org.cytoscape.ndex.io.cxio.CxImporter;
 import org.cytoscape.ndex.io.cxio.CxUtil;
 import org.cytoscape.ndex.io.cxio.Settings;
@@ -41,6 +35,7 @@ import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.ndexbio.model.cx.NiceCXNetwork;
 
+@Deprecated
 public class CytoscapeCxNetworkReader extends AbstractCyNetworkReader {
 
     private final List<CyNetwork>              _networks;
@@ -60,7 +55,7 @@ public class CytoscapeCxNetworkReader extends AbstractCyNetworkReader {
     private final CyLayoutAlgorithmManager layoutManager;
 	private TaskMonitor parentTaskMonitor;
 
-    public CytoscapeCxNetworkReader(final String network_collection_name,
+    private CytoscapeCxNetworkReader(final String network_collection_name,
                                     final InputStream input_stream,
                                     final CyApplicationManager application_manager,
                                     final CyNetworkFactory network_factory,

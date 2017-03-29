@@ -25,17 +25,21 @@
  */
 
 package org.cytoscape.ndex.internal.singletons;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+
 import org.ndexbio.model.object.network.NetworkSummary;
 
-/**
- *
- * @author David Welker
- */
+
 public enum NetworkManager
 {
     INSTANCE;
     private NetworkSummary selectedNetworkSummary;
-   // private PropertyGraphNetwork selectedNetwork;
+    
+    private final Map<UUID, CXInfoHolder> cxNetworkInfoTable;
+    
+    NetworkManager() { cxNetworkInfoTable = new TreeMap<>();}
 
     public NetworkSummary getSelectedNetworkSummary()
     {
@@ -47,13 +51,13 @@ public enum NetworkManager
         this.selectedNetworkSummary = selectedNetworkSummary;
     }
     
-  /*  public PropertyGraphNetwork getSelectedNetwork()
-    {
-        return selectedNetwork;
+    public CXInfoHolder getCXInfoHolder(UUID uuid) {
+    	return this.cxNetworkInfoTable.get(uuid);
     }
+    
+    public void setCXInfoHolder(UUID uuid, CXInfoHolder cxInfoHolder) {
+    	this.cxNetworkInfoTable.put(uuid, cxInfoHolder);
+    }
+    
 
-    public void setSelectedNetwork(PropertyGraphNetwork selectedNetwork)
-    {
-        this.selectedNetwork = selectedNetwork;
-    } */
 }
