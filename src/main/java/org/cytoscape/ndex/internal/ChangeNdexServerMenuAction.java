@@ -41,7 +41,12 @@ import javax.swing.*;
  */
 public class ChangeNdexServerMenuAction extends AbstractCyAction
 {
-    public ChangeNdexServerMenuAction(final String menuTitle, CyApplicationManager cyApplicationManager)
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ChangeNdexServerMenuAction(final String menuTitle, CyApplicationManager cyApplicationManager)
     {
         super(menuTitle, cyApplicationManager, null, null);
         // We want this menu item to appear under the App|NDEx menu. The actual name of the menu item is set in
@@ -53,7 +58,8 @@ public class ChangeNdexServerMenuAction extends AbstractCyAction
      * This method displays the select server dialog.
      * It is called when the menu item is selected.  
      */
-    public void actionPerformed(ActionEvent e)
+    @Override
+	public void actionPerformed(ActionEvent e)
     {
         JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
         ChangeNdexServerDialog dialog = new ChangeNdexServerDialog(parent);

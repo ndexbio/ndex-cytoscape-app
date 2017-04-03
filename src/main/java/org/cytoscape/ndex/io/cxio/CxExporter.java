@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.cxio.aspects.datamodels.ATTRIBUTE_DATA_TYPE;
@@ -26,13 +25,13 @@ import org.cxio.aspects.datamodels.NetworkRelationsElement;
 import org.cxio.aspects.datamodels.NodeAttributesElement;
 import org.cxio.aspects.datamodels.NodesElement;
 import org.cxio.aspects.datamodels.SubNetworkElement;
-import org.cxio.misc.AspectElementCounts;
+import org.cxio.aspects.writers.GeneralAspectFragmentWriter;
 import org.cxio.core.CxWriter;
 import org.cxio.core.interfaces.AspectElement;
 import org.cxio.core.interfaces.AspectFragmentWriter;
-import org.cxio.filters.AspectKeyFilter;
 import org.cxio.metadata.MetaDataCollection;
 import org.cxio.metadata.MetaDataElement;
+import org.cxio.misc.AspectElementCounts;
 import org.cytoscape.group.CyGroup;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyColumn;
@@ -40,9 +39,10 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.ndex.internal.singletons.CXInfoHolder;
+import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.io.cx_writer.VisualPropertiesGatherer;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -50,6 +50,9 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.ndexbio.model.cx.Provenance;
+import org.ndexbio.model.object.ProvenanceEntity;
+import org.ndexbio.model.object.ProvenanceEvent;
 
 /**
  * This class is for serializing Cytoscape networks, views, and attribute tables
@@ -182,11 +185,32 @@ public final class CxExporter {
      * @see FilterSet
      *
      */
-    private final boolean writeNetwork(final CyNetwork network,
+    
+    /**
+     * This is a method for serializing a Cytoscape network and associated table
+     * data as CX formatted OutputStream. <br>
+     * Method arguments control which aspects to serialize.
+     *
+     *
+     * @param network
+     *            the CyNetwork, and by association, tables to be serialized
+     * @param aspects
+     *            the set of aspects to serialize
+     * @param out
+     *            the stream to write to
+     * @throws IOException
+     *
+     *
+     * @see AspectSet
+     * @see Aspect
+     *
+     */
+    
+    public final boolean writeNetwork(final CyNetwork network,
                                       final boolean write_siblings,
                                       final AspectSet aspects,
-                                      final FilterSet filters,
-                                      final OutputStream out) throws IOException {
+                                      final OutputStream out,
+                                      boolean isUpdate) throws IOException {
 
         if (!aspects.contains(Aspect.SUBNETWORKS)) {
             if (aspects.contains(Aspect.VISUAL_PROPERTIES)) {
@@ -199,12 +223,12 @@ public final class CxExporter {
 
         final CxWriter w = CxWriter.createInstance(out, _use_default_pretty_printing);
 
-        if ((filters != null) && !filters.getFilters().isEmpty()) {
-            addAspectFragmentWriters(w, aspects.getCySupportedAspectFragmentWriters(), filters.getFiltersAsMap());
+        for (final AspectFragmentWriter writer : aspects.getCySupportedAspectFragmentWriters()) {
+            w.addAspectFragmentWriter(writer);
         }
-        else {
-            addAspectFragmentWriters(w, aspects.getCySupportedAspectFragmentWriters());
-        }
+       
+        w.addAspectFragmentWriter(new GeneralAspectFragmentWriter(Provenance.ASPECT_NAME));
+   //     w.addAspectFragmentWriter(writer);
 
         if (_write_pre_metdata) {
             addPreMetadata(aspects, network, write_siblings, w, 1L);
@@ -215,6 +239,24 @@ public final class CxExporter {
         String msg = null;
         boolean success = true;
 
+        CXInfoHolder cxInfoHolder = NetworkManager.INSTANCE.getCXInfoHolder(network.getSUID());
+        
+        Provenance cytoscapeProvenance = new Provenance();
+        
+        ProvenanceEntity oldProvenanceEntity = (cxInfoHolder !=null ? cxInfoHolder.getProvenance().getEntity() : null); 
+        
+        ProvenanceEvent creationEvent = cytoscapeProvenance.getEntity().getCreationEvent();
+        if( oldProvenanceEntity != null )
+            creationEvent.addInput(oldProvenanceEntity);
+        
+        String eventType = isUpdate ? "Cytoscape Update" : "Cytoscape Upload";
+        creationEvent.setEventType(eventType);
+        
+        final List<AspectElement> provAspect = new ArrayList<>(1);
+        provAspect.add(cytoscapeProvenance);
+
+        w.writeAspectElements(provAspect);
+        
         try {
             if (aspects.contains(Aspect.NODES)) {
                 writeNodes(network, write_siblings, w);
@@ -272,32 +314,8 @@ public final class CxExporter {
 
     }
 
-    /**
-     * This is a method for serializing a Cytoscape network and associated table
-     * data as CX formatted OutputStream. <br>
-     * Method arguments control which aspects to serialize.
-     *
-     *
-     * @param network
-     *            the CyNetwork, and by association, tables to be serialized
-     * @param aspects
-     *            the set of aspects to serialize
-     * @param out
-     *            the stream to write to
-     * @throws IOException
-     *
-     *
-     * @see AspectSet
-     * @see Aspect
-     *
-     */
-    public final boolean writeNetwork(final CyNetwork network,
-                                      final boolean write_siblings,
-                                      final AspectSet aspects,
-                                      final OutputStream out) throws IOException {
-        // Filters are not being used, thus null.
-        return writeNetwork(network, write_siblings, aspects, null, out);
-    }
+
+  
 
     private final static void addDataToMetaDataCollection(final MetaDataCollection pre_meta_data,
                                                           final String aspect_name,
@@ -619,25 +637,6 @@ public final class CxExporter {
         }
     }
 
-    private final void addAspectFragmentWriters(final CxWriter w, final Set<AspectFragmentWriter> writers) {
-        for (final AspectFragmentWriter writer : writers) {
-            w.addAspectFragmentWriter(writer);
-        }
-    }
-
-    private final void addAspectFragmentWriters(final CxWriter w,
-                                                final Set<AspectFragmentWriter> writers,
-                                                final SortedMap<String, AspectKeyFilter> filters) {
-        for (final AspectFragmentWriter writer : writers) {
-            if (filters != null) {
-                final String aspect = writer.getAspectName();
-                if (filters.containsKey(aspect)) {
-                    writer.addAspectKeyFilter(filters.get(aspect));
-                }
-            }
-            w.addAspectFragmentWriter(writer);
-        }
-    }
 
 	private final void addPostMetadata(final AspectSet aspects, final CyNetwork network, final CxWriter w,
 			final Long consistency_group, final AspectElementCounts aspects_counts) {

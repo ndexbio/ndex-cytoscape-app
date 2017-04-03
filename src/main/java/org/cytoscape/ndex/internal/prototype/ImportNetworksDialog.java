@@ -25,57 +25,40 @@
  */
 package org.cytoscape.ndex.internal.prototype;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cxio.aspects.datamodels.*;
-import org.cxio.core.CxReader;
-import org.cxio.core.interfaces.AspectElement;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyRow;
-import org.cytoscape.model.CyTable;
-import org.cytoscape.model.subnetwork.CyRootNetwork;
-import org.cytoscape.model.subnetwork.CySubNetwork;
-import org.cytoscape.ndex.internal.cx_reader.CxToCy;
-import org.cytoscape.ndex.internal.cx_reader.ViewMaker;
+import java.awt.Component;
+import java.awt.Frame;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
+
+import org.cxio.aspects.datamodels.EdgeAttributesElement;
+import org.cxio.aspects.datamodels.EdgesElement;
+import org.cxio.aspects.datamodels.NetworkAttributesElement;
+import org.cxio.aspects.datamodels.NodeAttributesElement;
+import org.cxio.aspects.datamodels.NodesElement;
 import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
-import org.cytoscape.ndex.io.cxio.Aspect;
-import org.cytoscape.ndex.io.cxio.AspectSet;
-import org.cytoscape.ndex.io.cxio.CxImporter;
-import org.cytoscape.view.layout.CyLayoutAlgorithm;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
-import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.presentation.RenderingEngineManager;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
-import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.view.vizmap.VisualStyleFactory;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
 import org.ndexbio.model.object.CXSimplePathQuery;
-import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.List;
 
 /**
  *
  * @author David
  */
+@Deprecated 
 public class ImportNetworksDialog extends javax.swing.JDialog
 {
 
@@ -88,7 +71,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
     /**
      * Creates new form QueryNetwork
      */
-    public ImportNetworksDialog(Frame parent)
+    private ImportNetworksDialog(Frame parent)
     {
         super(parent, true);
         initComponents();
@@ -100,7 +83,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
      * @param parent
      * @param modal
      */
-    public ImportNetworksDialog(FindNetworksDialog parent, boolean modal)
+    private ImportNetworksDialog(FindNetworksDialog parent, boolean modal)
     {
         super(parent, modal);
         initComponents();
@@ -132,10 +115,10 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         this.setModal(true);
         this.getRootPane().setDefaultButton(load);
 
-        NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+    /*    NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
         networkNameLabel.setText(networkSummary.getName());
         networkNameField.setText(networkSummary.getName());
-        networkDetails.setText(networkSummary.getDescription());
+        networkDetails.setText(networkSummary.getDescription());*/
 
         //edgePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Edges [ 25 out of " + edgeCount + " ]"));
 
@@ -152,7 +135,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 		}
         if (success)
         {
-            UUID id = networkSummary.getExternalId();
+  //          UUID id = networkSummary.getExternalId();
       /*      PropertyGraphNetwork network = null;
             try
             {
@@ -522,8 +505,8 @@ public class ImportNetworksDialog extends javax.swing.JDialog
             String queryString = queryComboBox.getSelectedItem().toString();
             int depth = 1; // TODO: need to add control for depth
             int edgeLimit = 1500; // TODO: need to add control for edge limit?
-            NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
-            UUID id = networkSummary.getExternalId();
+     //       NetworkSummary networkSummary = NetworkManager.INSTANCE.getSelectedNetworkSummary();
+     //       UUID id = networkSummary.getExternalId();
 
        /*     try
             {
@@ -559,7 +542,7 @@ public class ImportNetworksDialog extends javax.swing.JDialog
 
     private boolean disableLoad = false;
 
-    private void load()
+ /*   private void load()
     {
         if (disableLoad)
         {
@@ -669,11 +652,11 @@ public class ImportNetworksDialog extends javax.swing.JDialog
         worker.execute();
         findNetworksDialog.setFocusOnDone();
         this.setVisible(false);
-    }
+    } */
 
     private void loadActionPerformed(java.awt.event.ActionEvent evt)
     {//GEN-FIRST:event_loadActionPerformed
-        load();
+   //     load();
     }
 
     private void writeStreamToFile(InputStream in, String fullFileName)

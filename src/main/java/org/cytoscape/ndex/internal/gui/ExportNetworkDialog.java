@@ -26,9 +26,22 @@
 
 package org.cytoscape.ndex.internal.gui;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.awt.Frame;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.UUID;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
+
 import org.cytoscape.group.CyGroupManager;
-import org.cytoscape.model.*;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNetworkTableManager;
+import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.ndex.internal.server.Server;
@@ -41,18 +54,12 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.ndexbio.model.exceptions.NdexException;
-import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.Permissions;
-import org.ndexbio.model.object.ProvenanceEvent;
+import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.*;
-import java.util.*;
-
-import org.ndexbio.model.object.ProvenanceEntity;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -108,12 +115,12 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     {
         return updateIsPossibleHelper() != null;
     }
+    
+    
     private NetworkSummary updateIsPossibleHelper()
     {
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
-        String sourceFormat = cyNetwork.getRow(cyNetwork).get("ndex:sourceFormat", String.class);
-        if( sourceFormat != null && !sourceFormat.trim().equals("Unknown") && !sourceFormat.trim().equals("XGMML") )
-            return null;
+
         CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
         CyRow r = rootNetwork.getRow(rootNetwork);
         String modificationTime = r.get("ndex:modificationTime", String.class);
@@ -240,7 +247,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         upload.setText("Upload Network To NDEx");
         upload.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
                 uploadActionPerformed(evt);
             }
@@ -249,7 +257,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         cancel.setText("Cancel");
         cancel.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
                 cancelActionPerformed(evt);
             }
@@ -258,7 +267,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         networkOrCollectionCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Save this network (default)", "Save complete collection" }));
         networkOrCollectionCombo.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
                 networkOrCollectionComboActionPerformed(evt);
             }
@@ -267,7 +277,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         updateCheckbox.setText("Update Existing");
         updateCheckbox.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
                 updateCheckboxActionPerformed(evt);
             }
@@ -352,7 +363,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void prepareToWriteNetworkToCXStream(CyNetwork cyNetwork, PipedOutputStream out)
+    private void prepareToWriteNetworkToCXStream(CyNetwork cyNetwork, PipedOutputStream out, boolean isUpdate)
     {
         VisualMappingManager vmm = CyObjectManager.INSTANCE.getVisualMappingManager();
         final CyNetworkViewManager nvm = CyObjectManager.INSTANCE.getNetworkViewManager();
@@ -360,7 +371,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         final CyGroupManager gm = CyObjectManager.INSTANCE.getCyGroupManager();
         final CyNetworkTableManager ntm = CyObjectManager.INSTANCE.getNetworkTableManager();
         final VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
-        CxNetworkWriter writer = new CxNetworkWriter(out, cyNetwork, vmm, nvm, nm, gm, ntm, lexicon );
+        CxNetworkWriter writer = new CxNetworkWriter(out, cyNetwork, vmm, nvm, nm, gm, ntm, lexicon, isUpdate );
         boolean writeEntireCollection = networkOrCollectionCombo.getSelectedIndex() == 1;
         writer.setWriteSiblings(writeEntireCollection);
         TaskIterator ti = new TaskIterator(writer);
@@ -432,7 +443,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                     int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION);
                     if (choice == JOptionPane.NO_OPTION)
                         return;
-                    prepareToWriteNetworkToCXStream(cyNetwork,out);
+                    prepareToWriteNetworkToCXStream(cyNetwork,out, true);
                     networkUUID = mal.createCXNetwork(in);
                 }
                 else
@@ -441,7 +452,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                     {
                         if( !networkHasBeenModifiedSinceDownload() )
                         {
-                            prepareToWriteNetworkToCXStream(cyNetwork,out);
+                            prepareToWriteNetworkToCXStream(cyNetwork,out,true);
                             networkUUID = mal.updateCXNetwork(UUID.fromString(networkId), in);
                             networkUpdated = true;
                             updateModificationTimeLocally();
@@ -466,12 +477,12 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                                     options[0]);
                             if (choice == JOptionPane.YES_OPTION)
                             {
-                                prepareToWriteNetworkToCXStream(cyNetwork, out);
+                                prepareToWriteNetworkToCXStream(cyNetwork, out,true);
                                 networkUUID = mal.createCXNetwork(in);
                             }
                             else if (choice == JOptionPane.NO_OPTION)
                             {
-                                prepareToWriteNetworkToCXStream(cyNetwork, out);
+                                prepareToWriteNetworkToCXStream(cyNetwork, out,true);
                                 networkUUID = mal.updateCXNetwork(UUID.fromString(networkId), in);
                                 networkUpdated = true;
                                 updateModificationTimeLocally();
@@ -489,14 +500,14 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                         int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
                         if( choice == JOptionPane.NO_OPTION )
                             return;
-                        prepareToWriteNetworkToCXStream(cyNetwork, out);
+                        prepareToWriteNetworkToCXStream(cyNetwork, out,true);
                         networkUUID = mal.createCXNetwork(in);
                     }
                 }
             }
             else
             {
-                prepareToWriteNetworkToCXStream(cyNetwork, out);
+                prepareToWriteNetworkToCXStream(cyNetwork, out, false);
                 networkUUID = mal.createCXNetwork(in);
             }
 
@@ -564,29 +575,33 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 return;
         }
 
-        final ProvenanceEntity finalOldProvenance = oldProvenance;
+ //       final ProvenanceEntity finalOldProvenance = oldProvenance;
 
-        final boolean finalNetworkUpdated = networkUpdated;
+ //       final boolean finalNetworkUpdated = networkUpdated;
         SwingWorker<Void, Void> worker = new SwingWorker<Void,Void>()
         {
 
             @Override
             protected Void doInBackground() throws Exception
             {
-                try
+             /*   try
                 {
+             
                     ProvenanceEntity cytoscapeProvenance = mal.getNetworkProvenance( networkId );
+              
                     ProvenanceEvent creationEvent = cytoscapeProvenance.getCreationEvent();
                     if( finalOldProvenance != null )
                         creationEvent.addInput(finalOldProvenance);
                     String eventType = finalNetworkUpdated ? "Cytoscape Update" : "Cytoscape Upload";
                     creationEvent.setEventType(eventType);
                     mal.setNetworkProvenance(networkId, cytoscapeProvenance );
+                    
+                    
                 }
                 catch (IOException ex)
                 {
                     ex.printStackTrace();
-                }
+                } */
                 return null;
             }
         };
@@ -628,12 +643,12 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
+ /*   public static void main(String args[]) {
+        // Set the Nimbus look and feel 
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+        // If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+        // For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -653,7 +668,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         //</editor-fold>
         //</editor-fold>
 
-        /* Create and display the dialog */
+        // Create and display the dialog 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 ExportNetworkDialog dialog = new ExportNetworkDialog(new javax.swing.JFrame());
@@ -666,7 +681,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                 dialog.setVisible(true);
             }
         });
-    }
+    } */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancel;

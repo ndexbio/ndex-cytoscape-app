@@ -23,8 +23,9 @@ public class CxNetworkWriterFactory implements CyNetworkViewWriterFactory {
     private final CyNetworkManager      _network_manager;
     private final CyGroupManager        _group_manager;
     private final CyNetworkTableManager _table_manager;
+    private boolean isUpdate;
 
-    public CxNetworkWriterFactory(final CyFileFilter filter) {
+    public CxNetworkWriterFactory(final CyFileFilter filter, boolean isUpdate) {
         _filter = filter;
         _visual_mapping_manager = null;
         _application_manager = null;
@@ -32,6 +33,7 @@ public class CxNetworkWriterFactory implements CyNetworkViewWriterFactory {
         _network_manager = null;
         _group_manager = null;
         _table_manager = null;
+        this.isUpdate = isUpdate;
     }
 
     public CxNetworkWriterFactory(final CyFileFilter filter,
@@ -65,7 +67,8 @@ public class CxNetworkWriterFactory implements CyNetworkViewWriterFactory {
                                        _network_manager,
                                        _group_manager,
                                        _table_manager,
-                                       lexicon);
+                                       lexicon, 
+                                       isUpdate);
         }
         else {
             throw new IllegalStateException("visual_mapping_manager and/or application_manager or null");
@@ -90,7 +93,8 @@ public class CxNetworkWriterFactory implements CyNetworkViewWriterFactory {
                                        _network_manager,
                                        _group_manager,
                                        _table_manager,
-                                       lexicon);
+                                       lexicon,
+                                       isUpdate);
 
         }
         throw new IllegalStateException("visual_mapping_manager and/or application_manager or null");

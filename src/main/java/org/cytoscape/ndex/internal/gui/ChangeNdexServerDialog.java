@@ -162,7 +162,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         jScrollPane2 = new javax.swing.JScrollPane();
         serverInformation = new javax.swing.JTextArea();
         jScrollPane3 = new javax.swing.JScrollPane();
-        guiServerList = new javax.swing.JList();
+        guiServerList = new javax.swing.JList<>();
         jLabel1 = new javax.swing.JLabel();
         edit = new javax.swing.JButton();
 
@@ -172,18 +172,20 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         add.setText("Add");
         add.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                addActionPerformed(evt);
+                addActionPerformed();
             }
         });
 
         copy.setText("Copy");
         copy.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                copyActionPerformed(evt);
+                copyActionPerformed();
             }
         });
 
@@ -191,9 +193,10 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         delete.setEnabled(false);
         delete.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                deleteActionPerformed(evt);
+                deleteActionPerformed();
             }
         });
 
@@ -220,7 +223,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                cancelActionPerformed(evt);
+                cancelActionPerformed();
             }
         });
 
@@ -233,8 +236,10 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         guiServerList.setModel(new javax.swing.AbstractListModel()
         {
             String[] strings = { "Source 1", "Source 2", "Source 3", "Source 4", "Source 5", "Source 6", "Source 7", "Source 8", "Source 9", "Source 10" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
+            @Override
+			public int getSize() { return strings.length; }
+            @Override
+			public Object getElementAt(int i) { return strings[i]; }
         });
         guiServerList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane3.setViewportView(guiServerList);
@@ -246,7 +251,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                editActionPerformed(evt);
+                editActionPerformed();
             }
         });
 
@@ -309,16 +314,16 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void copyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyActionPerformed
+    private void copyActionPerformed() {//GEN-FIRST:event_copyActionPerformed
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
-        Server copy = new Server(selectedServer);
+        Server copied = new Server(selectedServer);
         ServerList servers = ServerManager.INSTANCE.getAvailableServers();
         String copyName = servers.findNextAvailableName( selectedServer.getName() );
-        copy.setName( copyName );
-        copy.setType(Server.Type.ADDED);
+        copied.setName( copyName );
+        copied.setType(Server.Type.ADDED);
         try
         {
-            servers.add(copy);
+            servers.add(copied);
             servers.save();
         }
         catch (Exception ex)
@@ -368,14 +373,14 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         }
     }//GEN-LAST:event_connectActionPerformed
 
-    private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
+    private void addActionPerformed() {//GEN-FIRST:event_addActionPerformed
         AddEditServerDialog dialog = new AddEditServerDialog(this);
         dialog.setMode(AddEditServerDialog.Mode.ADD);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }//GEN-LAST:event_addActionPerformed
 
-    private void editActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editActionPerformed
+    private void editActionPerformed()//GEN-FIRST:event_editActionPerformed
     {//GEN-HEADEREND:event_editActionPerformed
         AddEditServerDialog dialog = new AddEditServerDialog(this);
         dialog.setMode(AddEditServerDialog.Mode.EDIT);
@@ -383,12 +388,12 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         dialog.setVisible(true);
     }//GEN-LAST:event_editActionPerformed
 
-    private void cancelActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelActionPerformed
+    private void cancelActionPerformed()//GEN-FIRST:event_cancelActionPerformed
     {//GEN-HEADEREND:event_cancelActionPerformed
         setVisible(false);
     }//GEN-LAST:event_cancelActionPerformed
 
-    private void deleteActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_deleteActionPerformed
+    private void deleteActionPerformed()//GEN-FIRST:event_deleteActionPerformed
     {//GEN-HEADEREND:event_deleteActionPerformed
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         ServerList servers = ServerManager.INSTANCE.getAvailableServers();
@@ -469,7 +474,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
     private javax.swing.JButton copy;
     private javax.swing.JButton delete;
     private javax.swing.JButton edit;
-    private javax.swing.JList guiServerList;
+    private javax.swing.JList<Server> guiServerList;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;

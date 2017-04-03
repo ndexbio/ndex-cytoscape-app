@@ -27,37 +27,26 @@
 package org.cytoscape.ndex.internal.singletons;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
-
-import org.ndexbio.model.object.network.NetworkSummary;
 
 
 public enum NetworkManager
 {
     INSTANCE;
-    private NetworkSummary selectedNetworkSummary;
+//    private NetworkSummary selectedNetworkSummary;
     
-    private final Map<UUID, CXInfoHolder> cxNetworkInfoTable;
+    private final Map<Long, CXInfoHolder> cxNetworkInfoTable;
     
     NetworkManager() { cxNetworkInfoTable = new TreeMap<>();}
-
-    public NetworkSummary getSelectedNetworkSummary()
-    {
-        return selectedNetworkSummary;
-    }
-
-    public void setSelectedNetworkSummary(NetworkSummary selectedNetworkSummary)
-    {
-        this.selectedNetworkSummary = selectedNetworkSummary;
+ 
+    public CXInfoHolder getCXInfoHolder(Long subNetworkId) {
+    	return this.cxNetworkInfoTable.get(subNetworkId);
     }
     
-    public CXInfoHolder getCXInfoHolder(UUID uuid) {
-    	return this.cxNetworkInfoTable.get(uuid);
+    public void setCXInfoHolder(Long subNetworkId, CXInfoHolder cxInfoHolder) {
+    	this.cxNetworkInfoTable.put(subNetworkId, cxInfoHolder);
     }
     
-    public void setCXInfoHolder(UUID uuid, CXInfoHolder cxInfoHolder) {
-    	this.cxNetworkInfoTable.put(uuid, cxInfoHolder);
+    public void deleteCyNetworkEntry(Long subNetworkId) {
+    	this.cxNetworkInfoTable.remove(subNetworkId);
     }
-    
-
 }

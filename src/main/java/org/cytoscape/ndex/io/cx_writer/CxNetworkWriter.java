@@ -46,6 +46,7 @@ public class CxNetworkWriter implements CyWriter {
     private final CyNetworkViewManager _networkview_manager;
     private final CyGroupManager       _group_manager;
     private boolean                    _write_siblings;
+    private boolean isUpdate;
 
     public CxNetworkWriter(final OutputStream os,
                            final CyNetwork network,
@@ -54,7 +55,8 @@ public class CxNetworkWriter implements CyWriter {
                            final CyNetworkManager network_manager,
                            final CyGroupManager group_manager,
                            final CyNetworkTableManager table_manager,
-                           final VisualLexicon lexicon) {
+                           final VisualLexicon lexicon,
+                           boolean isUpdate) {
 
         _visual_mapping_manager = visual_mapping_manager;
         _networkview_manager = networkview_manager;
@@ -63,6 +65,7 @@ public class CxNetworkWriter implements CyWriter {
         _network = network;
         _group_manager = group_manager;
         _write_siblings = WRITE_SIBLINGS_DEFAULT;
+        this.isUpdate = isUpdate;
 
         if (Charset.isSupported(ENCODING)) {
             // UTF-8 is supported by system
@@ -115,13 +118,13 @@ public class CxNetworkWriter implements CyWriter {
         final long t0 = System.currentTimeMillis();
 
         if (TimingUtil.WRITE_TO_DEV_NULL) {
-            exporter.writeNetwork(_network, _write_siblings, aspects, new FileOutputStream(new File("/dev/null")));
+            exporter.writeNetwork(_network, _write_siblings, aspects, new FileOutputStream(new File("/dev/null")),isUpdate);
         }
         else if (TimingUtil.WRITE_TO_BYTE_ARRAY_OUTPUTSTREAM) {
-            exporter.writeNetwork(_network, _write_siblings, aspects, new ByteArrayOutputStream());
+            exporter.writeNetwork(_network, _write_siblings, aspects, new ByteArrayOutputStream(), isUpdate);
         }
         else {
-            exporter.writeNetwork(_network, _write_siblings, aspects, _os);
+            exporter.writeNetwork(_network, _write_siblings, aspects, _os, isUpdate);
             _os.close();
         }
 

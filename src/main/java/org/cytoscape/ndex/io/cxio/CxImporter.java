@@ -2,11 +2,8 @@ package org.cytoscape.ndex.io.cxio;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.cxio.aspects.datamodels.CartesianLayoutElement;
 import org.cxio.aspects.datamodels.EdgeAttributesElement;
@@ -14,23 +11,15 @@ import org.cxio.aspects.datamodels.EdgesElement;
 import org.cxio.aspects.datamodels.NetworkAttributesElement;
 import org.cxio.aspects.datamodels.NodeAttributesElement;
 import org.cxio.aspects.datamodels.NodesElement;
-import org.cxio.aspects.datamodels.SubNetworkElement;
+import org.cxio.aspects.readers.GeneralAspectFragmentReader;
 import org.cxio.core.CxElementReader2;
-import org.cxio.core.CxReader;
 import org.cxio.core.interfaces.AspectElement;
 import org.cxio.core.interfaces.AspectFragmentReader;
 import org.cxio.metadata.MetaDataCollection;
-import org.cxio.misc.OpaqueElement;
-import org.ndexbio.model.cx.CitationElement;
-import org.ndexbio.model.cx.EdgeCitationLinksElement;
-import org.ndexbio.model.cx.EdgeSupportLinksElement;
-import org.ndexbio.model.cx.FunctionTermElement;
+import org.cxio.metadata.MetaDataElement;
 import org.ndexbio.model.cx.NdexNetworkStatus;
 import org.ndexbio.model.cx.NiceCXNetwork;
-import org.ndexbio.model.cx.NodeCitationLinksElement;
-import org.ndexbio.model.cx.NodeSupportLinksElement;
 import org.ndexbio.model.cx.Provenance;
-import org.ndexbio.model.cx.SupportElement;
 
 /**
  * This class is for de-serializing CX formatted networks, views, and attribute
@@ -119,6 +108,9 @@ public final class CxImporter {
         for (final AspectFragmentReader reader : aspects.getCySupportedAspectFragmentReaders()) {
             all_readers.add(reader);
         }
+        
+		all_readers.add(new GeneralAspectFragmentReader (Provenance.ASPECT_NAME,Provenance.class));
+
         
     }
 
@@ -249,14 +241,35 @@ public final class CxImporter {
      					CartesianLayoutElement e = (CartesianLayoutElement)elmt;
      					niceCX.addNodeAssociatedAspectElement(e.getNode(), e);
      					break;
+     				case Provenance.ASPECT_NAME:
+     					Provenance prov = (Provenance) elmt;
+     					niceCX.setProvenance(prov);
+     					break;
      				default:    // opaque aspect
      					niceCX.addOpapqueAspect(elmt);
      			}
 
      	} 
      	
-     	MetaDataCollection postMetaData = r.getPostMetaData();
-     	
+     	MetaDataCollection postmetadata = r.getPostMetaData();
+  	    if ( postmetadata !=null) {
+		  if( metadata == null) {
+			  metadata = postmetadata;
+		  } else {
+			  for (MetaDataElement e : postmetadata.toCollection()) {
+				  Long cnt = e.getIdCounter();
+				  if ( cnt !=null) {
+					 metadata.setIdCounter(e.getName(),cnt);
+				  }
+				  cnt = e.getElementCount() ;
+				  if ( cnt !=null) {
+						 metadata.setElementCount(e.getName(),cnt);
+				  }
+			  }
+		  }
+	    }
+  	    
+  	    niceCX.setMetadata(metadata);
         
         return niceCX;
     }

@@ -56,7 +56,15 @@ public final class CxToCy {
     private VisualElementCollectionMap _visual_element_collections;
     private Map<Long, Long>            _network_suid_to_networkrelations_map;
     private Map<Long, CyNode>          _cxid_to_cynode_map;
-    private Map<Long, CyEdge>          _cxid_to_cyedge_map;
+    public Map<Long, CyNode> get_cxid_to_cynode_map() {
+		return _cxid_to_cynode_map;
+	}
+
+	public Map<Long, CyEdge> get_cxid_to_cyedge_map() {
+		return _cxid_to_cyedge_map;
+	}
+
+	private Map<Long, CyEdge>          _cxid_to_cyedge_map;
     private Map<Long, Long>            _view_to_subnet_map;
     private Map<Long, List<Long>>      _subnet_to_views_map;
     
