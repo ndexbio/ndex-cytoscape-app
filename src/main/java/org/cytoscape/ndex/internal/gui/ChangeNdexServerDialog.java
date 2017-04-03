@@ -221,7 +221,8 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         cancel.setText("Cancel");
         cancel.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
                 cancelActionPerformed();
             }
@@ -235,7 +236,11 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
 
         guiServerList.setModel(new javax.swing.AbstractListModel()
         {
-            String[] strings = { "Source 1", "Source 2", "Source 3", "Source 4", "Source 5", "Source 6", "Source 7", "Source 8", "Source 9", "Source 10" };
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+			String[] strings = { "Source 1", "Source 2", "Source 3", "Source 4", "Source 5", "Source 6", "Source 7", "Source 8", "Source 9", "Source 10" };
             @Override
 			public int getSize() { return strings.length; }
             @Override
@@ -249,7 +254,8 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         edit.setText("Edit");
         edit.addActionListener(new java.awt.event.ActionListener()
         {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
+            @Override
+			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
                 editActionPerformed();
             }

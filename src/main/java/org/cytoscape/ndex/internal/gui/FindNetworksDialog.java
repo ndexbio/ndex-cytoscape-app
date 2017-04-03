@@ -35,18 +35,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 
 import org.cxio.aspects.datamodels.CartesianLayoutElement;
+import org.cxio.aspects.datamodels.CyGroupsElement;
+import org.cxio.aspects.datamodels.CyTableColumnElement;
+import org.cxio.aspects.datamodels.CyViewsElement;
+import org.cxio.aspects.datamodels.CyVisualPropertiesElement;
+import org.cxio.aspects.datamodels.HiddenAttributesElement;
 import org.cxio.aspects.datamodels.SubNetworkElement;
-import org.cxio.core.CxReader;
 import org.cxio.core.interfaces.AspectElement;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -64,8 +69,6 @@ import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
-import org.cytoscape.ndex.io.cxio.Aspect;
-import org.cytoscape.ndex.io.cxio.AspectSet;
 import org.cytoscape.ndex.io.cxio.CxImporter;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
@@ -80,13 +83,8 @@ import org.cytoscape.work.TaskManager;
 import org.ndexbio.model.cx.NiceCXNetwork;
 import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexPropertyValuePair;
-import org.ndexbio.model.object.Permissions;
-import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -165,7 +163,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 		}
     }
 
-    private void createCyNetworkFromCX(InputStream cxStream, NetworkSummary networkSummary, boolean stopLayout) throws IOException
+    private void createCyNetworkFromCX(InputStream cxStream, NetworkSummary networkSummary/*, boolean stopLayout*/) throws IOException
     {
 
         //Create the CyNetwork to copy to.
@@ -190,7 +188,18 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         	cxInfoHolder.addEdgeMapping(entry.getValue().getSUID(), entry.getKey());
         }
         
-        cxInfoHolder.setOpaqueAspectsTable(niceCX.getOpaqueAspectTable());
+        cxInfoHolder.setOpaqueAspectsTable(
+        		niceCX.getOpaqueAspectTable().entrySet().stream()
+        		  .filter(map -> (!map.getKey().equals(SubNetworkElement.ASPECT_NAME) &&
+        				          !map.getKey().equals(CyGroupsElement.ASPECT_NAME))&&
+        				          !map.getKey().equals(CyViewsElement.ASPECT_NAME) &&
+        				          !map.getKey().equals(CyVisualPropertiesElement.ASPECT_NAME) &&
+        				          !map.getKey().equals(CartesianLayoutElement.ASPECT_NAME) && 
+        				          !map.getKey().equals(CyTableColumnElement.ASPECT_NAME) &&
+        				          !map.getKey().equals(HiddenAttributesElement.ASPECT_NAME)
+        				          )
+        		  .collect(Collectors.toMap( p -> p.getKey(), p -> p.getValue())));
+        
         cxInfoHolder.setProvenance(niceCX.getProvenance());
         cxInfoHolder.setMetadata(niceCX.getMetadata());
         cxInfoHolder.setNetworkId(networkSummary.getExternalId());
@@ -208,10 +217,10 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 
         //last ndex property is ndex:provenance
         CyTable networkTable = rootNetwork.getDefaultNetworkTable();
-        if (networkTable.getColumn("ndex:provenance") == null)
+      /*  if (networkTable.getColumn("ndex:provenance") == null)
         {
             networkTable.createColumn("ndex:provenance", String.class, false);
-        }
+        } */
         CyRow cyRow = rootNetwork.getRow(rootNetwork);
     //    ObjectMapper objectMapper = new ObjectMapper();
     //    JsonNode provenanceJson = objectMapper.valueToTree(provenance);
@@ -253,7 +262,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             	cyNetworkView = v;
             	break;
             }
-            if( doLayout && !stopLayout)
+            if( doLayout ) // && !stopLayout)
             {
                 CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
                 CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
@@ -292,7 +301,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             if (choice == JOptionPane.NO_OPTION)
                 return;
         }
-        final boolean finalLargeNetwork = largeNetwork;
+//        final boolean finalLargeNetwork = largeNetwork;
 
         final Component me = this;
        // final boolean isLargeNetwork = largeNetwork;
@@ -317,7 +326,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                         {
                      //       ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
                             InputStream cxStream = mal.getNetworkAsCXStream(id.toString());
-                            createCyNetworkFromCX(cxStream, networkSummary, finalLargeNetwork);
+                            createCyNetworkFromCX(cxStream, networkSummary); //, finalLargeNetwork);
                        //     me.setVisible(false);
                         }
                         catch (IOException ex)
@@ -367,7 +376,6 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Find Networks");
-        FindNetworksDialog me = this;
         resultsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][]
             {
@@ -407,7 +415,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                 int selectedIndex = resultsTable.getSelectedRow();
                 if( selectedIndex == -1 )
                 {
-                    JOptionPane.showMessageDialog(me, ErrorMessage.noNetworkSelected, "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog((Component)evt.getSource(), ErrorMessage.noNetworkSelected, "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 NetworkSummary ns = displayedNetworkSummaries.get(selectedIndex);
             //    NetworkManager.INSTANCE.setSelectedNetworkSummary(ns);
@@ -442,7 +450,14 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             @Override
 			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                administeredByMeActionPerformed();
+            	JCheckBox cb = (JCheckBox)evt.getSource();
+            	searchField.setEnabled(!cb.isSelected());
+            	if ( cb.isSelected()) {
+            	   getMyNetworks();	
+                   //administeredByMeActionPerformed();
+            	} else {
+            		search();
+            	}
             }
         });
 

@@ -2,7 +2,9 @@ package org.cytoscape.ndex.io.cxio;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -245,12 +247,11 @@ public final class CxExporter {
         
         ProvenanceEntity oldProvenanceEntity = (cxInfoHolder !=null ? cxInfoHolder.getProvenance().getEntity() : null); 
         
-        ProvenanceEvent creationEvent = cytoscapeProvenance.getEntity().getCreationEvent();
+        ProvenanceEvent creationEvent = new ProvenanceEvent((isUpdate ? "Cytoscape Update" : "Cytoscape Upload"),
+        		     new Timestamp(Calendar.getInstance().getTimeInMillis() ));
         if( oldProvenanceEntity != null )
             creationEvent.addInput(oldProvenanceEntity);
-        
-        String eventType = isUpdate ? "Cytoscape Update" : "Cytoscape Upload";
-        creationEvent.setEventType(eventType);
+        cytoscapeProvenance.getEntity().setCreationEvent(creationEvent);
         
         final List<AspectElement> provAspect = new ArrayList<>(1);
         provAspect.add(cytoscapeProvenance);

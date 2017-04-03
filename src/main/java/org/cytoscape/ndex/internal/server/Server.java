@@ -119,7 +119,7 @@ public class Server
         description = s.description;
     }
     
-    public String show()
+ /*   public String show()
     {
         String result = "";
         result += "Name: " + name +"\n";
@@ -130,17 +130,17 @@ public class Server
         result += "Authenticated: " + authenticated +"\n";
         result += "UUID: " + userId +"\n";
         return result;
-    }
+    } */
     
     public String getHeader()
     {
-        if( username == null )
-            username = "None";
+    	String userNameStr = 
+         username == null ? "None" : username;
         
         String header = "NDEx Source Information\n===============\n";
         header += "Name: " + name + "\n";
         header += "URL: " + url + "\n";
-        header += "Username: " + username + "\n";
+        header += "Username: " + userNameStr + "\n";
         if( description != null )
         {
             header += "\n";
