@@ -44,7 +44,12 @@ import javax.swing.*;
  */
 public class ExportCurrentNetworkMenuAction extends AbstractCyAction
 {
-    public ExportCurrentNetworkMenuAction(String menuTitle, CyApplicationManager applicationManager)
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ExportCurrentNetworkMenuAction(String menuTitle, CyApplicationManager applicationManager)
     {
         super(menuTitle, applicationManager, null, null);
         // We want this menu item to appear under the App|NDEx menu. The actual name of the menu item is set in

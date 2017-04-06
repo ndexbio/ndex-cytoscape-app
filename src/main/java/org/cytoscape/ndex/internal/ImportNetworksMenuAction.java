@@ -27,14 +27,13 @@
 package org.cytoscape.ndex.internal;
 
 import java.awt.event.ActionEvent;
+
+import javax.swing.JFrame;
+
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
-import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
-import org.cytoscape.ndex.internal.singletons.ServerManager;
-
-import javax.swing.*;
 
 /**
  *
@@ -43,7 +42,13 @@ import javax.swing.*;
  */
 public class ImportNetworksMenuAction extends AbstractCyAction
 {
-    public ImportNetworksMenuAction(String menuTitle, CyApplicationManager applicationManager)
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+
+	public ImportNetworksMenuAction(String menuTitle, CyApplicationManager applicationManager)
     {
         super(menuTitle, applicationManager, null, null);
         // We want this menu item to appear under the App|NDEx menu. The actual name of the menu item is set in
