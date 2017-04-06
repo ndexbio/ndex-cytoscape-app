@@ -98,7 +98,7 @@ public enum CyObjectManager
     }
     public VisualLexicon getDefaultVisualLexicon() { return adapter.getRenderingEngineManager().getDefaultVisualLexicon(); }
     public JFrame getApplicationFrame() { return adapter.getCySwingApplication().getJFrame(); }
-    public TaskManager getTaskManager() { return adapter.getDialogTaskManager(); }
+    public DialogTaskManager getTaskManager() { return adapter.getDialogTaskManager(); }
     public CyLayoutAlgorithmManager getLayoutAlgorithmManager() { return adapter.getCyLayoutAlgorithmManager(); }
     public VisualMappingManager getVisualMappingManager() { return adapter.getVisualMappingManager(); }
     public CyGroupManager getCyGroupManager() { return adapter.getCyGroupManager(); }

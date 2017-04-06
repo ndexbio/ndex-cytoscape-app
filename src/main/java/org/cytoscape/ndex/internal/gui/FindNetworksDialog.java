@@ -77,9 +77,11 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.swing.DialogTaskManager;
 import org.ndexbio.model.cx.NiceCXNetwork;
 import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexPropertyValuePair;
@@ -215,28 +217,6 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         String collectionName = networkSummary.getName();
         rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, collectionName);
 
-        //last ndex property is ndex:provenance
-        CyTable networkTable = rootNetwork.getDefaultNetworkTable();
-      /*  if (networkTable.getColumn("ndex:provenance") == null)
-        {
-            networkTable.createColumn("ndex:provenance", String.class, false);
-        } */
-        CyRow cyRow = rootNetwork.getRow(rootNetwork);
-    //    ObjectMapper objectMapper = new ObjectMapper();
-    //    JsonNode provenanceJson = objectMapper.valueToTree(provenance);
-    //    cyRow.set("ndex:provenance", provenanceJson.toString());
-
-        if (networkTable.getColumn("ndex:uuid") == null)
-        {
-            networkTable.createColumn("ndex:uuid", String.class, false);
-        }
-        cyRow.set("ndex:uuid", networkSummary.getExternalId().toString());
-
-        if (networkTable.getColumn("ndex:modificationTime") == null)
-        {
-            networkTable.createColumn("ndex:modificationTime", String.class, false);
-        }
-        cyRow.set("ndex:modificationTime", networkSummary.getModificationTime().toString());
 
         if( networks.size() == 1 )
         {
@@ -256,8 +236,10 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             VisualMappingFunctionFactory vmffd = CyObjectManager.INSTANCE.getVisualMappingFunctionDiscreteFactory();
             VisualMappingFunctionFactory vmffp = CyObjectManager.INSTANCE.getVisualMappingFunctionPassthroughFactory();
 
-            Map<CyNetworkView, Boolean> cyNetworkViewMap = ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp);
-            CyNetworkView cyNetworkView = null;
+           // Map<CyNetworkView, Boolean> cyNetworkViewMap = 
+            CyNetworkView cyNetworkView =
+            		ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp, doLayout);
+       /*     CyNetworkView cyNetworkView = null;
             for ( CyNetworkView v : cyNetworkViewMap.keySet()) {
             	cyNetworkView = v;
             	break;
@@ -267,14 +249,15 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                 CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
                 CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
                 TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
-                TaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
+                DialogTaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
                 tm.execute(ti);
                 cyNetworkView.updateView();
             }
-            vmm.getCurrentVisualStyle().apply(cyNetworkView);
+            VisualStyle currentStyle = vmm.getCurrentVisualStyle();
+            currentStyle.apply(cyNetworkView);
             if( cyNetworkView != null )
                 cyNetworkView.updateView();
-
+            */
 
             CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
         }

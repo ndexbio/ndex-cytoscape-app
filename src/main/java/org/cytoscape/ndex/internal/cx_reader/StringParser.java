@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 public final class StringParser {
-    private final Map<String, String> _data = new HashMap<String, String>();
+    private final Map<String, String> _data = new HashMap<>();
 
     public StringParser(final String str) {
         final StringTokenizer t = new StringTokenizer(str, ",");

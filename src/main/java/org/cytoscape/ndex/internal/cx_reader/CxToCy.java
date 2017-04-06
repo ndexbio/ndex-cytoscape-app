@@ -122,7 +122,7 @@ public final class CxToCy {
      * @param networks_relations
      * @return
      */
-    public final static Set<Long> getAllSubNetworkParentNetworkIds(final Collection<AspectElement> networks_relations) {
+    private final static Set<Long> getAllSubNetworkParentNetworkIds(final Collection<AspectElement> networks_relations) {
         final Set<Long> parents = new HashSet<>();
         for (final AspectElement e : networks_relations) {
             final NetworkRelationsElement nwe = (NetworkRelationsElement) e;
@@ -473,7 +473,7 @@ public final class CxToCy {
                     else if (vpe.getProperties_of().equals(VisualPropertyType.EDGES.asString())) {
                         Long applies_to_edge = vpe.getApplies_to();
                             _edges_with_visual_properties.add(_cxid_to_cyedge_map.get(applies_to_edge));
-                            _visual_element_collections.addEdgeVisualPropertiesElement(view,
+                            _visual_element_collections.addEdgeVisualPropertiesElement(subnetwork_id, //view,
                                                                                        _cxid_to_cyedge_map
                                                                                                .get(applies_to_edge),
                                                                                        vpe);

@@ -30,6 +30,7 @@ import java.awt.Frame;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.swing.JFrame;
@@ -45,7 +46,9 @@ import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.ndex.internal.server.Server;
+import org.cytoscape.ndex.internal.singletons.CXInfoHolder;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
+import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.io.cx_writer.CxNetworkWriter;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -120,31 +123,33 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     private NetworkSummary updateIsPossibleHelper()
     {
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
+        
+        CXInfoHolder cxInfo = NetworkManager.INSTANCE.getCXInfoHolder(cyNetwork.getSUID());
+        if ( cxInfo == null)
+        	return null;
 
+        /*
+        
         CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
         CyRow r = rootNetwork.getRow(rootNetwork);
         String modificationTime = r.get("ndex:modificationTime", String.class);
         String networkId = r.get("ndex:uuid", String.class);
         if( modificationTime == null || networkId == null )
-            return null;
+            return null;*/ 
+        
+        
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        UUID userId = ServerManager.INSTANCE.getSelectedServer().getUserId();
+
         try
         {
-            java.util.List<NetworkSummary> writeableNetworks = mal.findNetworks("", null, Permissions.WRITE, false, 0, 10000).getNetworks();
-            boolean networkFoundAmongWriteableNetworks = false;
-            for( NetworkSummary ns : writeableNetworks)
-            {
-                if( networkId.equals(ns.getExternalId().toString()) )
-                {
-                    networkFoundAmongWriteableNetworks = true;
-                    break;
-                }
-            }
-            if( !networkFoundAmongWriteableNetworks )
-                return null;
+        	Map<String, Permissions> permissionTable = mal.getUserNetworkPermission(userId, cxInfo.getNetworkId(), false);
+        	if (  permissionTable== null || permissionTable.get(cxInfo.getNetworkId().toString()) == Permissions.READ )
+        		return null;
+        	
         }
-        catch (IOException | NdexException e)
+        catch (IOException e)
         {
             return null;
         }
@@ -152,7 +157,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         NetworkSummary ns = null;
         try
         {
-            ns = mal.getNetworkSummaryById(networkId);
+            ns = mal.getNetworkSummaryById(cxInfo.getNetworkId().toString());
          //   if( ns.getReadOnlyCacheId() != -1L || ns.getReadOnlyCommitId() != -1L )
          //       return null;
         }
@@ -166,7 +171,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         }
         return ns;
     }
-
+/*
     private void updateModificationTimeLocally()
     {
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
@@ -189,7 +194,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         }
         r.set("ndex:modificationTime", ns.getModificationTime().toString());
     }
-
+*/
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -398,13 +403,13 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 
         CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
 
-        CyTable networkTable = cyNetwork.getDefaultNetworkTable();
+ /*       CyTable networkTable = cyNetwork.getDefaultNetworkTable();
         String sourceFormat = null;
         if (networkTable.getColumn("ndex:sourceFormat") != null)
         {
             sourceFormat = cyNetwork.getRow(cyNetwork).get("ndex:sourceFormat", String.class);
             networkTable.deleteColumn("ndex:sourceFormat");
-        }
+        } */
 
 
         String collectionName = rootNetwork.getRow(rootNetwork).get(CyNetwork.NAME, String.class);
@@ -424,7 +429,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         PipedOutputStream out = null;
 
         UUID networkUUID = null;
-        boolean networkUpdated = false;
+  //      boolean networkUpdated = false;
         try
         {
             in = new PipedInputStream();
@@ -432,31 +437,18 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 
             if( updateCheckbox.isSelected() )
             {
-                String networkId = rootNetwork.getRow(rootNetwork).get("ndex:uuid", String.class);
-                if (networkId == null)
-                {
-                    JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-                    String msg  = "You indicated that you would like to update an existing network.\n";
-                           msg += "But the network UUID is missing.\n";
-                           msg += "Would you like to proceed anyway by creating a new network instead of updating?";
-                    String dialogTitle = "Proceed?";
-                    int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION);
-                    if (choice == JOptionPane.NO_OPTION)
-                        return;
-                    prepareToWriteNetworkToCXStream(cyNetwork,out, true);
-                    networkUUID = mal.createCXNetwork(in);
-                }
-                else
-                {
+                  UUID networkId = NetworkManager.INSTANCE.getCXInfoHolder(cyNetwork.getSUID()).getNetworkId(); 
+                
                     if (updateIsPossible())
                     {
-                        if( !networkHasBeenModifiedSinceDownload() )
-                        {
+               //         if( !networkHasBeenModifiedSinceDownload() )
+               //         {
                             prepareToWriteNetworkToCXStream(cyNetwork,out,true);
-                            networkUUID = mal.updateCXNetwork(UUID.fromString(networkId), in);
-                            networkUpdated = true;
-                            updateModificationTimeLocally();
-                        }
+                            mal.updateCXNetwork(networkId, in);
+                            networkUUID = networkId;
+   //                         networkUpdated = true;
+               //             updateModificationTimeLocally();
+               /*         }
                         else
                         {
                             JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
@@ -489,7 +481,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                             }
                             else //choice == JOptionPane.CANCEL_OPTION
                                 return;
-                        }
+                        } */
                     }
                     else
                     {
@@ -500,10 +492,10 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
                         int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
                         if( choice == JOptionPane.NO_OPTION )
                             return;
-                        prepareToWriteNetworkToCXStream(cyNetwork, out,true);
+                        prepareToWriteNetworkToCXStream(cyNetwork, out,false);
                         networkUUID = mal.createCXNetwork(in);
                     }
-                }
+                
             }
             else
             {
@@ -535,11 +527,11 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             }
             rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, collectionName );
             cyNetwork.getRow(cyNetwork).set(CyNetwork.NAME, networkName);
-            if( sourceFormat != null )
+        /*    if( sourceFormat != null )
             {
                 networkTable.createColumn("ndex:sourceFormat", String.class, false);
                 cyNetwork.getRow(cyNetwork).set("ndex:sourceFormat", sourceFormat);
-            }
+            } */
             CyObjectManager.INSTANCE.getApplicationFrame().revalidate();
         }
 
@@ -551,10 +543,10 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             return;
         }
 
-        final String networkId = networkUUID.toString();
+   //     final String networkId = networkUUID.toString();
 
         //Provenance
-        String provenanceString = rootNetwork.getRow(rootNetwork).get("ndex:provenance", String.class);
+  /*      String provenanceString = rootNetwork.getRow(rootNetwork).get("ndex:provenance", String.class);
         ObjectMapper objectMapper = new ObjectMapper();
 
         ProvenanceEntity oldProvenance = null;
@@ -573,7 +565,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION );
             if( choice == JOptionPane.NO_OPTION )
                 return;
-        }
+        } */
 
  //       final ProvenanceEntity finalOldProvenance = oldProvenance;
 

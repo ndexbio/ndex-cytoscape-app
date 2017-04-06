@@ -1066,7 +1066,7 @@ public final class CxExporter {
         
         // Write root table
         if ( write_siblings)
-        	writeNetworkAttributesHelper( CyNetwork.DEFAULT_ATTRS, my_root, elements,write_siblings);
+        	writeNetworkAttributesHelper( CyNetwork.DEFAULT_ATTRS, my_root, elements,false);
 
         for (final CySubNetwork subnet : subnets) {
             writeNetworkAttributesHelper( CyNetwork.DEFAULT_ATTRS, subnet, elements,write_siblings);

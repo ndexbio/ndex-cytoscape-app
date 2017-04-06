@@ -26,8 +26,6 @@
 
 package org.cytoscape.ndex.internal;
 
-import static org.cytoscape.work.ServiceProperties.ID;
-
 import java.io.File;
 import java.util.Properties;
 
@@ -35,33 +33,10 @@ import org.cytoscape.app.swing.CySwingAppAdapter;
 import org.cytoscape.application.CyApplicationConfiguration;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
-import org.cytoscape.application.swing.CySwingApplication;
-import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.group.CyGroupFactory;
-import org.cytoscape.group.CyGroupManager;
-import org.cytoscape.io.DataCategory;
-import org.cytoscape.io.read.InputStreamTaskFactory;
-import org.cytoscape.io.util.StreamUtil;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkTableManager;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
-import org.cytoscape.model.events.NetworkAddedListener;
-import org.cytoscape.model.subnetwork.CyRootNetworkManager;
-import org.cytoscape.ndex.internal.cx_reader.CytoscapeCxFileFilter;
-import org.cytoscape.ndex.internal.cx_reader.CytoscapeCxNetworkReaderFactory;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
-import org.cytoscape.ndex.io.cx_writer.CxNetworkWriterFactory;
 import org.cytoscape.service.util.AbstractCyActivator;
-import org.cytoscape.task.create.CreateNetworkViewTaskFactory;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.view.presentation.RenderingEngineManager;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
-import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.view.vizmap.VisualStyleFactory;
-import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 
 /**

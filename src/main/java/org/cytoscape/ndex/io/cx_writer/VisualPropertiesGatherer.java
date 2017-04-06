@@ -308,8 +308,9 @@ public final class VisualPropertiesGatherer {
                                                            boolean writeSiblings) {
 
         final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.EDGES_DEFAULT.asString(),
+        																  writeSiblings? view.getSUID(): null,
                                                                           writeSiblings? view.getSUID(): null);
-        e.setApplies_to(view.getSUID());
+     //   e.setApplies_to(view.getSUID());
         for (final VisualProperty visual_property : all_visual_properties) {
             if (visual_property.getTargetDataType() == CyEdge.class) {
                 addDefaultProperties(current_visual_style, visual_property, e);
@@ -329,8 +330,9 @@ public final class VisualPropertiesGatherer {
         for (final CyEdge edge : view.getModel().getEdgeList()) {
             final View<CyEdge> edge_view = view.getEdgeView(edge);
             final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.EDGES.asString(),
-                                                                             writeSiblings ? view.getSUID() : null);
-            e.setApplies_to(edge.getSUID());
+            												edge.getSUID(),                                                                             
+            												writeSiblings ? view.getSUID() : null);
+     //       e.setApplies_to(edge.getSUID());
             for (final VisualProperty visual_property : all_visual_properties) {
                 if (visual_property.getTargetDataType() == CyEdge.class) {
                     addProperties(edge_view, visual_property, e);
@@ -350,6 +352,7 @@ public final class VisualPropertiesGatherer {
                                                       final Set<VisualProperty<?>> all_visual_properties,
                                                       boolean writeSiblings) {
         final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.NETWORK.asString(),
+        																 null,
                                                                          writeSiblings? view.getSUID() : null);
         e.setApplies_to(view.getSUID());
         for (final VisualProperty visual_property : all_visual_properties) {
@@ -367,8 +370,9 @@ public final class VisualPropertiesGatherer {
                                                            final Set<VisualProperty<?>> all_visual_properties,
                                                            boolean writeSiblings) {
         final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.NODES_DEFAULT.asString(),
-                                                                          writeSiblings? view.getSUID(): null);
-        e.setApplies_to(view.getSUID());
+        											writeSiblings? view.getSUID(): null,                      
+        											writeSiblings? view.getSUID(): null);
+    //    e.setApplies_to(view.getSUID());
         for (final VisualProperty visual_property : all_visual_properties) {
             if (visual_property.getTargetDataType() == CyNode.class) {
                 addDefaultProperties(current_visual_style, visual_property, e);
@@ -400,8 +404,9 @@ public final class VisualPropertiesGatherer {
         for (final CyNode cy_node : view.getModel().getNodeList()) {
             final View<CyNode> node_view = view.getNodeView(cy_node);
             final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.NODES.asString(),
+            																cy_node.getSUID(),
                                                                              writeSiblings? view.getSUID() : null);
-            e.setApplies_to(cy_node.getSUID());
+      //      e.setApplies_to(cy_node.getSUID());
             for (final VisualProperty visual_property : all_visual_properties) {
                 if (visual_property.getTargetDataType() == CyNode.class) {
                     addProperties(node_view, visual_property, e);

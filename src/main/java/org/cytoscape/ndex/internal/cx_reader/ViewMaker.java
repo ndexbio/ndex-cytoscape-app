@@ -15,9 +15,12 @@ import org.cxio.aspects.datamodels.Mapping;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.io.cxio.CxUtil;
 import org.cytoscape.ndex.io.cxio.Settings;
 import org.cytoscape.ndex.io.cxio.TimingUtil;
+import org.cytoscape.view.layout.CyLayoutAlgorithm;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.View;
@@ -34,13 +37,15 @@ import org.cytoscape.view.vizmap.mappings.BoundaryRangeValues;
 import org.cytoscape.view.vizmap.mappings.ContinuousMapping;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.swing.DialogTaskManager;
 
 public final class ViewMaker {
 
     public static final Pattern DIRECT_NET_PROPS_PATTERN = Pattern
             .compile("GRAPH_VIEW_(ZOOM|CENTER_(X|Y))|NETWORK_(WIDTH|HEIGHT|SCALE_FACTOR|CENTER_(X|Y|Z)_LOCATION)");
 
-    public final static Map<CyNetworkView, Boolean> makeView(final CyNetwork network,
+    public final static  CyNetworkView/*Map<CyNetworkView, Boolean>*/  makeView(final CyNetwork network,
                                                final CxToCy cx_to_cy,
                                                final String network_collection_name,
                                                final CyNetworkViewFactory networkview_factory,
@@ -49,7 +54,8 @@ public final class ViewMaker {
                                                final VisualStyleFactory visual_style_factory,
                                                final VisualMappingFunctionFactory vmf_factory_c,
                                                final VisualMappingFunctionFactory vmf_factory_d,
-                                               final VisualMappingFunctionFactory vmf_factory_p) 
+                                               final VisualMappingFunctionFactory vmf_factory_p,
+                                               boolean doLayout) 
                                             		   throws IOException {
 
     		final Map<CyNetworkView, Boolean> hasLayoutMap = new HashMap<>();
@@ -60,7 +66,7 @@ public final class ViewMaker {
         hasLayoutMap.put(view, Boolean.FALSE);
         
         if ((collection == null) || collection.isEmpty()) {
-            return hasLayoutMap;
+             return ViewMaker.applyStyle(visual_mapping_manager.getDefaultVisualStyle(), view, doLayout);
         }
 
         final Long network_id = cx_to_cy.getNetworkSuidToNetworkRelationsMap().get(network.getSUID());
@@ -75,7 +81,7 @@ public final class ViewMaker {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		try {
 			if (network_id == null || !cx_to_cy.getSubNetworkToViewsMap().containsKey(network_id)) {
-				return hasLayoutMap;
+				return ViewMaker.applyStyle(visual_mapping_manager.getDefaultVisualStyle(), view, doLayout);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -103,7 +109,7 @@ public final class ViewMaker {
                 }
                 counter++;
             }
-            ViewMaker.removeVisualStyle(viz_style_title, visual_mapping_manager);
+       //     ViewMaker.removeVisualStyle(viz_style_title, visual_mapping_manager);
             new_visual_style.setTitle(viz_style_title);
         }
         final VisualLexicon lexicon = rendering_engine_manager.getDefaultVisualLexicon();
@@ -174,11 +180,48 @@ public final class ViewMaker {
         if (Settings.INSTANCE.isTiming()) {
             TimingUtil.reportTimeDifference(t0, "time to make view", -1);
         }
-        return hasLayoutMap;
+        
+        return ViewMaker.applyStyle(new_visual_style, view, doLayout);
+        
+   /*     CyNetworkView cyNetworkView = null;
+        for ( CyNetworkView v : cyNetworkViewMap.keySet()) {
+        	cyNetworkView = v;
+        	break;
+        }
+        if( doLayout ) // && !stopLayout)
+        {
+            CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
+            CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
+            TaskIterator ti = algorithm.createTaskIterator(cyNetworkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
+            DialogTaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
+            tm.execute(ti);
+            cyNetworkView.updateView();
+        }
+        VisualStyle currentStyle = vmm.getCurrentVisualStyle();
+        currentStyle.apply(cyNetworkView);
+        if( cyNetworkView != null )
+            cyNetworkView.updateView();
+        
+        return hasLayoutMap; */
     }
 
+    private static CyNetworkView applyStyle (VisualStyle style, CyNetworkView networkView, boolean doLayout) {
+        if( doLayout ) // && !stopLayout)
+        {
+            CyLayoutAlgorithmManager lam = CyObjectManager.INSTANCE.getLayoutAlgorithmManager();
+            CyLayoutAlgorithm algorithm = lam.getLayout("force-directed");
+            TaskIterator ti = algorithm.createTaskIterator(networkView, algorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, "");
+            DialogTaskManager tm = CyObjectManager.INSTANCE.getTaskManager();
+            tm.execute(ti);
+            networkView.updateView();
+        }
+        style.apply(networkView);
+        networkView.updateView();	
+        return networkView;
+    }
+    
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public final static void addContinuousMapping(final VisualStyle style,
+    private final static void addContinuousMapping(final VisualStyle style,
                                                   final VisualProperty vp,
                                                   final StringParser sp,
                                                   final String col,
@@ -223,7 +266,7 @@ public final class ViewMaker {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public final static void addDiscreteMapping(final VisualStyle style,
+    private final static void addDiscreteMapping(final VisualStyle style,
                                                 final VisualProperty vp,
                                                 final StringParser sp,
                                                 final String col,
@@ -262,7 +305,7 @@ public final class ViewMaker {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public final static void addPasstroughMapping(final VisualStyle style,
+    private final static void addPasstroughMapping(final VisualStyle style,
                                                   final VisualProperty vp,
                                                   final String col,
                                                   final Class<?> type_class,
@@ -279,7 +322,7 @@ public final class ViewMaker {
         }
     }
 
-    public final static String createTitleForNewVisualStyle(final String network_collection_name) {
+    private final static String createTitleForNewVisualStyle(final String network_collection_name) {
         String viz_style_title = "new-Style";
         if (network_collection_name != null) {
             if (network_collection_name.toLowerCase().endsWith(".cx")) {
@@ -294,7 +337,7 @@ public final class ViewMaker {
         return viz_style_title;
     }
 
-    public final static void removeVisualStyle(final String viz_style_title,
+    private final static void removeVisualStyle(final String viz_style_title,
                                                final VisualMappingManager visual_mapping_manager) {
         final Iterator<VisualStyle> it = visual_mapping_manager.getAllVisualStyles().iterator();
         while (it.hasNext()) {
@@ -306,7 +349,7 @@ public final class ViewMaker {
         }
     }
 
-    public final static boolean containsVisualStyle(final String viz_style_title,
+    private final static boolean containsVisualStyle(final String viz_style_title,
                                                     final VisualMappingManager visual_mapping_manager) {
         final Iterator<VisualStyle> it = visual_mapping_manager.getAllVisualStyles().iterator();
         while (it.hasNext()) {
@@ -319,7 +362,7 @@ public final class ViewMaker {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public final static void setDefaultVisualPropertiesAndMappings(final VisualLexicon lexicon,
+    private final static void setDefaultVisualPropertiesAndMappings(final VisualLexicon lexicon,
                                                                    final CyVisualPropertiesElement cy_visual_properties_element,
                                                                    final VisualStyle style,
                                                                    final Class my_class,
@@ -456,7 +499,7 @@ public final class ViewMaker {
         }
     }
 
-    public final static void setEdgeVisualProperties(final CyNetworkView view,
+    private final static void setEdgeVisualProperties(final CyNetworkView view,
                                                      final VisualLexicon lexicon,
                                                      final VisualElementCollectionMap collection,
                                                      final Long subnetwork_id,
@@ -479,7 +522,7 @@ public final class ViewMaker {
         }
     }
 
-    public final static void setNodeVisualProperties(final CyNetworkView view,
+    private final static void setNodeVisualProperties(final CyNetworkView view,
                                                      final VisualLexicon lexicon,
                                                      final VisualElementCollectionMap collection,
                                                      final Long subnetwork_id,
@@ -502,14 +545,13 @@ public final class ViewMaker {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public final static void setVisualProperties(final VisualLexicon lexicon,
+    private final static void setVisualProperties(final VisualLexicon lexicon,
                                                  final SortedMap<String, String> props,
-                                                 final View view,
-                                                 final Class my_class) {
+                                                 final View<?> view,
+                                                 final Class<?> my_class) {
         if (props != null) {
             for (final Map.Entry<String, String> entry : props.entrySet()) {
-                final VisualProperty vp = lexicon.lookup(my_class, entry.getKey());
+                final VisualProperty<?> vp = lexicon.lookup(my_class, entry.getKey());
 
                 if (vp != null) {
                     final Object parsed_value = vp.parseSerializableString(entry.getValue());
@@ -527,7 +569,7 @@ public final class ViewMaker {
     }
 
     @SuppressWarnings("rawtypes")
-    public final static boolean shouldSetAsLocked(final VisualProperty vp) {
+    private final static boolean shouldSetAsLocked(final VisualProperty vp) {
         if (vp.getTargetDataType() == CyNode.class) {
             if ((vp == BasicVisualLexicon.NODE_X_LOCATION) || (vp == BasicVisualLexicon.NODE_Y_LOCATION)
                     || (vp == BasicVisualLexicon.NODE_Z_LOCATION)) {
@@ -540,7 +582,7 @@ public final class ViewMaker {
         return true;
     }
 
-    public final static Class<?> toClass(final String type) {
+    private final static Class<?> toClass(final String type) {
         if (type.equals("string")) {
             return String.class;
         }
@@ -561,7 +603,7 @@ public final class ViewMaker {
         }
     }
 
-    public final static Object toTypeValue(final String s, final String type) {
+    private final static Object toTypeValue(final String s, final String type) {
         if (type.equals("string")) {
             return s;
         }
