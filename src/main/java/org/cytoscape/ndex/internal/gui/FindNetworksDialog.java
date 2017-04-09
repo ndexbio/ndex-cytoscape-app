@@ -182,6 +182,8 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         //populate the CXInfoHolder object.
         CXInfoHolder cxInfoHolder = new CXInfoHolder();
         
+        cxInfoHolder.setNamespaces(niceCX.getNamespaces());
+        
         for (Map.Entry<Long, CyNode> entry: cxToCy.get_cxid_to_cynode_map().entrySet()) {
         	cxInfoHolder.addNodeMapping(entry.getValue().getSUID(), entry.getKey());
         }

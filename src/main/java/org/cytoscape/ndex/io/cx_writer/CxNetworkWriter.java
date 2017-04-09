@@ -8,6 +8,19 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
+import org.cxio.aspects.datamodels.CartesianLayoutElement;
+import org.cxio.aspects.datamodels.CyGroupsElement;
+import org.cxio.aspects.datamodels.CyTableColumnElement;
+import org.cxio.aspects.datamodels.CyViewsElement;
+import org.cxio.aspects.datamodels.CyVisualPropertiesElement;
+import org.cxio.aspects.datamodels.EdgeAttributesElement;
+import org.cxio.aspects.datamodels.EdgesElement;
+import org.cxio.aspects.datamodels.HiddenAttributesElement;
+import org.cxio.aspects.datamodels.NetworkAttributesElement;
+import org.cxio.aspects.datamodels.NetworkRelationsElement;
+import org.cxio.aspects.datamodels.NodeAttributesElement;
+import org.cxio.aspects.datamodels.NodesElement;
+import org.cxio.aspects.datamodels.SubNetworkElement;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
@@ -48,6 +61,7 @@ public class CxNetworkWriter implements CyWriter {
     private boolean                    _write_siblings;
     private boolean isUpdate;
 
+    
     public CxNetworkWriter(final OutputStream os,
                            final CyNetwork network,
                            final VisualMappingManager visual_mapping_manager,
@@ -111,9 +125,9 @@ public class CxNetworkWriter implements CyWriter {
         exporter.setVisualMappingManager(_visual_mapping_manager);
         exporter.setNetworkViewManager(_networkview_manager);
         exporter.setGroupManager(_group_manager);
-        exporter.setWritePreMetadata(true);
-        exporter.setWritePostMetadata(true);
-        exporter.setNextSuid(SUIDFactory.getNextSUID());
+    //    exporter.setWritePreMetadata(true);
+    //    exporter.setWritePostMetadata(true);
+    //        exporter.setNextSuid(SUIDFactory.getNextSUID());
 
         final long t0 = System.currentTimeMillis();
 

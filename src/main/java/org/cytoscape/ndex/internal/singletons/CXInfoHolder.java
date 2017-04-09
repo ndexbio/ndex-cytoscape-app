@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.cxio.core.interfaces.AspectElement;
 import org.cxio.metadata.MetaDataCollection;
+import org.ndexbio.model.cx.NamespacesElement;
 import org.ndexbio.model.cx.Provenance;
 
 public class CXInfoHolder {
@@ -16,6 +17,8 @@ public class CXInfoHolder {
 	private MetaDataCollection metadata;
 	
 	private Provenance provenance;
+	
+	private NamespacesElement namespaces;
 	
 	private UUID networkId;
 	
@@ -104,5 +107,13 @@ public class CXInfoHolder {
 
 	public void setSubNetCount(int subNetCount) {
 		this.subNetCount = subNetCount;
+	}
+
+	public NamespacesElement getNamespaces() {
+		return namespaces;
+	}
+
+	public void setNamespaces(NamespacesElement namespaces) {
+		this.namespaces = namespaces;
 	}
 }

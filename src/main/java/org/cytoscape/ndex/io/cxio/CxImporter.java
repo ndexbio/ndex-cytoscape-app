@@ -17,6 +17,7 @@ import org.cxio.core.interfaces.AspectElement;
 import org.cxio.core.interfaces.AspectFragmentReader;
 import org.cxio.metadata.MetaDataCollection;
 import org.cxio.metadata.MetaDataElement;
+import org.ndexbio.model.cx.NamespacesElement;
 import org.ndexbio.model.cx.NdexNetworkStatus;
 import org.ndexbio.model.cx.NiceCXNetwork;
 import org.ndexbio.model.cx.Provenance;
@@ -110,6 +111,7 @@ public final class CxImporter {
         }
         
 		all_readers.add(new GeneralAspectFragmentReader (Provenance.ASPECT_NAME,Provenance.class));
+		all_readers.add(new GeneralAspectFragmentReader (NamespacesElement.ASPECT_NAME,Provenance.class));
 
         
     }
@@ -214,18 +216,26 @@ public final class CxImporter {
         
         MetaDataCollection metadata = r.getPreMetaData();
 		
+        long nodeIdCounter = 0;
+        long edgeIdCounter = 0;
+        
         NiceCXNetwork niceCX = new NiceCXNetwork ();
         
      	for ( AspectElement elmt : r ) {
      		switch ( elmt.getAspectName() ) {
      			case NodesElement.ASPECT_NAME :       //Node
-     					niceCX.addNode((NodesElement) elmt);
+     				    NodesElement n = (NodesElement) elmt;
+     					niceCX.addNode(n);
+                        if (n.getId() > nodeIdCounter )
+                        	nodeIdCounter = n.getId();
      					break;
      				case NdexNetworkStatus.ASPECT_NAME:   //ndexStatus we ignore this in CX
      					break; 
      				case EdgesElement.ASPECT_NAME:       // Edge
      					EdgesElement ee = (EdgesElement) elmt;
      					niceCX.addEdge(ee);
+     					if( ee.getId() > edgeIdCounter)
+     						edgeIdCounter = ee.getId();
      					break;
      				case NodeAttributesElement.ASPECT_NAME:  // node attributes
      					niceCX.addNodeAttribute((NodeAttributesElement) elmt );
@@ -244,6 +254,10 @@ public final class CxImporter {
      				case Provenance.ASPECT_NAME:
      					Provenance prov = (Provenance) elmt;
      					niceCX.setProvenance(prov);
+     					break;
+     				case NamespacesElement.ASPECT_NAME:
+     					NamespacesElement ns = (NamespacesElement) elmt;
+     					niceCX.setNamespaces(ns);
      					break;
      				default:    // opaque aspect
      					niceCX.addOpapqueAspect(elmt);
@@ -269,8 +283,16 @@ public final class CxImporter {
 		  }
 	    }
   	    
+  	    Long cxNodeIdCounter = metadata.getIdCounter(NodesElement.ASPECT_NAME);
+  	    if (cxNodeIdCounter == null || cxNodeIdCounter.longValue() < nodeIdCounter)
+  	    	metadata.setIdCounter(NodesElement.ASPECT_NAME, Long.valueOf(nodeIdCounter));
+  	    
+  	    Long cxEdgeIdCounter = metadata.getIdCounter(EdgesElement.ASPECT_NAME);
+  	    if (cxEdgeIdCounter == null || cxEdgeIdCounter.longValue() < edgeIdCounter)
+  	        metadata.setIdCounter(EdgesElement.ASPECT_NAME, Long.valueOf(edgeIdCounter));
+  	
   	    niceCX.setMetadata(metadata);
-        
+  	    
         return niceCX;
     }
     
