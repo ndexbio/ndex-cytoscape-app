@@ -153,8 +153,7 @@ public final class CxToCy {
                              root_network,
                              network_factory,
                              null,
-                             collection_name,
-                             perform_basic_integrity_checks);
+                             collection_name);
 
     }
     
@@ -200,8 +199,7 @@ public final class CxToCy {
                                                CyRootNetwork root_network,
                                                final CyNetworkFactory network_factory,
                                                final CyGroupFactory group_factory,
-                                               final String collection_name,
-                                               final boolean perform_basic_integrity_checks) throws IOException {
+                                               final String collection_name) throws IOException {
 
        
 
@@ -212,26 +210,15 @@ public final class CxToCy {
             throw new IOException("no nodes in input");
         }
 
-  //      final Set<Long> node_ids = new HashSet<>();  // holds all the cx node ids.
-
-   /*     if (perform_basic_integrity_checks) {
-            checkNodeIds(nodes,
-                         node_ids);
-        }
-
-        final Set<Long> edge_ids = new HashSet<>();  // holds all the cx edge ids.
-
-        if (edges != null && perform_basic_integrity_checks) {
-            checkEdgeIds(edges,
-                         edge_ids);
-        }*/
-
         _network_suid_to_networkrelations_map = new HashMap<>();
         _visual_element_collections = new VisualElementCollectionMap();
         _cxid_to_cynode_map = new HashMap<>();
         _cxid_to_cyedge_map = new HashMap<>();
 
+        boolean isCollection = false;
+
         if (niceCX.getOpaqueAspectTable().get(SubNetworkElement.ASPECT_NAME) != null ) {
+        	isCollection = true;
             for (final AspectElement element : niceCX.getOpaqueAspectTable().get(SubNetworkElement.ASPECT_NAME)) {
                 final SubNetworkElement subnetwork_element = (SubNetworkElement) element;
                 _visual_element_collections.addSubNetworkElement(subnetwork_element.getId(),
@@ -243,13 +230,11 @@ public final class CxToCy {
         Long parent_network_id = null;
         List<Long> subnetwork_ids;
         int number_of_subnetworks;
-        boolean IsCollection;
 
         _view_to_subnet_map = new HashMap<>();
         _subnet_to_views_map = new HashMap<>();
         Map<Long, String> subnet_to_subnet_name_map = new HashMap<>();
         if (niceCX.getOpaqueAspectTable().containsKey(NetworkRelationsElement.ASPECT_NAME)) {  // network collection
-            IsCollection = true;
             Collection<AspectElement> network_relations = 
             		niceCX.getOpaqueAspectTable().get(NetworkRelationsElement.ASPECT_NAME);
             final Set<Long> subnetwork_parent_ids = getAllSubNetworkParentNetworkIds(network_relations);
@@ -266,8 +251,7 @@ public final class CxToCy {
                 System.out.println("parent_network_id: " + parent_network_id);
             }
 
-            subnetwork_ids = getSubNetworkIds((Collection<NetworkRelationsElement>)(Collection<?>)
-            		network_relations);
+            subnetwork_ids = getSubNetworkIds((Collection)network_relations);
             if (Settings.INSTANCE.isDebug()) {
                 System.out.println("subnetwork_ids: " + subnetwork_ids);
             }
@@ -291,7 +275,6 @@ public final class CxToCy {
             if (Settings.INSTANCE.isDebug()) {
                 System.out.println("no network relations");
             }
-            IsCollection = false;
             number_of_subnetworks = 1;
             subnetwork_ids = new ArrayList<>(1);
         }
@@ -316,7 +299,8 @@ public final class CxToCy {
             subnetworks_ary[i] = sub_network;
         }
         
-        addNetworkCollectionAttributes( niceCX.getNetworkAttributes(), root_network);
+        if (isCollection )
+        	addNetworkCollectionAttributes( niceCX.getNetworkAttributes(), root_network);
         
 
         processColumnLabels(niceCX.getOpaqueAspectTable().get(CyTableColumnElement.ASPECT_NAME),
@@ -335,9 +319,9 @@ public final class CxToCy {
                               subnet_info_present); */
 
         // subnetwork id -> network attribute list  
-        final Map<Long, List<NetworkAttributesElement>> network_attributes_map = 
+        final Map<Long, Collection<NetworkAttributesElement>> network_attributes_map = 
         processNetworkAttributes(niceCX.getNetworkAttributes(),
-                                 IsCollection,
+                                 isCollection,
                                  subnetwork_ids);
         // System.out.println(network_attributes_map);
 
@@ -366,7 +350,7 @@ public final class CxToCy {
                 System.out.println("network suid->network-relations: " + sub_network.getSUID() + "->" + subnetwork_id);
             }
 
-            if (!IsCollection) {
+            if (!isCollection) {
                 _view_to_subnet_map.put(subnetwork_id,
                                         subnetwork_id);
                 final List<Long> l = new ArrayList<>();
@@ -395,7 +379,7 @@ public final class CxToCy {
                      niceCX,
                      nodes_in_subnet,
                      subnetwork_id,
-                     IsCollection);
+                     isCollection);
 
             addEdges(sub_network,
                          niceCX,
@@ -403,7 +387,7 @@ public final class CxToCy {
                          subnetwork_id,
                      //    node_ids,
                      //    perform_basic_integrity_checks,
-                         IsCollection);
+                         isCollection);
             
 
             addColumns(sub_network,
@@ -415,8 +399,7 @@ public final class CxToCy {
                                         sub_network,
                                         sub_network.getTable(CyNetwork.class,
                                                              CyNetwork.LOCAL_ATTRS));
-            }
-            else if (network_attributes_map.containsKey(DEFAULT_SUBNET)) {
+            } else if (network_attributes_map.containsKey(DEFAULT_SUBNET)) {
             		// This is the root network! 
                 if (Settings.INSTANCE.isDebug()) {
                     System.out.println("adding network attributes lacking sub-network information");
@@ -688,7 +671,7 @@ public final class CxToCy {
     }
 */
 	private final void addNetworkAttributeData(
-			final List<NetworkAttributesElement> elements, final CyNetwork network,
+			final Collection<NetworkAttributesElement> elements, final CyNetwork network,
 			final CyTable table) {
 		if (table == null) {
 			throw new IllegalArgumentException("table (network) must not be null");
@@ -702,8 +685,8 @@ public final class CxToCy {
 		}
 
 		elements.stream()
-			.filter(el -> el.getSubnetwork() != null)
 			.forEach(e -> addToColumn(table, row, e));
+		
 	}
 
     private void addNetworkNames(final CySubNetwork sub_network,
@@ -1031,26 +1014,33 @@ public final class CxToCy {
         }
     }
 
-	private Map<Long, List<NetworkAttributesElement>> processNetworkAttributes(final Collection<NetworkAttributesElement> network_attributes,
-			 final boolean subnet_info_present,
+	private Map<Long, Collection<NetworkAttributesElement>> processNetworkAttributes(
+			final Collection<NetworkAttributesElement> network_attributes,
+			final boolean isCollection,
 			final List<Long> subnetworks_ids) {
 
-		Map<Long, List<NetworkAttributesElement>> network_attributes_map = new HashMap<>();
+		Map<Long, Collection<NetworkAttributesElement>> network_attributes_map = new HashMap<>();
 		
 		if (network_attributes == null) {
 			return network_attributes_map;
 		}
 		
+		if (!isCollection) {
+			network_attributes_map.put(DEFAULT_SUBNET,network_attributes);
+			return network_attributes_map;
+		}
+		
 		for (final NetworkAttributesElement nae : network_attributes) {
 
-			Long subnet = DEFAULT_SUBNET;
-			if (subnet_info_present) {
-				if (nae.getSubnetwork() != null) {
+			Long subnet = nae.getSubnetwork() ;
+			if (subnet == null)
+				subnet = DEFAULT_SUBNET;
+		/*	if (nae.getSubnetwork() != null) {
 					subnet = nae.getSubnetwork();
 				} else if (subnetworks_ids.size() == 1) {
 					subnet = subnetworks_ids.get(0);
-				}
-			}
+				}*/
+			
 
 			if (!network_attributes_map.containsKey(subnet)) {
 				network_attributes_map.put(subnet, new ArrayList<NetworkAttributesElement>());

@@ -341,7 +341,8 @@ public final class CxExporter {
             //write opaque aspects 
             if ( cxInfoHolder != null) {
             	for ( Map.Entry<String, Collection<AspectElement>> entry: cxInfoHolder.getOpaqueAspectsTable().entrySet()) {
-            		if ( !iscySupportedAspect(entry.getKey())) {          			
+            		if ( !iscySupportedAspect(entry.getKey())) {      
+            			System.out.println("writing " + entry.getKey());
             		    w.writeOpaqueAspectFragment2(entry.getKey(),
             				(Collection)entry.getValue());
             		}
@@ -544,8 +545,9 @@ public final class CxExporter {
             for (final CyEdge cy_edge : ((CySubNetwork) network).getEdgeList()) {
                 elements.add(new EdgesElement(
                 		getEdgeIdToExport(cy_edge,cxInfoHolder), 
-                		cy_edge.getSource().getSUID(), cy_edge.getTarget()
-                                              .getSUID(), getSharedInteractionFromEdgeTable(network, cy_edge)));
+                		getNodeIdToExport(cy_edge.getSource(),cxInfoHolder), 
+                		getNodeIdToExport(cy_edge.getTarget(),cxInfoHolder),
+                        getSharedInteractionFromEdgeTable(network, cy_edge)));
             }
         }
         final long t0 = System.currentTimeMillis();

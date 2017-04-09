@@ -111,7 +111,7 @@ public final class CxImporter {
         }
         
 		all_readers.add(new GeneralAspectFragmentReader (Provenance.ASPECT_NAME,Provenance.class));
-		all_readers.add(new GeneralAspectFragmentReader (NamespacesElement.ASPECT_NAME,Provenance.class));
+		all_readers.add(new GeneralAspectFragmentReader (NamespacesElement.ASPECT_NAME,NamespacesElement.class));
 
         
     }

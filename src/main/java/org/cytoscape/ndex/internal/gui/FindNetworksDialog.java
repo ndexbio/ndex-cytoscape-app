@@ -179,20 +179,21 @@ public class FindNetworksDialog extends javax.swing.JDialog {
            
         List<CyNetwork> networks = cxToCy.createNetwork(niceCX, null, networkFactory, null, true);
         
-        //populate the CXInfoHolder object.
-        CXInfoHolder cxInfoHolder = new CXInfoHolder();
+        if ( !niceCX.getOpaqueAspectTable().containsKey(SubNetworkElement.ASPECT_NAME)) {
+           //populate the CXInfoHolder object.
+           CXInfoHolder cxInfoHolder = new CXInfoHolder();
         
-        cxInfoHolder.setNamespaces(niceCX.getNamespaces());
+           cxInfoHolder.setNamespaces(niceCX.getNamespaces());
         
-        for (Map.Entry<Long, CyNode> entry: cxToCy.get_cxid_to_cynode_map().entrySet()) {
-        	cxInfoHolder.addNodeMapping(entry.getValue().getSUID(), entry.getKey());
-        }
+           for (Map.Entry<Long, CyNode> entry: cxToCy.get_cxid_to_cynode_map().entrySet()) {
+        	   cxInfoHolder.addNodeMapping(entry.getValue().getSUID(), entry.getKey());
+           }
         
-        for ( Map.Entry<Long,CyEdge> entry: cxToCy.get_cxid_to_cyedge_map().entrySet()) {
-        	cxInfoHolder.addEdgeMapping(entry.getValue().getSUID(), entry.getKey());
-        }
+           for ( Map.Entry<Long,CyEdge> entry: cxToCy.get_cxid_to_cyedge_map().entrySet()) {
+        	   cxInfoHolder.addEdgeMapping(entry.getValue().getSUID(), entry.getKey());
+           }
         
-        cxInfoHolder.setOpaqueAspectsTable(
+           cxInfoHolder.setOpaqueAspectsTable(
         		niceCX.getOpaqueAspectTable().entrySet().stream()
         		  .filter(map -> (!map.getKey().equals(SubNetworkElement.ASPECT_NAME) &&
         				          !map.getKey().equals(CyGroupsElement.ASPECT_NAME))&&
@@ -204,15 +205,17 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         				          )
         		  .collect(Collectors.toMap( p -> p.getKey(), p -> p.getValue())));
         
-        cxInfoHolder.setProvenance(niceCX.getProvenance());
-        cxInfoHolder.setMetadata(niceCX.getMetadata());
-        cxInfoHolder.setNetworkId(networkSummary.getExternalId());
-        Collection<AspectElement> subNets = niceCX.getOpaqueAspectTable().get(SubNetworkElement.ASPECT_NAME);
+           cxInfoHolder.setProvenance(niceCX.getProvenance());
+           cxInfoHolder.setMetadata(niceCX.getMetadata());
+           cxInfoHolder.setNetworkId(networkSummary.getExternalId());
+           Collection<AspectElement> subNets = niceCX.getOpaqueAspectTable().get(SubNetworkElement.ASPECT_NAME);
 
-        cxInfoHolder.setSubNetCount( subNets== null? 0 : subNets.size());
+           cxInfoHolder.setSubNetCount( subNets== null? 0 : subNets.size());
         
-        for ( CyNetwork subNetwork : networks) {
-        	NetworkManager.INSTANCE.setCXInfoHolder(subNetwork.getSUID(), cxInfoHolder);
+           for ( CyNetwork subNetwork : networks) {
+        	   NetworkManager.INSTANCE.setCXInfoHolder(subNetwork.getSUID(), cxInfoHolder);
+           }
+        
         }
         
         CyRootNetwork rootNetwork = ((CySubNetwork)networks.get(0)).getRootNetwork();
