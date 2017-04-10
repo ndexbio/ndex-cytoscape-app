@@ -57,8 +57,6 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyRow;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.ndex.internal.cx_reader.CxToCy;
@@ -70,18 +68,11 @@ import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
 import org.cytoscape.ndex.io.cxio.CxImporter;
-import org.cytoscape.view.layout.CyLayoutAlgorithm;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.presentation.RenderingEngineManager;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.swing.DialogTaskManager;
 import org.ndexbio.model.cx.NiceCXNetwork;
 import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexPropertyValuePair;
@@ -237,13 +228,10 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             RenderingEngineManager rem = CyObjectManager.INSTANCE.getRenderingEngineManager();
             VisualMappingManager vmm = CyObjectManager.INSTANCE.getVisualMappingManager();
             VisualStyleFactory vsf = CyObjectManager.INSTANCE.getVisualStyleFactory();
-            VisualMappingFunctionFactory vmffc = CyObjectManager.INSTANCE.getVisualMappingFunctionContinuousFactory();
-            VisualMappingFunctionFactory vmffd = CyObjectManager.INSTANCE.getVisualMappingFunctionDiscreteFactory();
-            VisualMappingFunctionFactory vmffp = CyObjectManager.INSTANCE.getVisualMappingFunctionPassthroughFactory();
-
+       
            // Map<CyNetworkView, Boolean> cyNetworkViewMap = 
             CyNetworkView cyNetworkView =
-            		ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, vmffc, vmffd, vmffp, doLayout);
+            		ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, doLayout);
        /*     CyNetworkView cyNetworkView = null;
             for ( CyNetworkView v : cyNetworkViewMap.keySet()) {
             	cyNetworkView = v;
@@ -680,10 +668,10 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     {
         for(NdexPropertyValuePair vp : ns.getProperties() )
         {
-            if( vp.getPredicateString().equals("sourceFormat") )
+            if( vp.getPredicateString().equals("ndex:sourceFormat") )
                 return vp.getValue();
         }
-        return "Unknown";
+        return null;
     }
 
     /**

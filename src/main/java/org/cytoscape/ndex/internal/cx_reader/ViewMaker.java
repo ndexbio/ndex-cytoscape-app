@@ -28,7 +28,6 @@ import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualPropertyDependency;
 import org.cytoscape.view.vizmap.VisualStyle;
@@ -45,16 +44,13 @@ public final class ViewMaker {
     public static final Pattern DIRECT_NET_PROPS_PATTERN = Pattern
             .compile("GRAPH_VIEW_(ZOOM|CENTER_(X|Y))|NETWORK_(WIDTH|HEIGHT|SCALE_FACTOR|CENTER_(X|Y|Z)_LOCATION)");
 
-    public final static  CyNetworkView/*Map<CyNetworkView, Boolean>*/  makeView(final CyNetwork network,
+    public final static  CyNetworkView  makeView(final CyNetwork network,
                                                final CxToCy cx_to_cy,
                                                final String network_collection_name,
                                                final CyNetworkViewFactory networkview_factory,
                                                final RenderingEngineManager rendering_engine_manager,
                                                final VisualMappingManager visual_mapping_manager,
                                                final VisualStyleFactory visual_style_factory,
-                                               final VisualMappingFunctionFactory vmf_factory_c,
-                                               final VisualMappingFunctionFactory vmf_factory_d,
-                                               final VisualMappingFunctionFactory vmf_factory_p,
                                                boolean doLayout) 
                                             		   throws IOException {
 
@@ -118,30 +114,21 @@ public final class ViewMaker {
             ViewMaker.setDefaultVisualPropertiesAndMappings(lexicon,
                                                             collection.getNetworkVisualPropertiesElement(view_id),
                                                             new_visual_style,
-                                                            CyNetwork.class,
-                                                            vmf_factory_c,
-                                                            vmf_factory_d,
-                                                            vmf_factory_p);
+                                                            CyNetwork.class);
         }
 
         if (collection.getNodesDefaultVisualPropertiesElement(view_id) != null) {
             ViewMaker.setDefaultVisualPropertiesAndMappings(lexicon,
                                                             collection.getNodesDefaultVisualPropertiesElement(view_id),
                                                             new_visual_style,
-                                                            CyNode.class,
-                                                            vmf_factory_c,
-                                                            vmf_factory_d,
-                                                            vmf_factory_p);
+                                                            CyNode.class);
         }
 
         if (collection.getEdgesDefaultVisualPropertiesElement(view_id) != null) {
             ViewMaker.setDefaultVisualPropertiesAndMappings(lexicon,
                                                             collection.getEdgesDefaultVisualPropertiesElement(view_id),
                                                             new_visual_style,
-                                                            CyEdge.class,
-                                                            vmf_factory_c,
-                                                            vmf_factory_d,
-                                                            vmf_factory_p);
+                                                            CyEdge.class);
         }
 
         ViewMaker.setNodeVisualProperties(view, lexicon, collection, view_id, cx_to_cy.getNodesWithVisualProperties());
@@ -226,9 +213,8 @@ public final class ViewMaker {
                                                   final StringParser sp,
                                                   final String col,
                                                   final String type,
-                                                  final Class<?> type_class,
-                                                  final VisualMappingFunctionFactory vmf_factory_c) {
-        final ContinuousMapping cmf = (ContinuousMapping) vmf_factory_c
+                                                  final Class<?> type_class) {
+        final ContinuousMapping cmf = (ContinuousMapping) CyObjectManager.INSTANCE.getVisualMappingFunctionContinuousFactory()
                 .createVisualMappingFunction(col, type_class, vp);
 
         if (cmf != null) {
@@ -271,9 +257,9 @@ public final class ViewMaker {
                                                 final StringParser sp,
                                                 final String col,
                                                 final String type,
-                                                final Class<?> type_class,
-                                                final VisualMappingFunctionFactory vmf_factory_d) {
-        final DiscreteMapping dmf = (DiscreteMapping) vmf_factory_d.createVisualMappingFunction(col, type_class, vp);
+                                                final Class<?> type_class) {
+        final DiscreteMapping dmf = (DiscreteMapping) CyObjectManager.INSTANCE.getVisualMappingFunctionDiscreteFactory()
+        		.createVisualMappingFunction(col, type_class, vp);
         if (dmf != null) {
             int counter = 0;
             while (true) {
@@ -308,11 +294,11 @@ public final class ViewMaker {
     private final static void addPasstroughMapping(final VisualStyle style,
                                                   final VisualProperty vp,
                                                   final String col,
-                                                  final Class<?> type_class,
-                                                  final VisualMappingFunctionFactory vmf_factory_p) throws IOException {
-        final PassthroughMapping pmf = (PassthroughMapping) vmf_factory_p.createVisualMappingFunction(col,
-                                                                                                      type_class,
-                                                                                                      vp);
+                                                  final Class<?> type_class) throws IOException {
+        final PassthroughMapping pmf = (PassthroughMapping) CyObjectManager.INSTANCE
+        		.getVisualMappingFunctionPassthroughFactory().createVisualMappingFunction(col,
+                                                       type_class,
+                                                       vp);
         if (pmf != null) {
             style.addVisualMappingFunction(pmf);
         }
@@ -365,10 +351,7 @@ public final class ViewMaker {
     private final static void setDefaultVisualPropertiesAndMappings(final VisualLexicon lexicon,
                                                                    final CyVisualPropertiesElement cy_visual_properties_element,
                                                                    final VisualStyle style,
-                                                                   final Class my_class,
-                                                                   final VisualMappingFunctionFactory vmf_factory_c,
-                                                                   final VisualMappingFunctionFactory vmf_factory_d,
-                                                                   final VisualMappingFunctionFactory vmf_factory_p)
+                                                                   final Class my_class)
                                                                            throws IOException {
 
         final SortedMap<String, String> props = cy_visual_properties_element.getProperties();
@@ -406,13 +389,13 @@ public final class ViewMaker {
                     final Class<?> type_class = ViewMaker.toClass(type);
                     if (vp != null) {
                         if (mapping == 'p') {
-                            addPasstroughMapping(style, vp, col, type_class, vmf_factory_p);
+                            addPasstroughMapping(style, vp, col, type_class);
                         }
                         else if (mapping == 'c') {
-                            addContinuousMapping(style, vp, sp, col, type, type_class, vmf_factory_c);
+                            addContinuousMapping(style, vp, sp, col, type, type_class);
                         }
                         else if (mapping == 'd') {
-                            addDiscreteMapping(style, vp, sp, col, type, type_class, vmf_factory_d);
+                            addDiscreteMapping(style, vp, sp, col, type, type_class);
                         }
                         else {
                             throw new IllegalStateException("unknown mapping type: " + mapping);
@@ -465,13 +448,13 @@ public final class ViewMaker {
                 final Class<?> type_class = ViewMaker.toClass(type);
                 if (vp != null) {
                     if (mapping_type.equals(CxUtil.PASSTHROUGH)) {
-                        addPasstroughMapping(style, vp, col, type_class, vmf_factory_p);
+                        addPasstroughMapping(style, vp, col, type_class);
                     }
                     else if (mapping_type.equals(CxUtil.CONTINUOUS)) {
-                        addContinuousMapping(style, vp, sp, col, type, type_class, vmf_factory_c);
+                        addContinuousMapping(style, vp, sp, col, type, type_class);
                     }
                     else if (mapping_type.equals(CxUtil.DISCRETE)) {
-                        addDiscreteMapping(style, vp, sp, col, type, type_class, vmf_factory_d);
+                        addDiscreteMapping(style, vp, sp, col, type, type_class);
                     }
                     else {
                         throw new IOException("unknown mapping type: " + mapping_type);
