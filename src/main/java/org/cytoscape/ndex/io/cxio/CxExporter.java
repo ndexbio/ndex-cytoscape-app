@@ -503,23 +503,23 @@ public final class CxExporter {
 
         final Long viewId = writeSiblings ? view.getSUID(): null; 
         for (final CyNode cy_node : network.getNodeList()) {
+        	long nodeId = getNodeIdToExport(cy_node, cxInfoHolder);
             final View<CyNode> node_view = view.getNodeView(cy_node);
             if (z_used) {
                 elements.add(new CartesianLayoutElement(
-                		getNodeIdToExport(cy_node, cxInfoHolder), 
+                		nodeId,
                 		viewId, node_view
                         .getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION), node_view
                                                         .getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION), node_view
                                                         .getVisualProperty(BasicVisualLexicon.NODE_Z_LOCATION)));
             }
             else {
-            	Long nodeID = cy_node.getSUID();
             	Double x = node_view
                         .getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
             	Double y = node_view
                         .getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
             	
-                elements.add(new CartesianLayoutElement(nodeID.longValue(), viewId, x.toString(), y.toString()));
+                elements.add(new CartesianLayoutElement(nodeId, viewId, x.toString(), y.toString()));
             }
 
         }
