@@ -41,8 +41,6 @@ import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkTableManager;
-import org.cytoscape.model.CyRow;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.ndex.internal.server.Server;
@@ -58,11 +56,8 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.Permissions;
-import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -103,7 +98,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         jLabel4.setText(selectedServer.getUsername());
         
     }
-
+/*
     private boolean networkHasBeenModifiedSinceDownload()
     {
         NetworkSummary ns = updateIsPossibleHelper();
@@ -112,7 +107,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         CyRow r = rootNetwork.getRow(rootNetwork);
         String modificationTime = r.get("ndex:modificationTime", String.class);
         return !modificationTime.equals(ns.getModificationTime().toString());
-    }
+    } */
 
     private boolean updateIsPossible()
     {
@@ -372,11 +367,9 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     {
         VisualMappingManager vmm = CyObjectManager.INSTANCE.getVisualMappingManager();
         final CyNetworkViewManager nvm = CyObjectManager.INSTANCE.getNetworkViewManager();
-        final CyNetworkManager nm = CyObjectManager.INSTANCE.getNetworkManager();
         final CyGroupManager gm = CyObjectManager.INSTANCE.getCyGroupManager();
-        final CyNetworkTableManager ntm = CyObjectManager.INSTANCE.getNetworkTableManager();
         final VisualLexicon lexicon = CyObjectManager.INSTANCE.getDefaultVisualLexicon();
-        CxNetworkWriter writer = new CxNetworkWriter(out, cyNetwork, vmm, nvm, nm, gm, ntm, lexicon, isUpdate );
+        CxNetworkWriter writer = new CxNetworkWriter(out, cyNetwork, vmm, nvm, gm, lexicon, isUpdate );
         boolean writeEntireCollection = networkOrCollectionCombo.getSelectedIndex() == 1;
         writer.setWriteSiblings(writeEntireCollection);
         TaskIterator ti = new TaskIterator(writer);

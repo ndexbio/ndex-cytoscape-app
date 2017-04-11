@@ -66,9 +66,7 @@ public class CxNetworkWriter implements CyWriter {
                            final CyNetwork network,
                            final VisualMappingManager visual_mapping_manager,
                            final CyNetworkViewManager networkview_manager,
-                           final CyNetworkManager network_manager,
                            final CyGroupManager group_manager,
-                           final CyNetworkTableManager table_manager,
                            final VisualLexicon lexicon,
                            boolean isUpdate) {
 

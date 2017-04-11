@@ -300,7 +300,8 @@ public final class CxExporter {
         
         Provenance cytoscapeProvenance = new Provenance();
         
-        ProvenanceEntity oldProvenanceEntity = (cxInfoHolder !=null ? cxInfoHolder.getProvenance().getEntity() : null); 
+        ProvenanceEntity oldProvenanceEntity = ((cxInfoHolder !=null && cxInfoHolder.getProvenance() !=null)? 
+        		cxInfoHolder.getProvenance().getEntity() : null); 
         
         ProvenanceEvent creationEvent = new ProvenanceEvent((isUpdate ? "Cytoscape Update" : "Cytoscape Upload"),
         		     new Timestamp(Calendar.getInstance().getTimeInMillis() ));
@@ -350,7 +351,7 @@ public final class CxExporter {
             }
             
             final AspectElementCounts aspects_counts = w.getAspectElementCounts();
-            addPostMetadata( network, w, aspects_counts, write_siblings, cxInfoHolder);
+            addPostMetadata( w, aspects_counts, write_siblings, cxInfoHolder);
             
         } catch (final Exception e) {
             e.printStackTrace();
@@ -720,7 +721,7 @@ public final class CxExporter {
     }
 
 
-	private final void addPostMetadata( final CyNetwork network, final CxWriter w,
+	private final void addPostMetadata( final CxWriter w,
 			final AspectElementCounts aspects_counts, boolean write_siblings, CXInfoHolder cxInfoHolder) {
 
 		final long t0 = System.currentTimeMillis();
@@ -850,7 +851,7 @@ public final class CxExporter {
                                         CartesianLayoutElement.ASPECT_NAME,
                                         consistency_group,
                                         null,
-                                        (long) my_network.getNodeList().size());
+                                        (long)my_network.getNodeList().size());
         
 
             addDataToMetaDataCollection(pre_meta_data,
@@ -1356,7 +1357,7 @@ public final class CxExporter {
                         }
                         NodeAttributesElement e = null;
                         final Long subnet = writeSiblings? my_network.getSUID(): null;
-                        
+                        Long nodeId = Long.valueOf(this.getNodeIdToExport(cy_node, cxInfoHolder));
                         
                         if (value instanceof List) {
                             final List<String> attr_values = new ArrayList<>();
@@ -1365,15 +1366,14 @@ public final class CxExporter {
                             }
                             if (!attr_values.isEmpty()) {
                                 e = new NodeAttributesElement(subnet,
-                                                              this.getNodeIdToExport(cy_node, cxInfoHolder),
+                                                              nodeId,
                                                               column_name,
                                                               attr_values,
                                                               AttributesAspectUtils.determineDataType(value));
                             }
-                        }
-                        else {
+                        } else {
                             e = new NodeAttributesElement(subnet,
-                                    					  this.getNodeIdToExport(cy_node, cxInfoHolder),
+                                    					  nodeId,
                                                           column_name,
                                                           String.valueOf(value),
                                                           AttributesAspectUtils.determineDataType(value));

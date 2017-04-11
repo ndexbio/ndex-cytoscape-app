@@ -54,12 +54,12 @@ public final class ViewMaker {
                                                boolean doLayout) 
                                             		   throws IOException {
 
-    		final Map<CyNetworkView, Boolean> hasLayoutMap = new HashMap<>();
+   // 		final Map<CyNetworkView, Boolean> hasLayoutMap = new HashMap<>();
     		
         final long t0 = System.currentTimeMillis();
         final VisualElementCollectionMap collection = cx_to_cy.getVisualElementCollectionMap();
         final CyNetworkView view = networkview_factory.createNetworkView(network);
-        hasLayoutMap.put(view, Boolean.FALSE);
+    //    hasLayoutMap.put(view, Boolean.FALSE);
         
         if ((collection == null) || collection.isEmpty()) {
              return ViewMaker.applyStyle(visual_mapping_manager.getDefaultVisualStyle(), view, doLayout);
@@ -75,12 +75,8 @@ public final class ViewMaker {
         // might change, which means instead of "get(0)" we will need a
         // loop.
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		try {
-			if (network_id == null || !cx_to_cy.getSubNetworkToViewsMap().containsKey(network_id)) {
+		if (network_id == null || !cx_to_cy.getSubNetworkToViewsMap().containsKey(network_id)) {
 				return ViewMaker.applyStyle(visual_mapping_manager.getDefaultVisualStyle(), view, doLayout);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 
         final Long view_id = cx_to_cy.getSubNetworkToViewsMap().get(network_id).get(0);
@@ -99,13 +95,11 @@ public final class ViewMaker {
             new_visual_style = visual_style_factory.createVisualStyle(default_visual_style);
             final String viz_style_title_base = ViewMaker.createTitleForNewVisualStyle(network_collection_name);
             String viz_style_title = viz_style_title_base;
-            while (counter < 101) {
-                if (ViewMaker.containsVisualStyle(viz_style_title, visual_mapping_manager)) {
+            while (counter < 101 && ViewMaker.containsVisualStyle(viz_style_title, visual_mapping_manager)) {
                     viz_style_title = viz_style_title_base + "-" + counter;
-                }
-                counter++;
+                    counter++;
             }
-       //     ViewMaker.removeVisualStyle(viz_style_title, visual_mapping_manager);
+ //           ViewMaker.removeVisualStyle(viz_style_title, visual_mapping_manager);
             new_visual_style.setTitle(viz_style_title);
         }
         final VisualLexicon lexicon = rendering_engine_manager.getDefaultVisualLexicon();
@@ -155,7 +149,7 @@ public final class ViewMaker {
                     }
                 }
             }
-            hasLayoutMap.put(view, Boolean.TRUE);
+   //         hasLayoutMap.put(view, Boolean.TRUE);
         }
 
         if (have_default_visual_properties) {
@@ -323,7 +317,7 @@ public final class ViewMaker {
         return viz_style_title;
     }
 
-    private final static void removeVisualStyle(final String viz_style_title,
+ /*   private final static void removeVisualStyle(final String viz_style_title,
                                                final VisualMappingManager visual_mapping_manager) {
         final Iterator<VisualStyle> it = visual_mapping_manager.getAllVisualStyles().iterator();
         while (it.hasNext()) {
@@ -333,7 +327,7 @@ public final class ViewMaker {
                 break;
             }
         }
-    }
+    } */
 
     private final static boolean containsVisualStyle(final String viz_style_title,
                                                     final VisualMappingManager visual_mapping_manager) {

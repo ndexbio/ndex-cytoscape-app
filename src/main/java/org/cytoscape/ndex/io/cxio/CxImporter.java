@@ -249,7 +249,7 @@ public final class CxImporter {
      					break;
      				case CartesianLayoutElement.ASPECT_NAME:
      					CartesianLayoutElement e = (CartesianLayoutElement)elmt;
-     					niceCX.addNodeAssociatedAspectElement(e.getNode(), e);
+     					niceCX.addNodeAssociatedAspectElement(Long.valueOf(e.getNode()), e);
      					break;
      				case Provenance.ASPECT_NAME:
      					Provenance prov = (Provenance) elmt;
