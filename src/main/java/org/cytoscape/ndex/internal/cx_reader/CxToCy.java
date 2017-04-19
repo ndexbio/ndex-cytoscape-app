@@ -430,7 +430,15 @@ public final class CxToCy {
                 for (final AspectElement element : niceCX.getOpaqueAspectTable().get(CyVisualPropertiesElement.ASPECT_NAME)) {
                     final CyVisualPropertiesElement vpe = (CyVisualPropertiesElement) element;
 
-                    final Long view = vpe.getView() != null ? vpe.getView() : subnetwork_id;
+                    //final Long view = vpe.getView() != null ? vpe.getView() : subnetwork_id;
+
+                    final Long view;
+                    if (  vpe.getView() != null)
+                    	view = vpe.getView();
+                    else {
+                    	view = subnetwork_id;
+                    	vpe.setView(view);
+                    }
 
                     if (vpe.getProperties_of().equals(VisualPropertyType.NETWORK.asString())) {
                         _visual_element_collections.addNetworkVisualPropertiesElement(view,
@@ -456,7 +464,7 @@ public final class CxToCy {
                     else if (vpe.getProperties_of().equals(VisualPropertyType.EDGES.asString())) {
                         Long applies_to_edge = vpe.getApplies_to();
                             _edges_with_visual_properties.add(_cxid_to_cyedge_map.get(applies_to_edge));
-                            _visual_element_collections.addEdgeVisualPropertiesElement(subnetwork_id, //view,
+                            _visual_element_collections.addEdgeVisualPropertiesElement(view,
                                                                                        _cxid_to_cyedge_map
                                                                                                .get(applies_to_edge),
                                                                                        vpe);

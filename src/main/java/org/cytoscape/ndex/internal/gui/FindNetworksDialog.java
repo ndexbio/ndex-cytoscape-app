@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 
@@ -379,6 +380,12 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             }
         });
         resultsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        
+        resultsTable.getColumnModel().getColumn(1).setMinWidth(50);
+        resultsTable.getColumnModel().getColumn(1).setMaxWidth(100);
+        resultsTable.getColumnModel().getColumn(2).setMinWidth(100);
+        resultsTable.getColumnModel().getColumn(2).setMaxWidth(100);
+        
         jScrollPane1.setViewportView(resultsTable);
 
         selectNetwork.setText("Load Network");

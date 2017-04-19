@@ -14,6 +14,8 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.ndex.internal.singletons.CXInfoHolder;
+import org.cytoscape.ndex.io.cxio.CxExporter;
 import org.cytoscape.ndex.io.cxio.CxUtil;
 import org.cytoscape.ndex.io.cxio.VisualPropertyType;
 import org.cytoscape.view.model.CyNetworkView;
@@ -61,7 +63,8 @@ public final class VisualPropertiesGatherer {
                                                                                    final VisualMappingManager visual_mapping_manager,
                                                                                    final VisualLexicon lexicon,
                                                                                    final Set<VisualPropertyType> types,
-                                                                                   boolean writeSiblings) {
+                                                                                   boolean writeSiblings,
+                                                                                   CXInfoHolder cxInfoHolder) {
 
         final List<AspectElement> elements = new ArrayList<>();
         final VisualStyle current_visual_style = visual_mapping_manager.getVisualStyle(view);
@@ -80,11 +83,11 @@ public final class VisualPropertiesGatherer {
         }
 
         if (types.contains(VisualPropertyType.NODES)) {
-            gatherNodeVisualProperties(view, elements, all_visual_properties, writeSiblings);
+            gatherNodeVisualProperties(view, elements, all_visual_properties, writeSiblings, cxInfoHolder);
         }
 
         if (types.contains(VisualPropertyType.EDGES)) {
-            gatherEdgeVisualProperties(view, elements, all_visual_properties, writeSiblings);
+            gatherEdgeVisualProperties(view, elements, all_visual_properties, writeSiblings, cxInfoHolder);
         }
 
         return elements;
@@ -326,11 +329,12 @@ public final class VisualPropertiesGatherer {
     private static void gatherEdgeVisualProperties(final CyNetworkView view,
                                                    final List<AspectElement> visual_properties,
                                                    final Set<VisualProperty<?>> all_visual_properties,
-                                                   boolean writeSiblings) {
+                                                   boolean writeSiblings , 
+                                                   CXInfoHolder cxInfoHolder) {
         for (final CyEdge edge : view.getModel().getEdgeList()) {
             final View<CyEdge> edge_view = view.getEdgeView(edge);
             final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.EDGES.asString(),
-            												edge.getSUID(),                                                                             
+            												CxExporter.getEdgeIdToExport(edge, cxInfoHolder),//edge.getSUID(),                                                                             
             												writeSiblings ? view.getSUID() : null);
      //       e.setApplies_to(edge.getSUID());
             for (final VisualProperty visual_property : all_visual_properties) {
@@ -352,9 +356,9 @@ public final class VisualPropertiesGatherer {
                                                       final Set<VisualProperty<?>> all_visual_properties,
                                                       boolean writeSiblings) {
         final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.NETWORK.asString(),
-        																 null,
-                                                                         writeSiblings? view.getSUID() : null);
-        e.setApplies_to(view.getSUID());
+        												writeSiblings? view.getSUID() : null,
+                                                        writeSiblings? view.getSUID() : null);
+
         for (final VisualProperty visual_property : all_visual_properties) {
             if (visual_property.getTargetDataType() == CyNetwork.class) {
                 addPropertiesNetwork(view, current_visual_style, visual_property, e);
@@ -400,11 +404,12 @@ public final class VisualPropertiesGatherer {
     private static void gatherNodeVisualProperties(final CyNetworkView view,
                                                    final List<AspectElement> visual_properties,
                                                    final Set<VisualProperty<?>> all_visual_properties,
-                                                   boolean writeSiblings) {
+                                                   boolean writeSiblings,
+                                                   CXInfoHolder cxInfoHolder) {
         for (final CyNode cy_node : view.getModel().getNodeList()) {
             final View<CyNode> node_view = view.getNodeView(cy_node);
             final CyVisualPropertiesElement e = new CyVisualPropertiesElement(VisualPropertyType.NODES.asString(),
-            																cy_node.getSUID(),
+            																CxExporter.getNodeIdToExport(cy_node, cxInfoHolder),//cy_node.getSUID(),
                                                                              writeSiblings? view.getSUID() : null);
       //      e.setApplies_to(cy_node.getSUID());
             for (final VisualProperty visual_property : all_visual_properties) {

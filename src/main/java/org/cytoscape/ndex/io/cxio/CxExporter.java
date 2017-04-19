@@ -664,7 +664,7 @@ public final class CxExporter {
         }
     }
 
-    private long getNodeIdToExport(CyNode cyNode, CXInfoHolder cxInfoHolder){
+    public static long getNodeIdToExport(CyNode cyNode, CXInfoHolder cxInfoHolder){
     	 long id = cyNode.getSUID().longValue();
 		 if( cxInfoHolder != null) {
 			   Long cxNodeId = cxInfoHolder.getCXNodeId(Long.valueOf(id));
@@ -681,7 +681,7 @@ public final class CxExporter {
 		return id;
     }
     
-    private long getEdgeIdToExport(CyEdge cyedge, CXInfoHolder cxInfoHolder){
+    public static long getEdgeIdToExport(CyEdge cyedge, CXInfoHolder cxInfoHolder){
    	 long id = cyedge.getSUID().longValue();
 		 if( cxInfoHolder != null) {
 			   Long cxEdgeId = cxInfoHolder.getCXEdgeId(Long.valueOf(id));
@@ -698,11 +698,12 @@ public final class CxExporter {
 		return id;
    }
     
-    private final static void writeVisualProperties(final CyNetworkView view,
+    private final void writeVisualProperties(final CyNetworkView view,
                                                     final VisualMappingManager visual_mapping_manager,
                                                     final VisualLexicon lexicon,
                                                     final CxWriter w,
-                                                    boolean writeSiblings) throws IOException {
+                                                    boolean writeSiblings,
+                                                    CXInfoHolder cxInfoHolder) throws IOException {
         final Set<VisualPropertyType> types = new HashSet<>();
         types.add(VisualPropertyType.NETWORK);
         types.add(VisualPropertyType.NODES);
@@ -711,7 +712,7 @@ public final class CxExporter {
         types.add(VisualPropertyType.EDGES_DEFAULT);
 
         final List<AspectElement> elements = VisualPropertiesGatherer
-                .gatherVisualPropertiesAsAspectElements(view, visual_mapping_manager, lexicon, types, writeSiblings);
+                .gatherVisualPropertiesAsAspectElements(view, visual_mapping_manager, lexicon, types, writeSiblings, cxInfoHolder);
 
         final long t0 = System.currentTimeMillis();
         w.writeAspectElements(elements);
@@ -1402,13 +1403,10 @@ public final class CxExporter {
             final Collection<CyNetworkView> views = _networkview_manager.getNetworkViews(subnet);
             for (final CyNetworkView view : views) {
 
-                if (aspects.contains(Aspect.CARTESIAN_LAYOUT)) {
-                    writeCartesianLayout(view, w, write_siblings, cxInfoHolder);
-                }
+                 writeCartesianLayout(view, w, write_siblings, cxInfoHolder);
 
-                if (aspects.contains(Aspect.VISUAL_PROPERTIES)) {
-                    writeVisualProperties(view, _visual_mapping_manager, _lexicon, w, write_siblings);
-                }
+                 writeVisualProperties(view, _visual_mapping_manager, _lexicon, w, write_siblings, cxInfoHolder);
+                
             }
         }
         
