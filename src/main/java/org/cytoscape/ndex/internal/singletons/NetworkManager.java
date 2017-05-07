@@ -27,6 +27,7 @@
 package org.cytoscape.ndex.internal.singletons;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 
 public enum NetworkManager
@@ -35,8 +36,11 @@ public enum NetworkManager
 //    private NetworkSummary selectedNetworkSummary;
     
     private final Map<Long, CXInfoHolder> cxNetworkInfoTable;
+    private final Map<Long,UUID> networkIdTable; // store the network ids for collections from NDEx
     
-    NetworkManager() { cxNetworkInfoTable = new TreeMap<>();}
+    NetworkManager() { 
+    	cxNetworkInfoTable = new TreeMap<>();
+    	networkIdTable = new TreeMap<>();	}
  
     public CXInfoHolder getCXInfoHolder(Long subNetworkId) {
     	return this.cxNetworkInfoTable.get(subNetworkId);
@@ -46,7 +50,16 @@ public enum NetworkManager
     	this.cxNetworkInfoTable.put(subNetworkId, cxInfoHolder);
     }
     
+    public void addNetworkUUID (Long subNetworkId, UUID networkId) {
+    	networkIdTable.put(subNetworkId, networkId);
+    }
+    
+    public UUID getNdexNetworkId(Long subNetworkId) {
+    	return networkIdTable.get(subNetworkId);
+    }
+    
     public void deleteCyNetworkEntry(Long subNetworkId) {
     	this.cxNetworkInfoTable.remove(subNetworkId);
+    	this.networkIdTable.remove(subNetworkId);
     }
 }

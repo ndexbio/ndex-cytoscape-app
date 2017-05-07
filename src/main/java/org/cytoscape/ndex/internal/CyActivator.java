@@ -75,6 +75,10 @@ public class CyActivator extends AbstractCyActivator
         // be together. Finally, notice the last line in this code group. When we call "registerAllServices" we tell
         // Cytoscape about our menu item and Cytoscape puts it in the appropriate location upon start-up. If you are 
         // wondering why registerAllServices is plural, I don't have any idea either.
+        action = new ChangeNdexServerMenuAction("Sign in to NDEx", applicationManager);
+        properties = new Properties();
+        registerAllServices(context, action, properties);
+
         action = new ImportNetworksMenuAction("Import Networks from NDEx", applicationManager);
         properties = new Properties();
         registerAllServices(context, action, properties);
@@ -83,9 +87,6 @@ public class CyActivator extends AbstractCyActivator
         properties = new Properties();
         registerAllServices(context, action, properties);
 
-        action = new ChangeNdexServerMenuAction("Change NDEx Source", applicationManager);
-        properties = new Properties();
-        registerAllServices(context, action, properties);
         
         //Get Cytocape objects needed by this app using the bundle context.
         CyApplicationConfiguration config = getService(context,CyApplicationConfiguration.class);

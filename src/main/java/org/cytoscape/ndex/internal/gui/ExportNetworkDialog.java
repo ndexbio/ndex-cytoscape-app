@@ -119,19 +119,16 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     {
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
         
+        UUID ndexNetworkId = null;
         CXInfoHolder cxInfo = NetworkManager.INSTANCE.getCXInfoHolder(cyNetwork.getSUID());
-        if ( cxInfo == null)
+        if ( cxInfo != null) {
+        	ndexNetworkId = cxInfo.getNetworkId();
+        } else {
+        	ndexNetworkId = NetworkManager.INSTANCE.getNdexNetworkId(cyNetwork.getSUID());
+        }
+        
+        if ( ndexNetworkId == null)
         	return null;
-
-        /*
-        
-        CyRootNetwork rootNetwork = ((CySubNetwork)cyNetwork).getRootNetwork();
-        CyRow r = rootNetwork.getRow(rootNetwork);
-        String modificationTime = r.get("ndex:modificationTime", String.class);
-        String networkId = r.get("ndex:uuid", String.class);
-        if( modificationTime == null || networkId == null )
-            return null;*/ 
-        
         
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
@@ -139,8 +136,8 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 
         try
         {
-        	Map<String, Permissions> permissionTable = mal.getUserNetworkPermission(userId, cxInfo.getNetworkId(), false);
-        	if (  permissionTable== null || permissionTable.get(cxInfo.getNetworkId().toString()) == Permissions.READ )
+        	Map<String, Permissions> permissionTable = mal.getUserNetworkPermission(userId, ndexNetworkId, false);
+        	if (  permissionTable== null || permissionTable.get(ndexNetworkId.toString()) == Permissions.READ )
         		return null;
         	
         }
@@ -152,9 +149,10 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         NetworkSummary ns = null;
         try
         {
-            ns = mal.getNetworkSummaryById(cxInfo.getNetworkId().toString());
-         //   if( ns.getReadOnlyCacheId() != -1L || ns.getReadOnlyCommitId() != -1L )
-         //       return null;
+            ns = mal.getNetworkSummaryById(ndexNetworkId.toString());
+            if ( ns.getIsReadOnly())
+            	return null;
+      
         }
         catch (IOException e)
         {
@@ -430,8 +428,11 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 
             if( updateCheckbox.isSelected() )
             {
-                  UUID networkId = NetworkManager.INSTANCE.getCXInfoHolder(cyNetwork.getSUID()).getNetworkId(); 
-                
+                  UUID networkId = NetworkManager.INSTANCE.getNdexNetworkId(cyNetwork.getSUID());
+                  if ( networkId == null)
+                	  networkId =  NetworkManager.INSTANCE.getCXInfoHolder(cyNetwork.getSUID()).getNetworkId(); 
+
+                  
                     if (updateIsPossible())
                     {
                //         if( !networkHasBeenModifiedSinceDownload() )

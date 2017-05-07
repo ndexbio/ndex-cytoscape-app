@@ -31,6 +31,7 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.ndex.internal.gui.ExportNetworkDialog;
+import org.cytoscape.ndex.internal.gui.SignInDialog;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
@@ -69,14 +70,21 @@ public class ExportCurrentNetworkMenuAction extends AbstractCyAction
         Server currentServer = ServerManager.INSTANCE.getSelectedServer();
         if( !currentServer.isAuthenticated() )
         {
-            String serverName = currentServer.getName();
+       /*     String serverName = currentServer.getName();
             String msg = "You are not authenticed on: " + serverName + "\n";
             msg += "You must be authenticated to export a network to an NDEx.";
             String dialogTitle = "Authentication Error";
             JOptionPane.showMessageDialog(parent, msg, dialogTitle, JOptionPane.ERROR_MESSAGE );
-            return;
+            return; */
+        	SignInDialog signInD = new SignInDialog(parent);
+        	signInD.setLocationRelativeTo(parent);
+        	signInD.setVisible(true);
         }
 
+        if (!currentServer.isAuthenticated()) {
+        	return;
+        }
+        
         CyNetwork currentNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
         if( currentNetwork == null )
         {
@@ -86,6 +94,9 @@ public class ExportCurrentNetworkMenuAction extends AbstractCyAction
             return;
         }
 
+        
+        
+        
         ExportNetworkDialog dialog = new ExportNetworkDialog(parent);
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);

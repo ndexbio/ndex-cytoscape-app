@@ -156,6 +156,12 @@ public class Server
         return new NdexRestClientModelAccessLayer(client);
     }
    
+ /*   public NdexRestClientModelAccessLayer getModelAccessLayer(String userName, String password)
+    {
+        NdexRestClient client = new NdexRestClient(username,password,url);
+        return new NdexRestClientModelAccessLayer(client);
+    } */
+
     public boolean isDefault()
     {
         return type == Type.DEFAULT;

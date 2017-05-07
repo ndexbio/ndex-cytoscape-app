@@ -122,8 +122,22 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         }
         else
         {
-            username.setText("Not Authenticated");
-            administeredByMe.setVisible(false);
+        	if ( selectedServer.getUsername() != null) {
+        		NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
+        		try {
+        			selectedServer.check(mal);
+                    username.setText( selectedServer.getUsername() );
+                    administeredByMe.setVisible(true);
+        		} catch (IOException e) {
+    			    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication + ": " +
+    			    		e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    			    this.setVisible(false);
+    			    return;
+        		}
+        	} else {
+        		username.setText("Not Authenticated");
+        		administeredByMe.setVisible(false);
+        	}
         }
         
         
@@ -208,6 +222,11 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         	   NetworkManager.INSTANCE.setCXInfoHolder(subNetwork.getSUID(), cxInfoHolder);
            }
         
+        } else {
+            for ( CyNetwork subNetwork : networks) {
+         	   NetworkManager.INSTANCE.addNetworkUUID(subNetwork.getSUID(), networkSummary.getExternalId());
+            }
+        	
         }
         
         CyRootNetwork rootNetwork = ((CySubNetwork)networks.get(0)).getRootNetwork();
