@@ -671,7 +671,14 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             Vector row = new Vector();
             
             //Network Title
-            row.add(networkSummary.getName());
+            if (networkSummary.getName() !=null)
+            	row.add(networkSummary.getName());
+            else {
+            	if ( !networkSummary.getIsValid() && networkSummary.getErrorMessage()!=null)
+            		row.add("Invalid network: " + networkSummary.getExternalId().toString());
+            	else if ( !networkSummary.getIsValid() ) 
+            		row.add("Network: " + networkSummary.getExternalId().toString()  + "Pending Validation");
+            }
             //Format
             row.add(getSourceFormat(networkSummary));
             //Number of Nodes
