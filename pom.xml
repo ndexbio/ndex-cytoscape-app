@@ -4,13 +4,13 @@
     <properties>
         <bundle.symbolicName>org.cytoscape.ndex.cyNDEx</bundle.symbolicName>
         <bundle.namespace>org.cytoscape.ndex</bundle.namespace>
-        <cytoscape-version>3.4.0</cytoscape-version>
+        <cytoscape-version>3.3.0</cytoscape-version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.ndex</groupId>
-    <artifactId>CyNDExPro</artifactId>
-    <version>1.0.0</version>
+    <artifactId>cyNDEx</artifactId>
+    <version>4.0.0</version>
     <!--<version>1.0.0-dev</version>-->
 
     <name>cyNDEx Pro</name>
