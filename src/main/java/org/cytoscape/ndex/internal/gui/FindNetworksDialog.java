@@ -332,6 +332,10 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                         {
                             JOptionPane.showMessageDialog(me, ErrorMessage.failedToParseJson, "Error", JOptionPane.ERROR_MESSAGE);
                             return -1;
+                        } catch (RuntimeException ex2) {
+                        	JOptionPane.showMessageDialog(me, "This network can't be imported to cytoscape. Cause: " + ex2.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        	ex2.printStackTrace();
+                            return -1;
                         }
                     } else
                     {

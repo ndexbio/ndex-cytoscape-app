@@ -87,7 +87,7 @@ public final class ViewMaker {
                 || (collection.getNodesDefaultVisualPropertiesElement(view_id) != null) || (collection
                         .getEdgesDefaultVisualPropertiesElement(view_id) != null));
 
-        VisualStyle new_visual_style = null;
+        VisualStyle new_visual_style = visual_mapping_manager.getDefaultVisualStyle();
         if (have_default_visual_properties) {
             int counter = 1;
             final VisualStyle default_visual_style = visual_mapping_manager.getDefaultVisualStyle();
