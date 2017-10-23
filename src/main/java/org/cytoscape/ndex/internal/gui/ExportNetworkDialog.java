@@ -26,6 +26,7 @@
 
 package org.cytoscape.ndex.internal.gui;
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -59,6 +60,8 @@ import org.ndexbio.model.object.Permissions;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 /**
  *
  * @author David
@@ -71,15 +74,18 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
 	private static final long serialVersionUID = 1L;
 	/**
      * Creates new form UploadNetwork
+	 * @throws NdexException 
+	 * @throws IOException 
+	 * @throws JsonProcessingException 
      */
-    public ExportNetworkDialog(Frame parent)
+    public ExportNetworkDialog(Frame parent) throws JsonProcessingException, IOException, NdexException
     {
         super(parent, true);
         initComponents();
         prepComponents();
     }
     
-    private void prepComponents()
+    private void prepComponents() throws JsonProcessingException, IOException, NdexException
     {
         setModal(true);
         rootPane.setDefaultButton(upload);
@@ -109,13 +115,13 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         return !modificationTime.equals(ns.getModificationTime().toString());
     } */
 
-    private boolean updateIsPossible()
+    private boolean updateIsPossible() throws JsonProcessingException, IOException, NdexException
     {
         return updateIsPossibleHelper() != null;
     }
     
     
-    private NetworkSummary updateIsPossibleHelper()
+    private NetworkSummary updateIsPossibleHelper() throws JsonProcessingException, IOException, NdexException
     {
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();
         
@@ -149,7 +155,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
         NetworkSummary ns = null;
         try
         {
-            ns = mal.getNetworkSummaryById(ndexNetworkId.toString());
+            ns = mal.getNetworkSummaryById(ndexNetworkId);
             if ( ns.getIsReadOnly())
             	return null;
       
@@ -248,7 +254,12 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
             @Override
 			public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                uploadActionPerformed(evt);
+                try {
+					uploadActionPerformed(evt);
+				} catch (IOException | NdexException e) {
+		            JOptionPane.showMessageDialog((Component)evt.getSource(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+				}
             }
         });
 
@@ -376,7 +387,7 @@ public class ExportNetworkDialog extends javax.swing.JDialog {
     }
 
 
-    private void uploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadActionPerformed
+    private void uploadActionPerformed(java.awt.event.ActionEvent evt) throws JsonProcessingException, IOException, NdexException {//GEN-FIRST:event_uploadActionPerformed
         
         CyNetwork cyNetwork = CyObjectManager.INSTANCE.getCurrentNetwork();  // get the current subNetwork
 

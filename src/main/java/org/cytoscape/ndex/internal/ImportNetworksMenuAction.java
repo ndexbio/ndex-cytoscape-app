@@ -27,13 +27,16 @@
 package org.cytoscape.ndex.internal;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.ndex.internal.gui.FindNetworksDialog;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
+import org.ndexbio.model.exceptions.NdexException;
 
 /**
  *
@@ -65,9 +68,16 @@ public class ImportNetworksMenuAction extends AbstractCyAction
     public void actionPerformed(ActionEvent e)
     {
         JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-        FindNetworksDialog dialog = new FindNetworksDialog(parent);
-        dialog.setLocationRelativeTo(parent);
-        dialog.setVisible(true);
+        FindNetworksDialog dialog;
+		try {
+			dialog = new FindNetworksDialog(parent);
+			dialog.setLocationRelativeTo(parent);
+	        dialog.setVisible(true);
+		} catch (IOException | NdexException e1) {
+            JOptionPane.showMessageDialog(parent, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE );
+
+		}
+        
     }
     
 }

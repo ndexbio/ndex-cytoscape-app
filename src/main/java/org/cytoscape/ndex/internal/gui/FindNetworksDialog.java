@@ -79,6 +79,9 @@ import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexPropertyValuePair;
 import org.ndexbio.model.object.network.NetworkSummary;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -97,8 +100,11 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     
     /**
      * Creates new form SimpleSearch
+     * @throws NdexException 
+     * @throws IOException 
+     * @throws JsonProcessingException 
      */
-    public FindNetworksDialog(Frame parent) {
+    public FindNetworksDialog(Frame parent) throws JsonProcessingException, IOException, NdexException {
         super(parent, true);
         initComponents();
         prepComponents();
@@ -110,7 +116,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         done.requestFocus();
     }
     
-    private void prepComponents()
+    private void prepComponents() throws JsonProcessingException, IOException, NdexException
     {
         this.setModal(true);
         this.getRootPane().setDefaultButton(search);
@@ -324,7 +330,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                         try
                         {
                      //       ProvenanceEntity provenance = mal.getNetworkProvenance(id.toString());
-                            InputStream cxStream = mal.getNetworkAsCXStream(id.toString());
+                            InputStream cxStream = mal.getNetworkAsCXStream(id);
                             createCyNetworkFromCX(cxStream, networkSummary); //, finalLargeNetwork);
                        //     me.setVisible(false);
                         }
@@ -461,7 +467,12 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             	JCheckBox cb = (JCheckBox)evt.getSource();
             	searchField.setEnabled(!cb.isSelected());
             	if ( cb.isSelected()) {
-            	   getMyNetworks();	
+            	   try {
+					getMyNetworks();
+				} catch (NdexException | IOException e) {
+				    JOptionPane.showMessageDialog((Component)evt.getSource(), ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+
+				}	
                    //administeredByMeActionPerformed();
             	} else {
             		search();
@@ -568,7 +579,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_selectNetworkActionPerformed
 
     
-    private void getMyNetworks() 
+    private void getMyNetworks() throws NdexException, JsonProcessingException, IOException 
     {
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
        
@@ -578,7 +589,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 			{
 			    try
 			    {
-				        networkSummaries = mal.getMyNetworks(selectedServer.getUserId());
+				        networkSummaries = mal.getMyNetworks();
 			    }
 			    catch (IOException ex)
 			    {         
@@ -612,14 +623,14 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         if( searchText.isEmpty() )
             searchText = "";
         
-        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         try {
+            NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
 			if( selectedServer.check(mal) )
 			{
 			    try
 			    {
 			    	if ( administeredByMe.isSelected() )
-				        networkSummaries = mal.getMyNetworks(selectedServer.getUserId());
+				        networkSummaries = mal.getMyNetworks();
 			    	else 
 			            networkSummaries = mal.findNetworks(searchText, null, null, true, 0, 10000).getNetworks();
 			    }
@@ -633,13 +644,11 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 			}
 			else
 			{
-			    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+			    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
 			    this.setVisible(false);
 			}
-		} catch (HeadlessException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+		} catch (HeadlessException | IOException | NdexException e) {
+		    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
 
 		}
     }
@@ -651,7 +660,8 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     }
 //GEN-LAST:event_searchActionPerformed
 
-    private void administeredByMeActionPerformed()//GEN-FIRST:event_administeredByMeActionPerformed
+    private void administeredByMeActionPerformed() throws NdexException//GEN-FIRST:event_administeredByMeActionPerformed
+, JsonProcessingException, IOException
     {//GEN-HEADEREND:event_administeredByMeActionPerformed
         getMyNetworks();
     }//GEN-LAST:event_administeredByMeActionPerformed
@@ -710,13 +720,13 @@ public class FindNetworksDialog extends javax.swing.JDialog {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+ //   public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
+  /*      try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
@@ -734,21 +744,26 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         }
         //</editor-fold>
 
-        /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
 			public void run() {
-                FindNetworksDialog dialog = new FindNetworksDialog(new javax.swing.JFrame());
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
+                FindNetworksDialog dialog;
+				try {
+					dialog = new FindNetworksDialog(new javax.swing.JFrame());
+					dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+	                    @Override
+	                    public void windowClosing(java.awt.event.WindowEvent e) {
+	                        System.exit(0);
+	                    }
+	                });
+	                dialog.setVisible(true);
+				} catch (HeadlessException | IOException | NdexException e1) {
+					 JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+				}
+                
             }
         });
-    }
+    } */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox administeredByMe;

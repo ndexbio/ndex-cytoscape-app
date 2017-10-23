@@ -34,9 +34,12 @@ import org.cytoscape.ndex.internal.singletons.ServerManager;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.GroupLayout;
+
+import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexStatus;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.io.IOException;
@@ -123,7 +126,12 @@ public class SignInDialog extends javax.swing.JDialog {
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                saveActionPerformed(evt);
+                try {
+					saveActionPerformed(evt);
+				} catch (NdexException e) {
+				    JOptionPane.showMessageDialog((Component)evt.getSource(), ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
+
+				}
             }
         });
 
@@ -194,7 +202,7 @@ public class SignInDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void saveActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_saveActionPerformed
+    private void saveActionPerformed(java.awt.event.ActionEvent evt) throws NdexException//GEN-FIRST:event_saveActionPerformed
     {
     	
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
@@ -205,8 +213,8 @@ public class SignInDialog extends javax.swing.JDialog {
    //     }	
         
         
-        NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         try {
+            NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
 			if( selectedServer.check(mal) )
 			{
 			    if( !selectedServer.isRunningNdexServer(mal) )

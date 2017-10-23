@@ -39,6 +39,7 @@ import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.server.ServerList;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
 import org.cytoscape.ndex.internal.strings.ErrorMessage;
+import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexStatus;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
@@ -208,7 +209,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
             {
                 try {
 					connectActionPerformed(evt);
-				} catch (HeadlessException | IOException e) {
+				} catch (HeadlessException | IOException | NdexException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					
@@ -341,7 +342,7 @@ public class ChangeNdexServerDialog extends javax.swing.JDialog
         }
     }//GEN-LAST:event_copyActionPerformed
 
-    private void connectActionPerformed(java.awt.event.ActionEvent evt) throws HeadlessException, IOException {//GEN-FIRST:event_connectActionPerformed
+    private void connectActionPerformed(java.awt.event.ActionEvent evt) throws HeadlessException, IOException, NdexException {//GEN-FIRST:event_connectActionPerformed
         Server selectedServer = ServerManager.INSTANCE.getSelectedServer();
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
         if( selectedServer.check(mal) )

@@ -30,9 +30,12 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.ndexbio.model.exceptions.NdexException;
+import org.ndexbio.model.object.NdexStatus;
 import org.ndexbio.model.object.User;
 import org.ndexbio.rest.client.NdexRestClient;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  *
@@ -75,9 +78,10 @@ public class Server
         userId = s.getUserId();
     }
 
-    public boolean isRunningNdexServer(NdexRestClientModelAccessLayer mal)
+    public boolean isRunningNdexServer(NdexRestClientModelAccessLayer mal) throws IOException, NdexException
     {
-        return mal.isServerRunningNdexServer();
+    	    NdexStatus s = mal.getServerStatus();
+    	    return s.getMessage().equals("Online");
     }
     
     public boolean check(NdexRestClientModelAccessLayer mal) throws IOException
@@ -91,18 +95,21 @@ public class Server
         }
         else
         {
-            try
-            {
-            	User user = mal.authenticateUser(mal.getUserName(),mal.getPassword());
+          //  try
+          //  {
+            	userId = mal.getNdexRestClient().getUserUid();
+            	authenticated = userId != null;
+          /* Old implementation. commenting out for now. 	
+           * User user = mal.authenticateUser(mal.getUserName(),mal.getPassword());
                 authenticated = user !=null;
                 if (user!=null) 
-                	userId = user.getExternalId();
-            }
+                	userId = user.getExternalId(); */
+          /*  }
             catch (NdexException e)
             {
                 authenticated = false;
                 e.printStackTrace();
-            }
+            } */
             return authenticated;
         }
     }
@@ -150,7 +157,7 @@ public class Server
         return header;
     }
     
-    public NdexRestClientModelAccessLayer getModelAccessLayer()
+    public NdexRestClientModelAccessLayer getModelAccessLayer() throws JsonProcessingException, IOException, NdexException
     {
         NdexRestClient client = new NdexRestClient(username,password,url);
         return new NdexRestClientModelAccessLayer(client);

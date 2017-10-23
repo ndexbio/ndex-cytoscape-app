@@ -27,6 +27,8 @@
 package org.cytoscape.ndex.internal;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.model.CyNetwork;
@@ -35,6 +37,7 @@ import org.cytoscape.ndex.internal.gui.SignInDialog;
 import org.cytoscape.ndex.internal.server.Server;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.ndex.internal.singletons.ServerManager;
+import org.ndexbio.model.exceptions.NdexException;
 
 import javax.swing.*;
 
@@ -97,8 +100,15 @@ public class ExportCurrentNetworkMenuAction extends AbstractCyAction
         
         
         
-        ExportNetworkDialog dialog = new ExportNetworkDialog(parent);
-        dialog.setLocationRelativeTo(parent);
-        dialog.setVisible(true);
+        ExportNetworkDialog dialog;
+		try {
+			dialog = new ExportNetworkDialog(parent);
+			 dialog.setLocationRelativeTo(parent);
+		        dialog.setVisible(true);
+		} catch (IOException | NdexException e1) {
+            JOptionPane.showMessageDialog(parent, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE );
+
+		}
+       
     }
 }
