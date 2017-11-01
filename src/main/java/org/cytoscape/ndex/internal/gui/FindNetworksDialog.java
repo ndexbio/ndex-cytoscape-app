@@ -133,16 +133,9 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         {
         	if ( selectedServer.getUsername() != null) {
         		NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        		try {
-        			selectedServer.check(mal);
-                    username.setText( selectedServer.getUsername() );
-                    administeredByMe.setVisible(true);
-        		} catch (IOException e) {
-    			    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication + ": " +
-    			    		e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    			    this.setVisible(false);
-    			    return;
-        		}
+        		selectedServer.check(mal);
+				username.setText( selectedServer.getUsername() );
+				administeredByMe.setVisible(true);
         	} else {
         		username.setText("Not Authenticated");
         		administeredByMe.setVisible(false);
@@ -151,32 +144,25 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         
         
         NdexRestClientModelAccessLayer mal = selectedServer.getModelAccessLayer();
-        try {
-			if( selectedServer.check(mal) )
-			{
-			    try
-			    {
-			        networkSummaries = mal.findNetworks("*", null, null, true, 0, 10000).getNetworks();
-			    }
-			    catch (IOException | NdexException ex)
-			    {         
-			        ex.printStackTrace();
-			        JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-			        this.setVisible(false);
-			        return;
-			    }
-			    showSearchResults( ); 
-			}
-			else
-			{
-			    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-			    this.setVisible(false);
-			}
-		} catch (HeadlessException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+        if( selectedServer.check(mal) )
+		{
+		    try
+		    {
+		        networkSummaries = mal.findNetworks("*", null, null, true, 0, 10000).getNetworks();
+		    }
+		    catch (IOException | NdexException ex)
+		    {         
+		        ex.printStackTrace();
+		        JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
+		        this.setVisible(false);
+		        return;
+		    }
+		    showSearchResults( ); 
+		}
+		else
+		{
 		    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "Error", JOptionPane.ERROR_MESSAGE);
-
+		    this.setVisible(false);
 		}
     }
 
@@ -604,7 +590,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
 			    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);
 			    this.setVisible(false);
 			}
-		} catch (HeadlessException | IOException e) {
+		} catch (HeadlessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		    JOptionPane.showMessageDialog(this, ErrorMessage.failedServerCommunication, "ErrorY", JOptionPane.ERROR_MESSAGE);

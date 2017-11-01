@@ -349,4 +349,9 @@ public class ServerList extends AbstractListModel<Server>
         return serverList.get(index);
     }
     
+    
+    public List<Server> getAllServers() {
+    		return serverList;
+    }
+    
 }

@@ -27,11 +27,11 @@
 package org.cytoscape.ndex.internal.server;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.UUID;
 
 import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexStatus;
-import org.ndexbio.model.object.User;
 import org.ndexbio.rest.client.NdexRestClient;
 import org.ndexbio.rest.client.NdexRestClientModelAccessLayer;
 
@@ -41,9 +41,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  *
  * @author David Welker
  */
-public class Server
+public class Server implements Serializable
 {
-    public enum Type {DEFAULT, CREDENTIALS, ADDED}
+
+	private static final long serialVersionUID = -2076750043971587470L;
+
+	public enum Type {DEFAULT, CREDENTIALS, ADDED}
     
     private String name;  // unique in the ServerList
     private String url;
@@ -84,7 +87,7 @@ public class Server
     	    return s.getMessage().equals("Online");
     }
     
-    public boolean check(NdexRestClientModelAccessLayer mal) throws IOException
+    public boolean check(NdexRestClientModelAccessLayer mal)
     {
         boolean usernamePresent = username != null && !username.isEmpty();
         boolean passwordPresent = password != null && !username.isEmpty();

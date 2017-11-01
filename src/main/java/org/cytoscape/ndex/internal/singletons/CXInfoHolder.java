@@ -1,5 +1,6 @@
 package org.cytoscape.ndex.internal.singletons;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
@@ -10,7 +11,11 @@ import org.cxio.metadata.MetaDataCollection;
 import org.ndexbio.model.cx.NamespacesElement;
 import org.ndexbio.model.cx.Provenance;
 
-public class CXInfoHolder {
+public class CXInfoHolder implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Map<Long,Long> cyNode2cxNodeMapping;
 	private Map<Long,Long> cyEdge2cxEdgeMapping;
 	

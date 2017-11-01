@@ -37,6 +37,8 @@ import org.cytoscape.model.CyNetworkTableManager;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.session.events.SessionAboutToBeSavedListener;
+import org.cytoscape.session.events.SessionLoadedListener;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -184,6 +186,11 @@ public class CyActivator extends AbstractCyActivator
 */
         //
         registerService(bc,new NdexNetworkAboutToBeDestroyedListener(), NetworkAboutToBeDestroyedListener.class, new Properties());
+     // Register the two listeners in the CyActivator class
+        cyNDExSessionHandler ndexSessionHandler = new cyNDExSessionHandler();
+        registerService(bc,ndexSessionHandler,SessionAboutToBeSavedListener.class, new Properties());
+        registerService(bc,ndexSessionHandler,SessionLoadedListener.class, new Properties());
+
         
     }
 

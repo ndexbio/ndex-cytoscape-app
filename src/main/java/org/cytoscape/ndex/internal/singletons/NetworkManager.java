@@ -35,8 +35,8 @@ public enum NetworkManager
     INSTANCE;
 //    private NetworkSummary selectedNetworkSummary;
     
-    private final Map<Long, CXInfoHolder> cxNetworkInfoTable;
-    private final Map<Long,UUID> networkIdTable; // store the network ids for collections from NDEx
+    private  Map<Long, CXInfoHolder> cxNetworkInfoTable;
+    private  Map<Long,UUID> networkIdTable; // store the network ids for collections from NDEx
     
     NetworkManager() { 
     	cxNetworkInfoTable = new TreeMap<>();
@@ -62,4 +62,23 @@ public enum NetworkManager
     	this.cxNetworkInfoTable.remove(subNetworkId);
     	this.networkIdTable.remove(subNetworkId);
     }
+    
+    public void setcxNetworkInfoTable ( Map<Long, CXInfoHolder> infoTable) {
+    		this.cxNetworkInfoTable= infoTable;
+    }
+    
+    public void setNetworkIdTable (Map<Long,UUID> netIdTable) { 
+    		this.networkIdTable = netIdTable;
+    }
+    
+    public Map<Long,CXInfoHolder> getInfoTable() { return this.cxNetworkInfoTable;}
+    public Map<Long,UUID> getIdTable() {return this.networkIdTable;}
+    
+ /*   protected Object readResolve() {
+
+        return INSTANCE;
+
+    } */
+
+
 }
