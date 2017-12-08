@@ -245,7 +245,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
             VisualStyleFactory vsf = CyObjectManager.INSTANCE.getVisualStyleFactory();
        
            // Map<CyNetworkView, Boolean> cyNetworkViewMap = 
-            CyNetworkView cyNetworkView =
+        //    CyNetworkView cyNetworkView =
             		ViewMaker.makeView(cyNetwork, cxToCy, collectionName, nvf, rem, vmm, vsf, doLayout);
        /*     CyNetworkView cyNetworkView = null;
             for ( CyNetworkView v : cyNetworkViewMap.keySet()) {
@@ -267,7 +267,7 @@ public class FindNetworksDialog extends javax.swing.JDialog {
                 cyNetworkView.updateView();
             */
 
-            CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
+        //    CyObjectManager.INSTANCE.getNetworkViewManager().addNetworkView(cyNetworkView);
         }
     }
 
