@@ -58,6 +58,7 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.SUIDFactory;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.ndex.internal.CyActivator;
 import org.cytoscape.ndex.internal.singletons.CXInfoHolder;
 import org.cytoscape.ndex.internal.singletons.NetworkManager;
 import org.cytoscape.ndex.io.cx_writer.VisualPropertiesGatherer;
@@ -71,6 +72,7 @@ import org.ndexbio.model.cx.NamespacesElement;
 import org.ndexbio.model.cx.Provenance;
 import org.ndexbio.model.object.ProvenanceEntity;
 import org.ndexbio.model.object.ProvenanceEvent;
+import org.ndexbio.model.object.SimplePropertyValuePair;
 
 /**
  * This class is for serializing Cytoscape networks, views, and attribute tables
@@ -303,12 +305,24 @@ public final class CxExporter {
         ProvenanceEntity oldProvenanceEntity = ((cxInfoHolder !=null && cxInfoHolder.getProvenance() !=null)? 
         		cxInfoHolder.getProvenance().getEntity() : null); 
         
-        ProvenanceEvent creationEvent = new ProvenanceEvent((isUpdate ? "Cytoscape Update" : "Cytoscape Upload"),
+        ProvenanceEvent creationEvent = new ProvenanceEvent( "CyNDEx "+
+        		(isUpdate ? "Update" : "Upload"),
         		     new Timestamp(Calendar.getInstance().getTimeInMillis() ));
         if( oldProvenanceEntity != null )
             creationEvent.addInput(oldProvenanceEntity);
         cytoscapeProvenance.getEntity().setCreationEvent(creationEvent);
-        
+        List<SimplePropertyValuePair> provenanceProps = new ArrayList<>(5);
+        provenanceProps.add(new SimplePropertyValuePair ("cyNDEx Version", CyActivator.getAppVersion()));
+        provenanceProps.add(new SimplePropertyValuePair ("Cytoscape Version", CyActivator.getCyVersion()));
+
+        CyRootNetwork rootNetwork = ((CySubNetwork) network).getRootNetwork();
+
+		String uploadName = write_siblings?
+				(((CySubNetwork) network).getRootNetwork()).getRow(rootNetwork).get(CyNetwork.NAME, String.class):
+				network.getRow(network).get(CyNetwork.NAME, String.class);
+
+        provenanceProps.add(new SimplePropertyValuePair ("dc:title", uploadName));
+        creationEvent.setProperties(provenanceProps);        
         final List<AspectElement> provAspect = new ArrayList<>(1);
         provAspect.add(cytoscapeProvenance);
 

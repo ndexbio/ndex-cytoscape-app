@@ -39,6 +39,7 @@ import org.cytoscape.ndex.internal.singletons.CyObjectManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.session.events.SessionAboutToBeSavedListener;
 import org.cytoscape.session.events.SessionLoadedListener;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -47,6 +48,9 @@ import org.osgi.framework.BundleContext;
  */
 public class CyActivator extends AbstractCyActivator
 {
+
+    private static String appVersion;
+    private static String cytoscapeVersion;
 
     @Override
     /**
@@ -59,7 +63,7 @@ public class CyActivator extends AbstractCyActivator
      * registered with Cytoscape (under the hood, Cytoscape depends on OSGi to manage modularity) and also do things
      * like register menu items with Cytoscape. To avoid trouble, you should probably avoid low-level use of the 
      * BundleContext directly and just pass it as a parameter into methods provided by CyActivator when it is needed.
-     */
+     */    
     public void start(BundleContext context) throws Exception
     {
         // This application manager, like many other Cytsocape-related objects, is registered using the OSGi framework.
@@ -68,6 +72,15 @@ public class CyActivator extends AbstractCyActivator
         
         AbstractCyAction action = null;
         Properties properties = null;
+        
+        Bundle[] bs = context.getBundles();
+        for ( Bundle b : bs) {
+        		if (b.getSymbolicName().equals("org.cytoscape.api-bundle")) {
+        			cytoscapeVersion = b.getVersion().toString();
+        			break;
+        		}
+        } 
+        appVersion = context.getBundle().getVersion().toString();
               
         // Unlike what you may be expecting if you are a Java Swing developer, instead of creating your own menu items,
         // you will often want to (and need to) delegate creating such menu items to Cytoscape instead. Looking at this
@@ -193,5 +206,8 @@ public class CyActivator extends AbstractCyActivator
 
         
     }
+    
+    public static String getAppVersion() {return appVersion;}
+    public static String getCyVersion() { return cytoscapeVersion;}
 
 }
