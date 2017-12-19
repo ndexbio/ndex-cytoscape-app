@@ -264,10 +264,11 @@ public final class ViewMaker {
         if (dmf != null) {
             int counter = 0;
             while (true) {
-                final String k = sp.get("K=" + counter);
+                String k = sp.get("K=" + counter);
                 if (k == null) {
                     break;
                 }
+                k = k.replaceAll(",,", ",");
                 final String v = sp.get("V=" + counter);
                 if (v != null) {
                     final Object pv = vp.parseSerializableString(v);

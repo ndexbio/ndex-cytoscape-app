@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.cytoscape.ndex.internal.CyActivator;
 import org.ndexbio.model.exceptions.NdexException;
 import org.ndexbio.model.object.NdexStatus;
 import org.ndexbio.rest.client.NdexRestClient;
@@ -142,6 +143,7 @@ public class Server implements Serializable
         return result;
     } */
     
+        		
     public String getHeader()
     {
     	String userNameStr = 
@@ -162,7 +164,8 @@ public class Server implements Serializable
     
     public NdexRestClientModelAccessLayer getModelAccessLayer() throws JsonProcessingException, IOException, NdexException
     {
-        NdexRestClient client = new NdexRestClient(username,password,url);
+        NdexRestClient client = new NdexRestClient(username,password,url, 
+        		CyActivator.getAppName()+"("+CyActivator.getAppVersion()+")");
         return new NdexRestClientModelAccessLayer(client);
     }
    

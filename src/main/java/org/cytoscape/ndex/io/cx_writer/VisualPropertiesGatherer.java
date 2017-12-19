@@ -176,18 +176,48 @@ public final class VisualPropertiesGatherer {
             }
         }
     }
+    
+	private static String processColForVisualStyleMapping(String colName, boolean shiftSharedNameToName) {
+		if (shiftSharedNameToName) {
+			if (colName.equals(CxUtil.SHARED_NAME_COL))
+				return CxUtil.NAME_COL;
+		}
+		return colName;
+	}
 
+	final public static char COMMA = ',';
+
+	// escape ',' with double ','
+	private static String escapeString(String str) {
+		if (str == null) {
+			return null;
+		}
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < str.length(); i++) {
+			char curChar = str.charAt(i);
+			if (curChar == COMMA) {
+				// special char
+				result.append(COMMA);
+			}
+			result.append(curChar);
+		}
+		return result.toString();
+	}
+    
+	// Note: ',' in column name and value are escaped by ',,' 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private final static void addMappings(final VisualStyle style,
                                           final VisualProperty vp,
                                           final CyVisualPropertiesElement cvp,
-                                          final CyTable table) {
+                                          final CyTable table,
+                                          boolean shiftSharedNameToName) {
         final VisualMappingFunction<?, ?> mapping = style.getVisualMappingFunction(vp);
 
         if (mapping != null) {
+            final String col = processColForVisualStyleMapping( mapping.getMappingColumnName(),shiftSharedNameToName) ;
+
             if (mapping instanceof PassthroughMapping<?, ?>) {
                 final PassthroughMapping<?, ?> pm = (PassthroughMapping<?, ?>) mapping;
-                final String col = pm.getMappingColumnName();
                 String type = null;
                 try {
                     type = toAttributeType(pm.getMappingColumnType(), table, col);
@@ -200,7 +230,7 @@ public final class VisualPropertiesGatherer {
                 final StringBuilder sb = new StringBuilder();
                 sb.append(CxUtil.VM_COL);
                 sb.append("=");
-                sb.append(col);
+                sb.append(escapeString(col));
                 sb.append(",");
                 sb.append(CxUtil.VM_TYPE);
                 sb.append("=");
@@ -209,7 +239,6 @@ public final class VisualPropertiesGatherer {
             }
             else if (mapping instanceof DiscreteMapping<?, ?>) {
                 final DiscreteMapping<?, ?> dm = (DiscreteMapping<?, ?>) mapping;
-                final String col = dm.getMappingColumnName();
                 String type = null;
                 try {
                     type = toAttributeType(dm.getMappingColumnType(), table, col);
@@ -223,7 +252,7 @@ public final class VisualPropertiesGatherer {
                 final StringBuilder sb = new StringBuilder();
                 sb.append(CxUtil.VM_COL);
                 sb.append("=");
-                sb.append(col);
+                sb.append(escapeString(col));
                 sb.append(",");
                 sb.append(CxUtil.VM_TYPE);
                 sb.append("=");
@@ -238,7 +267,7 @@ public final class VisualPropertiesGatherer {
                         sb.append(",K=");
                         sb.append(counter);
                         sb.append("=");
-                        sb.append(entry.getKey().toString());
+                        sb.append(escapeString(entry.getKey().toString()));
                         sb.append(",V=");
                         sb.append(counter);
                         sb.append("=");
@@ -255,7 +284,6 @@ public final class VisualPropertiesGatherer {
             }
             else if (mapping instanceof ContinuousMapping<?, ?>) {
                 final ContinuousMapping<?, ?> cm = (ContinuousMapping<?, ?>) mapping;
-                final String col = cm.getMappingColumnName();
                 String type = null;
                 try {
                     type = toAttributeType(cm.getMappingColumnType(), table, col);
@@ -268,7 +296,7 @@ public final class VisualPropertiesGatherer {
                 final StringBuilder sb = new StringBuilder();
                 sb.append(CxUtil.VM_COL);
                 sb.append("=");
-                sb.append(col);
+                sb.append(escapeString(col));
                 sb.append(",");
                 sb.append(CxUtil.VM_TYPE);
                 sb.append("=");
@@ -318,7 +346,7 @@ public final class VisualPropertiesGatherer {
             if (visual_property.getTargetDataType() == CyEdge.class) {
                 addDefaultProperties(current_visual_style, visual_property, e);
                 final CyTable table = view.getModel().getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
-                addMappings(current_visual_style, visual_property, e, table);
+                addMappings(current_visual_style, visual_property, e, table,false);
             }
         }
         addDependency(CxUtil.ARROW_COLOR_MATCHES_EDGE, current_visual_style, e);
@@ -381,7 +409,7 @@ public final class VisualPropertiesGatherer {
             if (visual_property.getTargetDataType() == CyNode.class) {
                 addDefaultProperties(current_visual_style, visual_property, e);
                 final CyTable table = view.getModel().getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
-                addMappings(current_visual_style, visual_property, e, table);
+                addMappings(current_visual_style, visual_property, e, table,!writeSiblings);
             }
         }
         addDependency(CxUtil.NODE_CUSTOM_GRAPHICS_SIZE_SYNC, current_visual_style, e);

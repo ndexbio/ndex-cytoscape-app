@@ -27,6 +27,7 @@
 package org.cytoscape.ndex.internal;
 
 import java.io.File;
+import java.util.Dictionary;
 import java.util.Properties;
 
 import org.cytoscape.app.swing.CySwingAppAdapter;
@@ -51,6 +52,7 @@ public class CyActivator extends AbstractCyActivator
 
     private static String appVersion;
     private static String cytoscapeVersion;
+    private static String appName; 
 
     @Override
     /**
@@ -81,6 +83,9 @@ public class CyActivator extends AbstractCyActivator
         		}
         } 
         appVersion = context.getBundle().getVersion().toString();
+        
+        Dictionary d = context.getBundle().getHeaders();
+        appName = (String) d.get("Bundle-name");
               
         // Unlike what you may be expecting if you are a Java Swing developer, instead of creating your own menu items,
         // you will often want to (and need to) delegate creating such menu items to Cytoscape instead. Looking at this
@@ -209,5 +214,6 @@ public class CyActivator extends AbstractCyActivator
     
     public static String getAppVersion() {return appVersion;}
     public static String getCyVersion() { return cytoscapeVersion;}
+    public static String getAppName () { return appName;}
 
 }
