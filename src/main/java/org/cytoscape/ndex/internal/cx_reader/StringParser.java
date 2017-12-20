@@ -40,13 +40,13 @@ public final class StringParser {
         			_data.put(CxUtil.VM_COL, v.replace(",,", ","));
         		} else if ( n.startsWith("T=")) {
         			String v = n.substring(2);
-        			_data.put(CxUtil.VM_TYPE, v);       			
+        			_data.put(CxUtil.VM_TYPE, v.replace(",,", ","));       			
         		} else {
         			Matcher m = p.matcher(n);
         			if ( !m.matches())
         				throw new IOException ("Failed to parse mapping string: "+ n);
 
-        			_data.put(m.group(1), m.group(4));
+        			_data.put(m.group(1), m.group(4).replace(",,", ","));
         		} 
         	
 

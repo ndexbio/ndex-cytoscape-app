@@ -234,7 +234,7 @@ public final class VisualPropertiesGatherer {
                 sb.append(",");
                 sb.append(CxUtil.VM_TYPE);
                 sb.append("=");
-                sb.append(type);
+                sb.append(escapeString(type));
                 cvp.putMapping(vp.getIdString(), CxUtil.PASSTHROUGH, sb.toString());
             }
             else if (mapping instanceof DiscreteMapping<?, ?>) {
@@ -256,7 +256,7 @@ public final class VisualPropertiesGatherer {
                 sb.append(",");
                 sb.append(CxUtil.VM_TYPE);
                 sb.append("=");
-                sb.append(type);
+                sb.append(escapeString(type));
                 int counter = 0;
                 for (final Map.Entry<?, ?> entry : map.entrySet()) {
                     final Object value = entry.getValue();
@@ -271,7 +271,7 @@ public final class VisualPropertiesGatherer {
                         sb.append(",V=");
                         sb.append(counter);
                         sb.append("=");
-                        sb.append(vp.toSerializableString(value));
+                        sb.append(escapeString(vp.toSerializableString(value)));
                     }
                     catch (final Exception e) {
                         System.out.println("could not add discrete mapping entry: " + value);
@@ -300,7 +300,7 @@ public final class VisualPropertiesGatherer {
                 sb.append(",");
                 sb.append(CxUtil.VM_TYPE);
                 sb.append("=");
-                sb.append(type);
+                sb.append(escapeString(type));
                 final List<?> points = cm.getAllPoints();
                 int counter = 0;
                 for (final Object point : points) {
@@ -311,19 +311,19 @@ public final class VisualPropertiesGatherer {
                     sb.append(",L=");
                     sb.append(counter);
                     sb.append("=");
-                    sb.append(vp.toSerializableString(lesser));
+                    sb.append(escapeString(vp.toSerializableString(lesser)));
                     sb.append(",E=");
                     sb.append(counter);
                     sb.append("=");
-                    sb.append(vp.toSerializableString(equal));
+                    sb.append(escapeString(vp.toSerializableString(equal)));
                     sb.append(",G=");
                     sb.append(counter);
                     sb.append("=");
-                    sb.append(vp.toSerializableString(greater));
+                    sb.append(escapeString(vp.toSerializableString(greater)));
                     sb.append(",OV=");
                     sb.append(counter);
                     sb.append("=");
-                    sb.append(cp.getValue());
+                    sb.append(escapeString(cp.getValue().toString()));
                     ++counter;
                 }
                 cvp.putMapping(vp.getIdString(), CxUtil.CONTINUOUS, sb.toString());

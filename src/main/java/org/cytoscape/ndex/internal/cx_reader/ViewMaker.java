@@ -385,24 +385,26 @@ public final class ViewMaker {
                 }
                 if (is_mapping) {
                     final VisualProperty vp = lexicon.lookup(my_class, mapping_key);
-                    final StringParser sp = new StringParser(entry.getValue());
-                    final String col = sp.get(CxUtil.VM_COL);
-                    final String type = sp.get(CxUtil.VM_TYPE);
-                    final Class<?> type_class = ViewMaker.toClass(type);
-                    if (vp != null) {
-                        if (mapping == 'p') {
-                            addPasstroughMapping(style, vp, col, type_class);
-                        }
-                        else if (mapping == 'c') {
-                            addContinuousMapping(style, vp, sp, col, type, type_class);
-                        }
-                        else if (mapping == 'd') {
-                            addDiscreteMapping(style, vp, sp, col, type, type_class);
-                        }
-                        else {
-                            throw new IllegalStateException("unknown mapping type: " + mapping);
-                        }
-                    }
+					try {
+						final StringParser sp = new StringParser(entry.getValue());
+						final String col = sp.get(CxUtil.VM_COL);
+						final String type = sp.get(CxUtil.VM_TYPE);
+						final Class<?> type_class = ViewMaker.toClass(type);
+						if (vp != null) {
+							if (mapping == 'p') {
+								addPasstroughMapping(style, vp, col, type_class);
+							} else if (mapping == 'c') {
+								addContinuousMapping(style, vp, sp, col, type, type_class);
+							} else if (mapping == 'd') {
+								addDiscreteMapping(style, vp, sp, col, type, type_class);
+							} else {
+								throw new IllegalStateException("unknown mapping type: " + mapping);
+							}
+						}
+					} catch (IOException e) {
+						System.err.println("Failed to parse mapping string: " + entry.getValue() + ". " + "\nError: "
+								+ e.getMessage());
+					}
                     // TODO
                     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ remove me
                 }
@@ -444,26 +446,29 @@ public final class ViewMaker {
                 final Mapping mapping = entry.getValue();
                 final String mapping_type = mapping.getType();
                 final VisualProperty vp = lexicon.lookup(my_class, mapping_target);
-                final StringParser sp = new StringParser(mapping.getDefintion());
-                String col = sp.get(CxUtil.VM_COL);
-                if ( cy_visual_properties_element.getProperties_of().equals("edges:default") && col.equals("interaction") ) 
-                	col = "shared interaction";
-                final String type = sp.get(CxUtil.VM_TYPE);
-                final Class<?> type_class = ViewMaker.toClass(type);
-                if (vp != null) {
-                    if (mapping_type.equals(CxUtil.PASSTHROUGH)) {
-                        addPasstroughMapping(style, vp, col, type_class);
-                    }
-                    else if (mapping_type.equals(CxUtil.CONTINUOUS)) {
-                        addContinuousMapping(style, vp, sp, col, type, type_class);
-                    }
-                    else if (mapping_type.equals(CxUtil.DISCRETE)) {
-                        addDiscreteMapping(style, vp, sp, col, type, type_class);
-                    }
-                    else {
-                        throw new IOException("unknown mapping type: " + mapping_type);
-                    }
-                }
+				try {
+					final StringParser sp = new StringParser(mapping.getDefintion());
+					String col = sp.get(CxUtil.VM_COL);
+					if (cy_visual_properties_element.getProperties_of().equals("edges:default")
+							&& col.equals("interaction"))
+						col = "shared interaction";
+					final String type = sp.get(CxUtil.VM_TYPE);
+					final Class<?> type_class = ViewMaker.toClass(type);
+					if (vp != null) {
+						if (mapping_type.equals(CxUtil.PASSTHROUGH)) {
+							addPasstroughMapping(style, vp, col, type_class);
+						} else if (mapping_type.equals(CxUtil.CONTINUOUS)) {
+							addContinuousMapping(style, vp, sp, col, type, type_class);
+						} else if (mapping_type.equals(CxUtil.DISCRETE)) {
+							addDiscreteMapping(style, vp, sp, col, type, type_class);
+						} else {
+							throw new IOException("unknown mapping type: " + mapping_type);
+						}
+					}
+				} catch (IOException e) {
+					System.err.println("Failed to parse mapping string: " + entry.getValue() + ". " + "\nError: "
+							+ e.getMessage());
+				}
             }
         }
         if (dependencies != null) {
