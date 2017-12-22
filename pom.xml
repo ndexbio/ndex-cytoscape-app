@@ -4,7 +4,7 @@
     <properties>
         <bundle.symbolicName>org.cytoscape.ndex.cyNDEx</bundle.symbolicName>
         <bundle.namespace>org.cytoscape.ndex</bundle.namespace>
-        <cytoscape-version>3.4.0</cytoscape-version>
+        <cytoscape-version>3.3.0</cytoscape-version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
