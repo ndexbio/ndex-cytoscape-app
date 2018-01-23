@@ -195,14 +195,11 @@ public final class CxToCy {
 	}
 
 	
-    public final List<CyNetwork> createNetwork(final NiceCXNetwork niceCX, 
+    private final List<CyNetwork> createNetwork(final NiceCXNetwork niceCX, 
                                                CyRootNetwork root_network,
                                                final CyNetworkFactory network_factory,
                                                final CyGroupFactory group_factory,
                                                final String collection_name) throws IOException {
-
-       
-
         
         final Map<Long, List<CyTableColumnElement>> subnetwork_to_col_labels_map = new HashMap<>();
 

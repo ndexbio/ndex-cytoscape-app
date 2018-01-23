@@ -283,9 +283,9 @@ public class FindNetworksDialog extends javax.swing.JDialog {
         if (largeNetwork)
         {
             JFrame parent = CyObjectManager.INSTANCE.getApplicationFrame();
-            String  msg = "You have chosen to download a network that has more than 10,000 edges.\n";
+            String  msg = "You have chosen to download a network that has more than 5,000 edges.\n";
             msg += "The download will occur in the background and you can continue working,\n";
-            msg += "but it may take a while to appear in Cytoscape. Also, no layout will be\n";
+            msg += "but it may take a while to appear in Cytoscape. Also, a grid layout will be\n";
             msg += "applied. Would you like to proceed?";
             String dialogTitle = "Proceed?";
             int choice = JOptionPane.showConfirmDialog(parent, msg, dialogTitle, JOptionPane.YES_NO_OPTION);
