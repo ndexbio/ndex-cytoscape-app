@@ -578,10 +578,10 @@ public final class ViewMaker {
     }
 
     private final static Class<?> toClass(final String type) {
-        if (type.equals("string")) {
+        if (type.equals("string") || type.equals("char")) {
             return String.class;
         }
-        else if (type.equals("integer")) {
+        else if (type.equals("integer") || type.equals("short") || type.equals("byte")) {
             return Integer.class;
         }
         else if (type.equals("long")) {
@@ -599,14 +599,14 @@ public final class ViewMaker {
     }
 
     private final static Object toTypeValue(final String s, final String type) {
-        if (type.equals("string")) {
+        if (type.equals("string") || type.equals("char")) {
             return s;
         }
-        else if (type.equals("integer")) {
-            return Double.valueOf(s);
+        else if (type.equals("integer") || type.equals("short") || type.equals("byte")) {
+            return Integer.valueOf(s);
         }
         else if (type.equals("long")) {
-            return Double.valueOf(s);
+            return Long.valueOf(s);
         }
         else if (type.equals("double") || type.equals("float")) {
             return Double.valueOf(s);
